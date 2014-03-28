@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% load floppyforms %}
+{% load lib_pal %}
+
+{% block content %}
+     <form class="form-horizontal well" method="post">
+     <h3>État-civil</h3>
+     {% include "include/read_only_form.html" with form=individu  %}
+     <div class="form-actions">
+    <a class="btn btn-inverse" href="{% url 'recapitulatif_individu' "info_perso" %}">Modifier votre état-civil</a>
+     </div>
+    </form>
+
+    <form class="form-horizontal well" method="post">
+        {% for adresse in adresses %}
+        <div>
+            <h3>Adresse {% if adresse.type.value == '1' %}annuelle {% else %}fixe{% endif %}</h3>
+
+            {% include "include/read_only_form.html" with form=adresse %}
+            {% if adresse.type_hidden == 1 %}
+                <div id="div_id_type_adresse_annuelle" class="clearfix control-group">
+                    <label for="id_type_adresse_annuelle" class="control-label">
+                       Type de l'hébergement :
+                    </label>
+                    <div class="controls">
+                        <label class="checkbox">{{ type_hebergement_annuel}}</label>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+
+    {% endfor %}
+
+    <div class="form-actions">
+    <a class="btn btn-inverse" href="{% url 'recapitulatif_individu' "adresse" %}">Modifier l'adresse</a>
+    </div>
+
+    </form>
+
+    <form id="form" class=" form-horizontal well" method="post" novalidate="novalidate">
+    {% csrf_token %}
+        <div class="form-actions">
+        <input id="submit-id-verifier" class="btn btn-primary btn btn-success" type="submit" value="J'atteste que les informations ci-dessus sont exactes" name="Verifier">
+        </div>
+    </form>
+<script type="text/javascript">
+$(document).ready(function(){
+    $('#form').validate();
+
+        });
+</script>
+{% endblock %}

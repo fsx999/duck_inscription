@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style xmlns="http://www.w3.org/1999/html">
+h3{ text-decoration:underline ; }
+</style>
+    <div class="container-fluid  clearfix">
+        <div class="well">
+            <p><h3>SITUATION SOCIALE</h3></p>
+            <div class="row-fluid">
+                <div class="span8"><label>Situation sociale :</label></div>
+                <div class="span4"><p>{{ data.situation_sociale|default:"Jamais " }}</p></div>
+            </div>
+            {% if  data.echelon %}
+            <div class="row-fluid">
+                <div class="span8"><label>Echelon :</label></div>
+                <div class="span4"><p>{{ data.echelon|default:"Jamais " }}</p></div>
+            </div>
+            {% endif %}
+            {% if  data.num_boursier %}
+            <div class="row-fluid">
+                <div class="span6"><label>Numéro de bourse :</label></div>
+                <div class="span4"><p>{{ data.num_boursier|default:"Jamais " }}</p></div>
+            </div>
+            {% endif %}
+            {% if  data.bousier_crous %}
+                <div class="row-fluid">
+                    <div class="span6"><label>Boursier crous :</label></div>
+                    <div class="span4"><p>{{ data.boursier_crous|default:"Jamais " }}</p></div>
+                </div>
+            {% endif %}
+        </div>
+        <div class="well">
+            <h3>SECURITÉ SOCIALE</h3>
+            <div class="row-fluid">
+                <div class="span8"><label>Affiliation au régime des parents : </label></div>
+                <div class="span4"><p>{{ data.affiliation_parent|default:"Aucune" }}</p></div>
+            </div>
+            <div class="row-fluid">
+                <div class="span8"><label>Cas de nom affiliation à la sécurité sociale étudiante : </label></div>
+                <div class="span4"><p>{{ data.non_affiliation|default:"Aucun" }}</p></div>
+            </div>
+            <div class="row-fluid">
+                <div class="span8"><label>Centre de sécurité sociale étudiante : </label></div>
+                <div class="span4"><p>{{ data.centre_payeur|default:"Aucun" }}</p></div>
+            </div>
+        </div>
+        {% if data.num_secu %}
+        <div class="well">
+            <h3>NUMÉRO SECURITÉ SOCIALE</h3>
+            <div class="row-fluid">
+                <div class="span8"><label>Numéro de sécurité sociale :</label></div>
+                <div class="span4"><p>{{ data.num_secu }}</p></div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+{% include "include/warning_validation.html" %}
+<form action="" method="POST">
+{% csrf_token %}
+{{ wizard.management_form }}
+    <div class="form-actions">
+        <button name="wizard_goto_step" id="id_wizard_prev_step" value="{{ step_prev }}" class="btn btn-info cancel" >Etape précédente</button>
+        <a class="btn btn-success" href="{% url validation_situation_sociale pk %}">Valider</a>
+    </div>
+</form>
+{% endblock %}

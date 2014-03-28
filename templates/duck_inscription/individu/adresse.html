@@ -1,0 +1,169 @@
+{% extends "base_formulaire.html" %}
+{% load floppyforms %}
+{% block titre_form %}
+Adresses
+{% endblock %}
+{% block form %}
+        {{ formset.management_form }}
+        {% for form in formset.forms %}
+           <div id="id_formset_{{ form.prefix }}">
+            {% if forloop.first %}
+                <h1>Adresse Annuelle</h1>
+                {% formrow type %}
+            {% else %}
+                <hr class="black">
+                <h1>Adresse Fixe</h1>
+            {% endif %}
+            {%  form form %}
+
+            </div>
+        {% endfor %}
+
+        <div class="form-actions">
+                <input id="submit-id-verifier" class="btn btn-success" type="submit" value="Suite" name="Verifier">
+        </div>
+{% endblock %}
+{% block form_script %}
+
+    <script src="{{ STATIC_URL }}js/chosen.jquery.min.js"></script>
+<script>
+CODE_FRANCE = 100;
+
+$(document).ready(function(){
+
+    jQuery.validator.addMethod(
+            "phone",
+            function(value, element, params){
+{#                return this.optional(element)||value.match(/^(\d|\+)\d+$/);#}
+{#                return this.optional(element)||value.match(/^(\+33\.|0)[0-9]{9}$/);#}
+                return this.optional(element)||value.match(/^(\+|0)[0-9]{6,20}$/);
+            },
+            jQuery.validator.format("Le format de téléphone n'est pas le bon")
+    );
+    jQuery.validator.addMethod(
+            "com_bdi",
+            function(value, element, params){
+                var test=false;
+
+                var ta=$(element).attr('name').split('-');
+                var id_element = '#id_form-'+ta[1]+'-com_bdi';
+                if ((value.length==5 || value.length==0) && $(id_element).val()!='' ){
+                    test = true;
+                }
+                else if ($(id_element).val()!='' && value=='') test=true;
+
+                return test;
+            },
+            jQuery.validator.format("Veuillez saisir un code postal valide")
+    );
+    function hide_show(val, prefix){
+        if (val==""){
+            $("#div_id_"+prefix+'-com_bdi').hide();
+            $("#id_"+prefix+'-com_bdi').val(''); //on reselt
+            $("#div_id_"+prefix+'-label_adr_etr').hide();
+            $("#id_"+prefix+'-label_adr_etr').val('');
+        }
+        else if (val==CODE_FRANCE){
+            $("#div_id_"+prefix+'-com_bdi').show();
+            $("#div_id_"+prefix+'-label_adr_etr').hide();
+            $("#id_"+prefix+'-label_adr_etr').val('');
+        }
+        else{
+            $("#div_id_"+prefix+'-com_bdi').hide();
+            $("#id_"+prefix+'-com_bdi').val('');
+            $("#div_id_"+prefix+'-label_adr_etr').show();
+        }
+    }
+    function hide_show_adresse_annuelle(value){
+
+        if(value in {1:1,2:2,3:3,6:6,7:7}){
+            $('#id_formset_adresses-1').show();
+           $('#id_adresses-1-type').val('2');
+        }
+        else{
+            $('#id_formset_adresses-1').hide();
+            $('#id_adresses-1-type').val('');
+            $("#id_adresses-1-listed_number").val('');
+            $("#id_adresses-1-label_adr_1").val('');
+            $("#id_adresses-1-label_adr_2").val('');
+            $("#id_adresses-1-label_adr_3").val('');
+            $("#id_adresses-1-com_bdi").val('');
+            $("#id_adresses-1-label_adr_etr").val('');
+            $("#id_adresses-1-code_pays").val('');
+        }
+    }
+    $('#id_adresses-0-type').val('1');
+
+    {% for form in formset.forms %}
+    hide_show($('#id_{{ form.prefix }}-code_pays').val(), '{{ form.prefix }}');
+
+    $('#id_{{ form.prefix }}-code_pays').change(function(){
+        hide_show($('#id_{{ form.prefix }}-code_pays').val(), '{{ form.prefix }}');
+
+    });
+
+    {% endfor %}
+    hide_show_adresse_annuelle($('#id_adresses-0-type_hebergement').val());
+
+    $('#id_adresses-0-type_hebergement').change(function(){
+        hide_show_adresse_annuelle($(this).val());
+    });
+
+
+    $('#form').validate({
+
+        rules:{
+            {% for form in formset.forms %}
+            '{{ form.prefix }}-listed_number':{
+                  phone:true
+            },
+            '{{ form.prefix }}-code_pays':{
+              required: function(element){
+                  return $('#id_{{ form.prefix }}-listed_number').is(':visible');
+              }
+
+            },
+            '{{ form.prefix }}-label_adr_etr':{
+                required:function(){
+                    if ($('#id_{{ form.prefix }}-code_pays').val()!=CODE_FRANCE){ //pas france
+                        return true;
+                    }
+                    else{ //on reset
+                        $('#id_{{ form.prefix }}-label_adr_etr').val('');
+                        return false;
+                    }
+                }
+            },
+            '{{ form.prefix }}-com_bdi-autocomplete':{
+                com_bdi:true,
+                required:function(){
+                    if ($('#id_{{ form.prefix }}-code_pays').val()==CODE_FRANCE){ //france
+                            return true;
+                    }
+                    else{ //on reset
+                        $('#id_{{ form.prefix }}-com_bdi').val('');
+                        return false;
+                    }
+
+
+                }
+
+
+            }{% if forloop.first %}
+                ,
+            {% endif %}
+
+            {% endfor %}
+        }
+
+
+    });
+
+
+
+});
+</script>
+
+{% endblock %}
+
+

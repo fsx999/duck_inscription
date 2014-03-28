@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% load lib_pal crispy_forms_tags static%}
+{% block content %}
+
+    <h3>
+    Veuillez remplir soigneusement les formulaires suivants
+    </h3>
+    {{ wizard.form.errors }}
+{% crispy wizard.form %}
+    <script type="text/javascript">
+    function toggle_element(){
+        $(document).find("[toggle_field]").each(function(){
+            var toggle_element = '#id_'+$(this).attr('toggle_field'); //l'élément référent
+            var value = $(this).attr('value_toggle'); // la valeur de test
+            console.log($(toggle_element));
+            function a(element){
+                var val = $(toggle_element).val()
+                console.log(val);
+                var show = true
+                if (value[0] == '!'){
+                   show = (val != value.slice(1));
+                }
+                else{
+
+                    show = (val == value)
+                }
+                if(!show){
+                    $('select',element).val('');
+                    $(element).val('');
+                }
+                $('#div_'+$(element).attr('id')).toggle(show);
+            }
+            a(this);
+            var element = this;
+            $(toggle_element).bind ("change",function(){
+                console.log('ouou');
+                a(element);
+            });
+
+        });
+    }
+    function show_smrep_lmde(){
+        if($('#id_affiliation_parent').val() != '' || $('#id_non_affiliation').val() != ''){
+            $('#div_id_centre_payeur').hide();
+        }
+        else{
+            $('#div_id_centre_payeur').show();
+        }
+    }
+    $(document).ready(function(){
+        toggle_element();
+        show_smrep_lmde();
+        $('#id_affiliation_parent, #id_non_affiliation').change(show_smrep_lmde);
+        function is_boursier(){
+            if ($("#id_situation_sociale").val()=="BO"){
+                return true;
+            }
+            return false;
+        }
+
+        $('#form').validate({
+            rules:{
+                "premier_universite_fr":{
+                    required:function(){
+                        if ($("#id_annee_premiere_inscription_universite_fr").val() != "")
+                            return true;
+                        else return false;
+                    }
+                },
+                "echelon":{
+                    required:is_boursier
+                },
+                'num_boursier':{
+                    required:is_boursier
+                },
+                boursier_crous:{
+                    required:is_boursier
+                },
+                centre_payeur:{
+                    required:true
+                }
+
+            }
+        });
+    });
+    </script>
+{% endblock %}

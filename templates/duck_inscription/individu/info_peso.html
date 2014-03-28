@@ -1,0 +1,183 @@
+{% extends "base_formulaire.html" %}
+{% load floppyforms %}
+{% block titre_form %}
+État-civil
+{% endblock %}
+{% block form %}
+
+        {%  form form %}
+        <div class="form-actions">
+            {% if not individu.student_code %}
+                <a id="id_reset" class="btn btn-primary" href="{% url "info_perso" %}?revenir=ok">Revenir</a>
+            {% endif %}
+                <input id="submit-id-verifier" class="btn btn-primary btn btn-success" type="submit" value="Suite" name="Verifier">
+        </div>
+{% endblock %}
+{% block form_script %}
+
+    <script>
+
+        $(document).ready(function(){
+            var CODE_FRANCE = 100;
+            function valide_date(){
+                var current = new Date();
+                var plus_28 = new Date(current.getFullYear()-28, current.getMonth(), current.getDay());
+                var jour = $("#id_birthday_day").val();
+                var mois = $("#id_birthday_month").val();
+                var year = $("#id_birthday_year").val();
+                var choix_date = new Date(year, mois, jour);
+                return plus_28 < choix_date;
+            }
+            function show_hide(val){
+                if(val==CODE_FRANCE){
+                    $('#div_id_code_departement_birth').show();
+                }
+                else{
+                    $('#div_id_code_departement_birth').hide();
+                }
+            }
+            function remplaceoption(i){
+                var a = $("#id_birthday_"+i+" option:selected");
+                $("#id_birthday_"+i).html("<option value='"+a.val()+"'>"+a.text()+"</option>");
+            }
+            if ($("#id_last_name").attr('readonly') == 'readonly'){
+                remplaceoption("day");
+                remplaceoption("month");
+                remplaceoption("year");
+            }
+            $("#id_diplome_acces").change(function(element){
+                var date = $("#id_annee_obtention");
+                if (date.val()){
+                   $("#form").validate().element("#id_annee_obtention");
+                }
+            });
+            function show_hide_situation_militaire(){
+
+                if(valide_date() && $('#id_code_pays_nationality').val()==CODE_FRANCE){
+
+                    $('#div_id_situation_militaire').show();
+                }
+                else{
+                    $('#div_id_situation_militaire').hide();
+                }
+            }
+
+            var code_pays_birth = $('select[name="code_pays_birth"]');
+            show_hide(code_pays_birth.val());
+{#            var situation_militaire = $('#div_id_situation_militaire');#}
+            show_hide_situation_militaire();
+
+            $("#form").validate({
+                rules:{
+                    id_birthday_day:{
+                        required:true
+                    },
+                    ine:{
+                        required: function(element){
+                            return $('#id_valid_ine').val() != "N" && $('#id_valid_ine').val() != "";
+                        },
+                        remote: "{% url 'test_ine' %}",
+                        minlength:11,
+                        maxlength:11
+
+                    },
+                    town_birth:{
+                        required:function(element){
+                            return $(element).is(':visible');
+                        }
+                    },
+                    code_pays_nationality:{
+                        required:true
+                    },
+                    code_departement_birth:{
+                        required:function(element){
+                            return $(element).is(':visible');
+                        }
+                    },
+                    situation_militaire:{
+                        required:function(element){
+                            return valide_date();
+                        }
+                    },
+                    annee_obtention:{
+                        min: function(element){
+                            if ($("#id_birthday_year").length){
+                                return  parseInt($("#id_birthday_year").val())+15;
+                            }
+                            else{
+
+                                var date_naissance = $("#id_birthday").val();
+                                date_naissance = date_naissance.split("/");
+                                return parseInt(date_naissance[2]) + 15;
+
+                            }
+
+                            //année obtention du bac à 15 ans c'est déjà pas mal
+                        },
+                        remote:{
+                            url:"{% url 'validation_annee_bac' %}",
+                            type: "get",
+                            data: {
+                                bac: function(){
+                                    return  $('#id_diplome_acces').val();
+                                }
+                            }
+                        },
+                        required:true
+                    }
+
+                },
+                messages:{
+                    annee_obtention:{
+
+                        remote:jQuery.validator.format("L'année d'obtention n'est pas valide")
+                    },
+                    ine:{
+                        minlength: jQuery.validator.format("Votre code INE contient 11 caractères."),
+                        remote: jQuery.validator.format("Votre code INE n'est pas un code valide veuillez le vérifier")
+                    }
+
+                }
+            });
+
+
+            $("#id_valid_ine").change(function(element){
+                if ($("#id_valid_ine").val() == 'O'){
+                    $("#id_ine").rules('add', {remote: "{% url 'test_ine' %}"});
+                    $("#id_ine").parent().parent().show();
+                }
+                else{
+                     $("#id_ine").rules('remove', 'remote');
+                     $("#id_ine").parent().parent().hide();
+                }
+
+
+            });
+
+            code_pays_birth.change(function(){
+                show_hide($(this).val());
+            });
+            $('#id_birthday_day').change(function(){
+                console.log($(this).val());
+                show_hide_situation_militaire();
+            });
+            $('#id_birthday_month').change(function(){
+                show_hide_situation_militaire();
+            });
+            $('#id_birthday_year').change(function(){
+                show_hide_situation_militaire();
+            });
+            $('#id_code_pays_nationality').change(function(){
+                show_hide_situation_militaire();
+            });
+{#            $("#id_ine").popover({#}
+{#                title:"Information",#}
+{#                content:"Ce numéro figure sur votre dernière carte d'étudiant(e)" +#}
+{#                        " et/ou sur le relevé de notes du baccalauréat en tant que numéro BEA (numéro de base élèves académique)."#}
+{#            });#}
+
+        });
+    </script>
+
+{% endblock %}
+

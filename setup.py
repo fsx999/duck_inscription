@@ -6,4 +6,7 @@ setup(name='duck_inscription', version='0.1', packages=['duck_inscription'], url
                         'south',
                         'cx_Oracle',
                         'django_apogee',
-                        'django-registration'])
+                        'django-registration',
+                        'django-simple-captcha',
+                        'django-floppyforms',
+                        'django_xworkflows'])

@@ -1,0 +1,10 @@
+{% if field.value and not field.is_hidden %}
+    <div id="div_id_{{ field.html_name }}" class="clearfix control-group">
+        <label for="{{ field.html_name }}" class="control-label">
+            {{ field.label }}
+        </label>
+        <div class="controls">
+            <input id="id_{{ field.html_name }}" value="{{ field }}" disabled="disabled"/>
+        </div>
+    </div>
+{% endif %}
