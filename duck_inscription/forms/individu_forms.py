@@ -1,10 +1,14 @@
 # -*- coding: utf-8 -*-
+from __future__ import unicode_literals
 # import autocomplete_light
+import autocomplete_light
 import django
 from django.conf import settings
 from django.utils import formats, six
 import re
-from django_apogee.models import Individu
+from django_apogee.models import Individu, Departement, Pays, SitFam, SitMil, TypHandicap, BacOuxEqu, TypHebergement, \
+    ComBdi
+from duck_inscription.models import AdresseIndividu
 
 RE_DATE = re.compile(r'(\d{4})-(\d\d?)-(\d\d?)$')
 import floppyforms as forms
@@ -20,14 +24,44 @@ from django.template import loader
 
 __author__ = 'paul'
 from django.utils.dates import MONTHS
-from datetime import datetime, date, timedelta
+from datetime import datetime, date, timedelta, tzinfo
+
 
 ANNEE = (('', '------'),) + tuple([(x, str(x) + '/' + str(x + 1)) for x in range(1920, datetime.today().year + 1)])
 ANNEE_INSCRIPTION = (('', 'Jamais'),) + tuple(
     [(x, str(x) + '/' + str(x + 1)) for x in range(1950, datetime.today().year + 1)])
-ANNEE_P8 = ((u'', u'Jamais'),) + tuple([(x, str(x) + '/' + str(x + 1)) for x in range(2000,
-                                                            datetime.today().year + 1)])
+ANNEE_P8 = ((u'', u'Jamais'),) + tuple([(x, str(x) + '/' + str(x + 1)) for x in range(2000, datetime.today().year + 1)])
 FRANCE = '100'
+
+
+class GMT0(tzinfo):
+    def utcoffset(self, dt):
+        return timedelta(hours=0, minutes=0)
+
+    def tzname(self, dt):
+        return "GMT +5"
+
+    def dst(self, dt):
+        return timedelta(0)
+
+
+class NationalityModelChoiceField(forms.ModelChoiceField):
+    def label_from_instance(self, obj):
+        return "%s" % obj.lib_nat
+
+
+class LabelModelChoiceField(forms.ModelChoiceField):
+    def label_from_instance(self, obj):
+        if hasattr(obj, 'title'):
+            return "%s" % obj.title
+        if hasattr(obj, 'lib_thp'):
+            return "%s" % obj.lib_thp
+        if hasattr(obj, 'lib_sim'):
+            return "%s" % obj.lib_sim
+        if hasattr(obj, 'lib_ach'):
+            return "%s" % obj.lib_ach
+        if hasattr(obj, 'lib_thb'):
+            return "%s" % obj.lib_thb
 
 
 class EtablissementWidget(forms.Select):
@@ -49,7 +83,6 @@ class SelectDateWidget(forms.SelectDateWidget):
     day_field = '%s_day'
     year_field = '%s_year'
     template_name = 'floppyforms/select_date.html'
-
 
     def render(self, name, value, attrs=None, extra_context={}):
         try:
@@ -135,246 +168,260 @@ class CodeEtudiantForm(forms.Form):
     def clean(self):
         data = super(CodeEtudiantForm, self).clean()
         code_etu = data.get("code_etu", 0)
-        date_naissance = data.get("date_naissance", "")
+        date_naissance = data.get("date_naissance", date.today())
+        gt0 = GMT0()
+        arg = {'tzinfo': gt0}
+        date_naissance = datetime(*(date_naissance.timetuple()[:6]), **arg)
         if not Individu.objects.filter(cod_etu=code_etu, date_nai_ind=date_naissance):
             raise forms.ValidationError(u"Le numéro étudiant et la date de naissance ne correspondent pas")
         return data
 
 
-# class InfoPersoForm(forms.ModelForm):
-#     """
-#     formulaire pour les infos perso
-#     """
-#     last_name = forms.CharField(
-#         label=u"Nom patronymique",
-#         max_length=60,
-#         help_text=u"(indiquez le nom de naissance)"
-#     )
-#     common_name = forms.CharField(
-#         label=u"Nom d'usage",
-#         max_length=60,
-#         required=False,
-#         help_text=u"(Pour les femmes mariées, inscrivez le nom d'épouse)"
-#     )
-#     first_name1 = forms.CharField(
-#         label=u"Prénom ",
-#         max_length=60
-#     )
-#     first_name2 = forms.CharField(
-#         label=u"Second prénom ",
-#         max_length=60,
-#         required=False,
-#     )
-#     first_name3 = forms.CharField(
-#         label=u"Troisième prénom ",
-#         max_length=60,
-#         required=False
-#     )
-#     birthday = django.forms.DateField(
-#         label=u"Date de naissance ",
-#         required=True,
-#         widget=SelectDateWidget(
-#             #            years = ['-----']+[x for x in range(1900,2001)]
-#             years=range(datetime.today().year-15-80, datetime.today().year-15),
-#             attrs={'required':""}
-#         )
-#
-#     )
-#
-#     code_pays_birth = forms.ModelChoiceField(
-#         label=u"Pays de naissance ",
-#         queryset=Pays.objects.all().exclude(lib_pay='').order_by('lib_pay')
-#     )
-#
-#     code_departement_birth = forms.ModelChoiceField(
-#         label=u"Département de naissance ",
-#         queryset=Departement.objects.exclude(lib_dep='ARMEES'),
-#         required=False
-#     )
-#     town_birth = forms.CharField(
-#         label=u'Ville naissance :',
-#         max_length=30,
-#         required=False
-#     )
-#     #todo trouver le bug pour required
-#     code_pays_nationality = NationalityModelChoiceField(
-#         label=u"Nationalité",
-#         queryset=Pays.objects.all().exclude(lib_pay='').order_by('lib_nat')
-#     )
-#
-#     sex = forms.ChoiceField(
-#         label=u"Sexe ",
-#         choices=((u'', '------'), (u'M', u'Homme'), (u'F', u'Femme'))
-#     )
-#     valid_ine = forms.ChoiceField(
-#         label=u"Confirmation de votre INE",
-#         choices=(
-#             ('', '------'),
-#             ('O', u'Je suis sur de mon numéro'),
-#             # ('P', u'Je ne suis pas sur de mon numéro'),
-#             ('N', u"Je n'ai pas de numéro")
-#         )
-#     )
-#     ine = forms.CharField(
-#         label=u"INE/BEA ",
-#         max_length=11,
-#         required=False,
-#         help_text=u'(<a href="https://www.iedparis8.net/ied/rubrique.php?id_rubrique=129#a_12L129"'
-#                   u' target="_blank">Où trouver votre INE/BEA ?</a>)'
-#     )
-#
-#     family_status = LabelModelChoiceField(
-#         label=u"Statut familial ",
-#         queryset=FamilyStatus.objects.all()
-#     )
-#
-#     situation_militaire = forms.ModelChoiceField(
-#         label=u"Situation militaire ",
-#         queryset=SituationMilitaire.objects.all().exclude(cod_sim__in=[1,2]),
-#         required=False,
-#     )
-#
-#     type_handicap = forms.ModelChoiceField(
-#         label=u"Handicap ",
-#         queryset=TypeHandicap.objects.all(),
-#         required=False,
-#         empty_label=u"Aucun handicap"
-#     )
-#     diplome_acces = forms.ModelChoiceField(
-#         label=u"Baccalauréat ou équivalent ",
-#         queryset=BacOuxEqui.objects.all()
-#     )
-#     annee_obtention = forms.ChoiceField(
-#         choices=[(u'', u'-------')] + [(unicode(i), unicode(i)) for i in range(datetime.today().year - 70,
-#                                                                     datetime.today().year + 1)],
-#         label=u"Année d'obtention",
-#         help_text=u"(Année d'obtention du baccalauréat ou équivalent",
-#         required=True
-#     )
-#
-#
-#     class Meta:
-#         model = Individu
-#         exclude = ('user', 'etape', 'personal_email', 'personal_email_save', 'student_code',
-#                    'type_hebergement_annuel', 'code_opi', 'opi_save', 'year')
-#
-#     def __init__(self, *args, **kwargs):
-#         readonly = kwargs.pop('readonly', False)
-#         readonlyAll = kwargs.pop('readonlyall', False)
-#         super(InfoPersoForm, self).__init__(*args, **kwargs)
-#         if readonly:
-#             self.fields['last_name'].widget.attrs['readonly'] = 'readonly'
-#             self.fields['first_name1'].widget.attrs['readonly'] = 'readonly'
-#
-#             self.fields['birthday'] = forms.DateField(label=u"Date de naissance ")
-#             self.fields['birthday'].widget.attrs['readonly'] = 'readonly'
-#             if self.instance.ine:
-#                 self.fields['ine'].widget.attrs['readonly'] = 'readonly'
-#                 self.fields['valid_ine'].widget.attrs['readonly'] = 'readonly'
-#             self.fields['sex'].widget.attrs['readonly'] = 'readonly'
-#
-#         if readonlyAll:
-#             for field in self.fields:
-#                 self.fields[field].widget.attrs['disabled'] = 'disabled'
-#
-#
-#     def clean(self):
-#         """
-#         Plusieurs règles :
-#         date de naissance :
-#         si moins de 28 et français : situation militaire obligatoire
-#         date du bac > +15ans date de naissance
-#         si née en france, département de naissance obligatoire
-#         """
-#         data = super(InfoPersoForm, self).clean()
-#         code_pays_birth = data.get('code_pays_birth', None)
-#         birthday = data.get('birthday', None)
-#         annee_obtention = data.get('annee_obtention', 0)
-#         code_pays_nationality= data.get('code_pays_nationality', 0)
-#         situation_militaire = data.get('situation_militaire', None)
-#         ine, valid_ine = data.get('ine', None), data.get('valid_ine', None)
-#         if code_pays_birth == FRANCE: ##france
-#             code_departement_birth, town_birth = data.get('code_departement_birth', None), data.get('town_birth', None)
-#             if not code_departement_birth or not town_birth:
-#                 raise forms.ValidationError(
-#                     u"Vous devez saisir votre département de naissance et votre ville de naissance")
-#         if code_pays_nationality == FRANCE:
-#             now = date.today()
-#             birthday_28 = date(birthday.year + 28, birthday.month, birthday.day)
-#             dif = birthday_28 - now
-#             if dif > 0:  # il n'a pas 28 ans
-#                 if situation_militaire is None:
-#                     raise forms.ValidationError(
-#                         u"Vous avez moins de 28 ans, vous devez renseigner votre situation militaire")
-#
-#         if (birthday.year + 15) >  int(annee_obtention):
-#             raise forms.ValidationError(
-#                     u"Vous avez saisi une date d'obtention du bac incorect vis à vis de votre date de naissance"
-#             )
-#         if valid_ine in ['O', 'P']:
-#             if ine == u"":
-#                 raise forms.ValidationError(
-#                     u"Vous devez saisir un INE"
-#                 )
-#         if valid_ine == u"N" and ine is not None:
-#             data['ine'] = None
-#         return data
-#
-#
-# class AdresseForm(forms.ModelForm):
-#     listed_number = forms.CharField(label=u'Numero de teléphone :', widget=forms.PhoneNumberInput(),
-#                                     help_text=u"(Sans espace et sans tiret)")
-#     code_pays = forms.ModelChoiceField(queryset=ApogeePays.objects.all().order_by('lib_pay'))
-#     com_bdi = forms.ModelChoiceField(ApogeeComBdi.objects.all(),
-#                                      label= u"Code postal",
-#                                      required=False,
-#                                      widget=autocomplete_light.ChoiceWidget('ApogeeComBdiAutocomplete'))
-#     label_adr_1 = forms.CharField(label=u"Adresse ")
-#     type = django.forms.CharField(
-#         widget=django.forms.HiddenInput()
-#     )
-#
-#
-#     class Meta:
-#         model = AdresseIndividu
-#         exclude = ('individu',)
-#
-#     def clean(self):
-#         data = super(AdresseForm, self).clean()
-#         pays = data.get('code_pays', None)
-#         if pays is None:
-#             raise forms.ValidationError(u"Vous devez choisir un pays pour votre adresse")
-#         if pays.cod_pay == FRANCE:
-#             if not data.get("com_bdi", None):
-#                 raise forms.ValidationError(u"Vous devez choisir une commune pour votre adresse")
-#             else:
-#                 if data.get('label_adr_etr', None):
-#                     data['label_adr_etr'] = None
-#         else:
-#             if not data.get("label_adr_etr", None):
-#                 raise forms.ValidationError(u"Vous devez indiquer un complément d'adresse")
-#             else:
-#                 if data.get('com_bdi', None):
-#                     data['com_bdi'] = None
-#         return data
-#
-#
-# class AdresseBaseFormSet(BaseInlineFormSet):
-#     def add_fields(self, form, index):
-#         super(AdresseBaseFormSet, self).add_fields(form, index)
-#         if index == 0:#il s'agit de l'adrese annuel
-#             form.fields['type_hebergement'] = forms.ModelChoiceField(
-#                 # initial=self.initial_extra[0]['type_hebergement'],
-#                 queryset=TypeHebergement.objects.all(),
-#                 widget=forms.Select(attrs={'class': 'required'}, ),
-#                 label=u"Hébergement ",
-#                 help_text=u"(Renseigner le type de votre hébergement annuel)"
-#             )
-#
-#
-#
-# class RecapitulatifIndividuForm(forms.Form):
-#     pass
+class InfoPersoForm(forms.ModelForm):
+    """
+    formulaire pour les infos perso
+    """
+    last_name = forms.CharField(
+        label=u"Nom patronymique",
+        max_length=60,
+        help_text=u"(indiquez le nom de naissance)"
+    )
+    common_name = forms.CharField(
+        label=u"Nom d'usage",
+        max_length=60,
+        required=False,
+        help_text=u"(Pour les femmes mariées, inscrivez le nom d'épouse)"
+    )
+    first_name1 = forms.CharField(
+        label=u"Prénom ",
+        max_length=60
+    )
+    first_name2 = forms.CharField(
+        label=u"Second prénom ",
+        max_length=60,
+        required=False,
+    )
+    first_name3 = forms.CharField(
+        label=u"Troisième prénom ",
+        max_length=60,
+        required=False
+    )
+    birthday = django.forms.DateField(
+        label=u"Date de naissance ",
+        required=True,
+        widget=SelectDateWidget(
+            years=range(datetime.today().year-15-80, datetime.today().year-15),
+            attrs={'required': ""}
+        )
+
+    )
+
+    code_pays_birth = forms.ModelChoiceField(
+        label=u"Pays de naissance ",
+        queryset=Pays.objects.all().exclude(lib_pay='').order_by('lib_pay')
+    )
+
+    code_departement_birth = forms.ModelChoiceField(
+        label=u"Département de naissance ",
+        queryset=Departement.objects.exclude(lib_dep='ARMEES'),
+        required=False
+    )
+    town_birth = forms.CharField(
+        label=u'Ville naissance :',
+        max_length=30,
+        required=False
+    )
+    #todo trouver le bug pour required
+    code_pays_nationality = NationalityModelChoiceField(
+        label=u"Nationalité",
+        queryset=Pays.objects.all().exclude(lib_pay='').order_by('lib_nat')
+    )
+
+    sex = forms.ChoiceField(
+        label=u"Sexe ",
+        choices=((u'', '------'), (u'M', u'Homme'), (u'F', u'Femme'))
+    )
+    valid_ine = forms.ChoiceField(
+        label=u"Confirmation de votre INE",
+        choices=(
+            ('', '------'),
+            ('O', u'Je suis sur de mon numéro'),
+            ('N', u"Je n'ai pas de numéro")
+        )
+    )
+    ine = forms.CharField(
+        label=u"INE/BEA ",
+        max_length=11,
+        required=False,
+        help_text=u'(<a href="https://www.iedparis8.net/ied/rubrique.php?id_rubrique=129#a_12L129"'
+                  u' target="_blank">Où trouver votre INE/BEA ?</a>)'
+    )
+
+    family_status = LabelModelChoiceField(
+        label=u"Statut familial ",
+        queryset=SitFam.objects.all()
+    )
+
+    situation_militaire = forms.ModelChoiceField(
+        label=u"Situation militaire ",
+        queryset=SitMil.objects.all().exclude(cod_sim__in=[1,2]),
+        required=False,
+    )
+
+    type_handicap = forms.ModelChoiceField(
+        label=u"Handicap ",
+        queryset=TypHandicap.objects.all(),
+        required=False,
+        empty_label=u"Aucun handicap"
+    )
+    diplome_acces = forms.ModelChoiceField(
+        label=u"Baccalauréat ou équivalent ",
+        queryset=BacOuxEqu.objects.all()
+    )
+    annee_obtention = forms.ChoiceField(
+        choices=[(u'', u'-------')] + [(unicode(i), unicode(i)) for i in range(datetime.today().year - 70,
+                                                                    datetime.today().year + 1)],
+        label=u"Année d'obtention",
+        help_text=u"(Année d'obtention du baccalauréat ou équivalent",
+        required=True
+    )
+
+    class Meta:
+        model = Individu
+        fields = ('last_name',
+                  'common_name',
+                  'first_name1',
+                  'first_name2',
+                  'first_name3',
+                  'birthday',
+                  'code_pays_birth',
+                  'code_departement_birth',
+                  'town_birth',
+                  'code_pays_nationality',
+                  'sex',
+                  'valid_ine',
+                  'ine',
+                  'family_status',
+                  'situation_militaire',
+                  'type_handicap',
+                  'diplome_acces',
+                  'annee_obtention')
+
+    def __init__(self, *args, **kwargs):
+        readonly = kwargs.pop('readonly', False)
+        readonly_all = kwargs.pop('readonlyall', False)
+        super(InfoPersoForm, self).__init__(*args, **kwargs)
+        if readonly:
+            self.fields['last_name'].widget.attrs['readonly'] = 'readonly'
+            self.fields['first_name1'].widget.attrs['readonly'] = 'readonly'
+
+            if self.instance.ine:
+                self.fields['ine'].widget.attrs['readonly'] = 'readonly'
+                self.fields['valid_ine'].widget.attrs['readonly'] = 'readonly'
+            self.fields['sex'].widget.attrs['readonly'] = 'readonly'
+
+        if readonly_all:
+            for field in self.fields:
+                self.fields[field].widget.attrs['disabled'] = 'disabled'
+
+    def clean(self):
+        """
+        Plusieurs règles :
+        date de naissance :
+        si moins de 28 et français : situation militaire obligatoire
+        date du bac > +15ans date de naissance
+        si née en france, département de naissance obligatoire
+        """
+        data = super(InfoPersoForm, self).clean()
+        code_pays_birth = data.get('code_pays_birth', None)
+        birthday = data.get('birthday', None)
+        annee_obtention = data.get('annee_obtention', 0)
+        code_pays_nationality = data.get('code_pays_nationality', 0)
+        situation_militaire = data.get('situation_militaire', None)
+        ine, valid_ine = data.get('ine', None), data.get('valid_ine', None)
+        if code_pays_birth == FRANCE:
+            code_departement_birth, town_birth = data.get('code_departement_birth', None), data.get('town_birth', None)
+            if not code_departement_birth or not town_birth:
+                raise forms.ValidationError(
+                    u"Vous devez saisir votre département de naissance et votre ville de naissance")
+        if code_pays_nationality == FRANCE:
+            now = date.today()
+            birthday_28 = date(birthday.year + 28, birthday.month, birthday.day)
+            dif = birthday_28 - now
+            if dif > 0:  # il n'a pas 28 ans
+                if situation_militaire is None:
+                    raise forms.ValidationError(
+                        u"Vous avez moins de 28 ans, vous devez renseigner votre situation militaire")
+
+        if (birthday.year + 15) >  int(annee_obtention):
+            raise forms.ValidationError(
+                    u"Vous avez saisi une date d'obtention du bac incorect vis à vis de votre date de naissance"
+            )
+        if valid_ine in ['O', 'P']:
+            if ine == u"":
+                raise forms.ValidationError(
+                    u"Vous devez saisir un INE"
+                )
+        if valid_ine == u"N" and ine is not None:
+            data['ine'] = None
+        return data
+
+
+class AdresseForm(forms.ModelForm):
+    listed_number = forms.CharField(label=u'Numero de teléphone :', widget=forms.PhoneNumberInput(),
+                                    help_text=u"(Sans espace et sans tiret)")
+    code_pays = forms.ModelChoiceField(queryset=Pays.objects.all().order_by('lib_pay'))
+    com_bdi = forms.ModelChoiceField(ComBdi.objects.all(),
+                                     label=u"Code postal",
+                                     required=False,
+                                     widget=autocomplete_light.ChoiceWidget('ComBdiAutocomplete'))
+    label_adr_1 = forms.CharField(label=u"Adresse ")
+    label_adr_2 = forms.CharField(label=u"Suite de l'adresse ", required=False)
+    label_adr_3 = forms.CharField(label=u"Suite de l'adresse ", required=False)
+    label_adr_etr = forms.CharField(label=u"Adresse étrangère ", required=False)
+    type = django.forms.CharField(
+        widget=django.forms.HiddenInput()
+    )
+
+    class Meta:
+        model = AdresseIndividu
+        exclude = ('individu',)
+
+    def clean(self):
+        data = super(AdresseForm, self).clean()
+        pays = data.get('code_pays', None)
+        if pays is None:
+            raise forms.ValidationError(u"Vous devez choisir un pays pour votre adresse")
+        if pays.cod_pay == FRANCE:
+            if not data.get("com_bdi", None):
+                raise forms.ValidationError(u"Vous devez choisir une commune pour votre adresse")
+            else:
+                if data.get('label_adr_etr', None):
+                    data['label_adr_etr'] = None
+        else:
+            if not data.get("label_adr_etr", None):
+                raise forms.ValidationError(u"Vous devez indiquer un complément d'adresse")
+            else:
+                if data.get('com_bdi', None):
+                    data['com_bdi'] = None
+        return data
+
+
+class AdresseBaseFormSet(BaseInlineFormSet):
+    def add_fields(self, form, index):
+        super(AdresseBaseFormSet, self).add_fields(form, index)
+        if index == 0:  # il s'agit de l'adrese annuel
+            form.fields['type_hebergement'] = forms.ModelChoiceField(
+                initial=self.initial_extra[0]['type_hebergement'],
+                queryset=TypHebergement.objects.all(),
+                widget=forms.Select(attrs={'class': 'required'}, ),
+                label=u"Hébergement ",
+                help_text=u"(Renseigner le type de votre hébergement annuel)"
+            )
+
+
+class RecapitulatifIndividuForm(forms.Form):
+    pass
 #
 #
 #

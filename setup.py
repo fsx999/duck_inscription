@@ -9,4 +9,5 @@ setup(name='duck_inscription', version='0.1', packages=['duck_inscription'], url
                         'django-registration',
                         'django-simple-captcha',
                         'django-floppyforms',
-                        'django_xworkflows'])
+                        'django_xworkflows',
+                        'django-extra-views'])

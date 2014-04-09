@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Espace étudiant</h1>
+    {{ form.media }}
+    <form id="form" class=" form-horizontal well" method="post" novalidate="novalidate">{% csrf_token %}
+<div class="page-header">
+        <h1 class="text-center">{% block titre_form %}Voeux{% endblock %}</h1>
+    </div>
+
+    {% block contenu %}
+
+    {% endblock %}
+</form>
+    {% block form_script %}{% endblock %}
+
+<a href="{% url 'accueil' %}" class="btn btn-inverse">Retour à l'accueil</a>
+{% endblock %}

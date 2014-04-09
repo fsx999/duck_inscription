@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% load floppyforms lib_inscription %}
+
+{% block content %}
+    <form class="form-horizontal well" method="post">
+        <h3>État-civil</h3>
+        {% include "duck_inscription/individu/include/read_only_form.html" with form=individu %}
+        <div class="form-group">
+            <div class="col-sm-offset-3 col-sm-8">
+                <a class="btn btn-primary" href="{% url 'recap' "modif_individu" %}">Modifier votre état-civil</a>
+            </div>
+        </div>
+    </form>
+
+    <form class="form-horizontal well" method="post">
+        {% for adresse in adresses %}
+            <div>
+                <h3>Adresse {% if adresse.type.value == '1' %}annuelle {% else %}fixe{% endif %}</h3>
+
+                {% include "duck_inscription/individu/include/read_only_form.html" with form=adresse %}
+                {% if adresse.type_hidden == 1 %}
+                    <div id="div_id_type_adresse_annuelle" class="form-group">
+                        <label for="id_type_adresse_annuelle" class="col-sm-3 control-label">
+                            Type de l'hébergement :
+                        </label>
+
+                        <div class="col-sm-7 form-controls">
+                            <p class="form-control-static">{{ type_hebergement_annuel }}</p>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+
+        {% endfor %}
+        <div class="form-group">
+            <div class="col-sm-offset-3 col-sm-8">
+                <a class="btn btn-primary" href="{% url 'recap' "modif_adresse" %}">Modifier l'adresse</a>
+            </div>
+        </div>
+
+    </form>
+
+    <form id="form" class=" form-horizontal well" method="post" novalidate="novalidate">
+        {% csrf_token %}
+        <div class="form-group">
+            <div class="col-sm-offset-3 col-sm-8">
+                <input id="submit-id-verifier" class="btn btn-success" type="submit"
+                       value="J'atteste que les informations ci-dessus sont exactes" name="Verifier">
+            </div>
+        </div>
+
+    </form>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('#form').validate();
+
+        });
+    </script>
+{% endblock %}

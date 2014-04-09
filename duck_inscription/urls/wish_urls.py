@@ -22,12 +22,14 @@
 #                                NoteMasterView, DroitView)
 #
 # __author__ = 'paul'
-# from django.conf.urls import patterns, url
+from django.conf.urls import patterns, url
 # from django.contrib.auth.decorators import login_required
 #
-# urlpatterns = patterns('',
-#                        url(r'^nouveau_voeu/$', wish_verif_etape_and_login(NewWishView.as_view()), name='new_wish'),
-#                        url(r'^liste_etape/$', StepView.as_view(), name="liste_etape"),
+from duck_inscription.views import NewWishView, StepView
+
+urlpatterns = patterns('',
+                       url(r'^nouveau_voeu/$', NewWishView.as_view(), name='new_wish'),
+                       url(r'^liste_etape/$', StepView.as_view(), name="liste_etape"),
 #                        url(r'^supprimer_voeu/(?P<pk>\d+)/$', login_required(DeleteWish.as_view()), name="delete_wish"),
 #                        url(r'^liste_diplome/(?P<pk>\d+)/$', login_required(ListeDiplomeAccesView.as_view()),
 #                            name="liste_diplome"),
@@ -78,4 +80,5 @@
 #                        url(r'^auditeur_libre/$', login_required(NewAuditeurView.as_view()), name='new_auditeur'),
 #                        url(r'^auditeur/(?P<pk>\d+)/$', login_required(AuditeurView.as_view()), name="auditeur"),
 #                        url(r'do_pdf_auditeur/(?P<pk>\d+)/$', login_required(AuditeurPdfView.as_view()),
-#                            name="do_pdf_auditeur"),)
+#                            name="do_pdf_auditeur"),
+)

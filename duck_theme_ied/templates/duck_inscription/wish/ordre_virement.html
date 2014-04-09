@@ -1,0 +1,163 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<style type="text/css">
+
+@page {
+margin-left: 2cm;
+margin-right: 1cm;
+text-align: justify;
+margin-top: 2cm;
+margin-bottom: 2cm;
+}
+img {
+    zoom: 50%;
+
+}
+
+#info tr{
+    padding-top:3pt;
+}
+table{
+
+    margin-top: 5px;
+}
+body{
+    margin-bottom:0;
+    margin-left:0;
+    margin-right:0;
+    margin-top:0;
+    padding-bottom:0;
+    padding-left:0;
+    padding-right:0;
+    padding-top:0;
+    font-size: 12px;
+    text-align: justify;
+
+    }
+h3{
+    padding-bottom:0;
+    padding-top:0;
+    }
+br{
+    padding-bottom:0;
+    padding-top:0;
+    }
+
+
+
+td.first{
+    border-top-style:medium;
+    border-top-color:black;
+    border-top-width: 1px;
+
+    }
+td.last{
+    border-bottom-style:medium;
+    border-bottom-color:black;
+    border-bottom-width: 1px;
+
+    }
+.rib{
+    text-align: center;
+    padding-top: 10px;
+    padding-right: 10px;
+    padding-bottom: 10px;
+    padding-left: 10px;
+
+}
+.cadre{
+    border-right-style:medium;
+    border-right-color:black;
+    border-right-width: 1px;
+    border-left-style:medium;
+    border-left-color:black;
+    border-left-width: 1px;
+    border-bottom-style:medium;
+    border-bottom-color:black;
+    border-bottom-width: 1px;
+    border-top-style:medium;
+    border-top-color:black;
+    border-top-width: 1px;
+
+
+}
+
+
+
+td.droite{
+    border-right-style:medium;
+    border-right-color:black;
+    border-right-width: 1px;
+}
+td.gauche{
+    border-left-style:medium;
+    border-left-color:black;
+    border-left-width: 1px;
+}
+.padding{
+    /*padding-right: 1px;*/
+    /*padding-bottom: 5px;*/
+    padding-top: 5px;
+    padding-left: 5px;
+}
+.not_magin{
+    margin-top: 0;
+}
+</style>
+
+</head>
+<body>
+
+<div><b>
+Ce document contient tous les renseignements à transmettre à votre banque pour établir les virements, vous ne devez pas nous l'envoyer.</b>
+</div>
+<div>
+ <b>Les virements sont à créditer au profit de :</b>
+<br>
+
+    <center>Université Paris 8 <br>
+    2 rue de la Liberté <br>
+    93526 SAINT-DENIS Cedex <br>
+    </center>
+        <br>
+
+</div>
+<center><b>RIB</b></center>
+{% include 'wish/include/rib_ied.html' %}
+    <br>
+
+<center><h1>Il faudra réaliser les {{ paiement_frais.nb_paiement_frais|add:1 }} virements suivants.</h1></center>
+<div>
+    <h4>Virement concernant les droits universitaires</h4>
+   <p> <strong>Le libellé du virement doit être : IED  {{ paiement_droit.wish.step.name }} {{ individu.code_opi }} {{ individu.last_name }} 0</strong> <br>
+    Le motif du virement doit être : IED  {{ paiement_droit.wish.step.name }} {{ individu.code_opi }} {{ individu.last_name }} 0 <br>
+       Le montant doit être de : {{ wish.droit_total|floatformat:2 }} euros <br>
+        Le virement doit être effectué au moment de l'inscription
+    </p>
+
+</div>
+<hr>
+{% for motif in paiement_frais.liste_motif %}
+
+    <div>
+    <h4>Virement des frais pédagogiques numéro {{ forloop.counter }}</h4>
+    <p><strong>Le libellé du virement doit être : {{ motif }}</strong><br>
+    Le motif du virement doit être : {{ motif }}<br>
+Le montant doit être de : {{ tarif_versement_frais|floatformat:2 }} euros <br>
+         Le virement doit être effectué  {% if forloop.counter == 1 %}
+          au moment de l'inscription
+            {% elif forloop.counter == 2 %}
+            le 1er janvier 2014
+            {% else %}
+            le 15 février 2014
+        {% endif %} 
+    </p>
+    </div>
+    <hr>
+{% endfor %}
+<br>
+<h1>Il est nécessaire de respecter scrupuleusement les libellés et les dates, afin que les paiements puissent être constatés.</h1>
+</body>
+</html>
+

@@ -1,0 +1,42 @@
+{% extends "wish/base_wish.html" %}
+{% load lib_pal floppyforms%}
+{% block titre_form %}<legend>Diplôme d'accès à la formation : {{ wish.step.label }}</legend>{% endblock %}
+{% block contenu %}
+    <p>Si vous possédez l'un de diplômes dans la liste proposée ci-dessous veillez à bien
+                 le selectionner avant de poursuivre.</p>
+{% form form %}
+    <div class="alert alert-info">Si vous n'êtes pas détenteur de l'un
+                de ces diplômes veuillez poursuivre votre inscription.</div>
+   <div class="form-actions">
+        <input id="submit-id-verifier" class="btn btn-primary btn btn-success" type="submit" value="Suite" name="Verifier">
+   </div>
+
+{% endblock %}
+{% block form_script %}
+<script type="text/javascript">
+    $(document).ready(function(){
+        function show_hide(){
+            $("#div_id_step").toggle($('#id_grades').val()!="");
+        }
+        function get_step(value){//ajax pour récuper les steps
+            $.get("{% url 'liste_etape' %}", {'diplome':value},function(data){
+                if (data == 'echec'){
+					$("#div_id_step").hide();
+					$("#id_step").html('');
+				}
+				else {
+					$("#div_id_step").show();
+					$("#id_step").replaceWith(data);
+				}
+            });
+        }
+        show_hide();
+        $("#id_grades").change(function(element){
+            show_hide();
+            get_step($(this).val());
+        });
+        $("#form").validate();
+    });
+</script>
+
+ {% endblock %}

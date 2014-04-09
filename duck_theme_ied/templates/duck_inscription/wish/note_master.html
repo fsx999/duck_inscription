@@ -1,0 +1,16 @@
+{% extends "wish/base_wish.html" %}
+{% load lib_pal floppyforms%}
+{% block titre_form %}<legend>Demande de candidature</legend>{% endblock %}
+{% block contenu %}
+<p>
+    Vous avez la possiblilité de saisir vos notes. <br>
+</p>
+<div class="alert alert-info">
+    Cette saisie non obligatoire permet d'accélérer le traitement de votre dossier.
+</div>
+    <p>Si vous n'avez pas ces notes veuillez continuer.</p>
+{% form form %}
+<div class="form-actions">
+        <input id="submit-id-verifier" class="btn btn-primary btn btn-success" type="submit" value="Suite" name="Verifier">
+   </div>
+ {% endblock %}

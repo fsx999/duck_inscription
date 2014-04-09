@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Espace étudiant</h1>
+<div class="well">
+    <div class="alert alert-info">
+        <p>Vous êtes dans votre espace étudiant en ligne et pouvez effectuer jusqu'à <strong>treize (13)</strong> vœux.</p>
+        <p>Tout vœu doit être <strong>validé</strong> afin d'être pris en compte.</p>
+    </div>
+
+
+        {% if wishes %}
+            <div class="well">
+            <legend>Vos vœux en cours</legend>
+
+        {% for wish in wishes %}
+        <p>
+            <span>
+            <a href="{{ wish.get_absolute_url }}">{{ wish.name_url }}</a>
+                </span>
+            {% if not wish.valide %}
+                <span class="pull-right">
+{#            <a class="btn btn-danger" href="{% url 'delete_wish' wish.pk %}">Supprimer ce vœu</a>#}
+                </span>
+            {% endif %}
+        </p>
+        <hr>
+    {% endfor %}</div>
+</div>
+        {% endif %}
+    {% if not wishes|length_is:"13" %}
+<div class="well">
+<a class="btn btn-primary" href="{% url 'new_wish' %}">Ajouter un vœu</a>
+</div>
+    {% endif %}
+{#    {% if not auditeur %}#}
+{#<div class="well">#}
+{#<a class="btn btn-primary" href="{% url 'new_auditeur' %}">Auditeur libre</a>#}
+{#</div>#}
+{#    {% endif %}#}
+
+{% endblock %}

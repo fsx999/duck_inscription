@@ -1,0 +1,140 @@
+{% extends "wish/base_wish.html" %}
+{% load crispy_forms_tags %}
+{% block contenu %}
+
+    {% crispy wizard.form %}
+<script>
+
+function toggle_element(element_a_tester, element_a_change, value){
+    function a(){
+        var val = $(element_a_tester).val();
+        var show;
+        if (value[0] == '!'){
+           show = (val != value.slice(1));
+        }
+        else{
+
+            show = (val == value);
+        }
+        $(element_a_change).toggle(show);
+
+    }
+    a();
+    $(element_a_tester).bind ("change",function(){
+                a();
+    });
+}
+function is_visible(element){
+    if ($(element).is(':visible')){
+        return true;
+    }
+    return false;
+}
+$(document).ready(function(){
+    $('#form').validate({
+        rules:{
+            nb_paiement:{
+                required: is_visible
+            },
+            demi_annee:{
+                required: is_visible
+            },
+            autre_payeur:{
+                required: is_visible
+            },
+            moyen_paiement:{
+                required: is_visible
+            },
+            num_cheque:{
+                required: is_visible,
+                number:true
+            },
+            num_cheque2:{
+                required: is_visible,
+                number:true
+            },
+            num_cheque3:{
+                required: is_visible,
+                number:true
+            },
+            etablissement:{
+                required: is_visible
+
+            },
+            guichet:{
+                required: is_visible
+
+            },
+            num_compte:{
+                required: is_visible
+
+            },
+            cle:{
+                required: is_visible
+
+            }
+        }
+    });
+    if ('{{ moyen_paiement.pk }}' == 'v') {
+        $('#virement').show();
+        $('#cheque').hide();
+
+    }
+    else{
+        $('#virement').hide();
+        $('#cheque').show();
+    }
+    if ($('#id_moyen_paiement').val() == 'cb'){
+        $('#div_id_nb_paiement').hide();
+        $('#info-paiement').text('Vous avez la possibilité de payer par chèque ou par virement.')
+    }
+    else{
+        $('#div_id_nb_paiement').show();
+    }
+    if($('#_id_demi_annee').val() == 1){
+        $('#frais_peda').text(val/2);
+        $('#frais_peda').addClass('demi_tarif');
+
+    }
+    if($('#_id_demi_annee').val() != 0){
+        $('#confirmation_annee_complete').hide();
+    }
+    $('#id_demi_annee').change(function(element){
+       if ($(this).val() == '1'){
+            $('#confirmation_annee_complete').hide();
+       }
+       else{
+           $('#confirmation_annee_complete').show();
+       }
+       if($(this).val() == '1' && !$('#frais_peda').hasClass('demi_tarif')){
+           var val = $('#frais_peda').text();
+           val = parseInt(val);
+           $('#frais_peda').text(val/2);
+           $('#frais_peda').addClass('demi_tarif');
+       }
+       else if($('#frais_peda').hasClass('demi_tarif')){
+           var val = $('#frais_peda').text();
+           val = parseInt(val);
+           $('#frais_peda').text(val*2);
+           $('#frais_peda').removeClass('demi_tarif');
+       }
+
+    });
+    $('#form').submit(function(e){
+       $('#id_tarif').val($('#frais_peda').text());
+    });
+    $('#id_moyen_paiement').change(function(){
+       if ($(this).val()=='cb'){
+           $('#div_id_nb_paiement').hide();
+           $('#id_nb_paiement').val(1);
+           $('#info-paiement').text('Vous avez la possibilité de payer par chèque ou par virement.')
+       }
+        else{
+            $('#div_id_nb_paiement').show();
+           $('#info-paiement').text('Vous avez la possibilité de payer par chèque ou par virement en une ou plusieurs fois.')
+       }
+    });
+    toggle_element('#id_etudiant_payeur','#div_id_autre_payeur','0');
+});
+</script>
+{% endblock %}

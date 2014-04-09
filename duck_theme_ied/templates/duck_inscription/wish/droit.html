@@ -1,0 +1,74 @@
+{% extends "wish/base_wish.html" %}
+{% load crispy_forms_tags %}
+{% block contenu %}
+
+    {% crispy wizard.form %}
+<script>
+
+function toggle_element(element_a_tester, element_a_change, value){
+    function a(){
+        var val = $(element_a_tester).val();
+        console.log(val);
+        var show;
+        if (value[0] == '!'){
+           show = (val != value.slice(1));
+        }
+        else{
+
+            show = (val == value);
+        }
+        console.log(show);
+        $(element_a_change).toggle(show);
+
+    }
+    a();
+    $(element_a_tester).bind ("change",function(){
+                a();
+    });
+}
+function is_visible(element){
+    if ($(element).is(':visible')){
+        return true;
+    }
+    return false;
+}
+$(document).ready(function(){
+    $('#form').validate({
+        rules:{
+            num_cheque:{
+                required: is_visible,
+                number:true
+            },
+            etablissement:{
+                required: is_visible
+
+            },
+            guichet:{
+                required: is_visible
+
+            },
+            num_compte:{
+                required: is_visible
+
+            },
+            cle:{
+                required: is_visible
+
+            }
+        }
+    });
+    if ('{{ moyen_paiement.pk }}' == 'v') {
+        $('#virement').show();
+        $('#cheque').hide();
+
+    }
+    else{
+        $('#virement').hide();
+        $('#cheque').show();
+    }
+
+
+    toggle_element('#id_etudiant_payeur','#div_id_autre_payeur','0');
+});
+</script>
+{% endblock %}

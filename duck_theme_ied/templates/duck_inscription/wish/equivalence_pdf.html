@@ -1,0 +1,234 @@
+{% load lib_pal %}
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<style type="text/css">
+
+@page {
+margin-left: 2cm;
+margin-right: 1cm;
+margin-top: 2cm;
+text-align: justify;
+    @frame footer {
+    -pdf-frame-content: footerContent;
+    bottom: 1cm;
+    margin-left: 1cm;
+    margin-right: 1cm;
+    height: 1cm;
+    font-size: 14px;
+    }
+}
+
+
+
+
+
+img{
+    display:inline;
+    float:left;
+    }
+
+#info tr{
+    padding-top:3pt;
+}
+#codebar{
+    margin-bottom:10pt;
+    }
+#oui{
+    paddin-top:2px;
+    text-align: right;
+    }
+
+body{
+    margin-bottom:0;
+    margin-left:0;
+    margin-right:0;
+    margin-top:0;
+    padding-bottom:0;
+    padding-left:0;
+    padding-right:0;
+    padding-top:0;
+    font-size: 16px;
+    text-align: justify;
+    
+    }
+h3{
+    padding-bottom:0;
+    padding-top:0;
+    }
+br{
+    padding-bottom:0;
+    padding-top:0;
+    }
+#code_barre{
+    display: inline;
+    position: relative;
+    float: right;
+}
+.titre_pdf{
+    text-align: center;
+
+    margin-bottom:0;
+    margin-left:0;
+    margin-right:0;
+    margin-top:0;
+    padding-bottom:0;
+    padding-left:0;
+    padding-right:0;
+    padding-top:0;
+    
+    }
+h2.titre_pdf{
+    text-align: center;
+
+    }
+h3.titre_pdf{
+    text-align: center;
+    }
+
+.alert{
+    text-align: center;
+    background: #CCCCCC;
+    padding-bottom:10px;
+    padding-top:10px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    border-bottom-style:medium;
+    border-left-style:medium;
+    border-right-style:medium;
+    border-top-style:medium;
+    }
+
+
+.footer {
+    font-size: 14px;
+    text-align: right;
+}
+#date {
+    text-align: left;
+}
+#logo_ied {
+    zoom: 15%;
+}
+</style>
+
+</head>
+
+
+
+
+<body>
+<table id="codebar">
+<tr>
+<td><img id="logo_ied" src="{{ static }}logo_ied.jpg" /></td>
+<td id="oui">
+    <pdf:barcode  value="{{ voeu.code_dossier }}" type="code128"  align="baseline" humanreadable="1" barwidth="2" barheight="40" fontsize="16"/>
+</td>
+</tr>
+</table>
+</div>
+
+<div class="titre_pdf">
+<h2 class="titre_pdf">ANNÉE UNIVERSITAIRE {% annee_en_cour %}</h2>
+<h2 class="titre_pdf">DEMANDE D’EQUIVALENCE POUR UNE ADMISSION EN</h2>
+<h2 class="titre_pdf" >{{ voeu.step.label_formation  }} par enseignement à distance</h2>
+
+
+<h2 class="titre_pdf">(Validation des études)</h2>
+
+</div>
+<br />
+
+<div class="info">
+<table id="info">
+    <tr class="fields">
+        <td><b>Nom : </b></td>
+        <td>{{ individu.last_name|capfirst  }}</td>
+    </tr>
+    {% if  individu.common_name %}
+    <tr class="fields">
+        <td><b>Nom d'épouse:</b> </td>
+        <td>{{ individu.common_name|capfirst  }}</td>
+    </tr>
+    {% endif %}
+    <tr class="fields">
+        <td><b>Prénom : </b></td>
+        <td>{{ individu.first_name1|capfirst  }}</td>
+    </tr>
+    <tr class="fields">
+        <td><b>Date de naissance : </b></td>
+        <td>{{ individu.birthday|date:"d F Y" }}</td>
+    </tr>
+
+    <tr class="fields">
+        <td><b>Nationalité : </b></td>
+        <td>{{ individu.code_pays_nationality.lib_nat|capfirst   }}</td>
+    </tr>
+    {% for address in individu.adresses.all %}
+    
+        {% if address.type == '1' %}
+        <tr class="fields">
+            <td valign="top"><b>Adresse:</b> </td>
+            <td valign="top">
+            {% if address.label_adr_1 %}
+            {{ address.label_adr_1  }}
+            {% endif %}
+            {% if  address.label_adr_2 %}
+            {{ address.label_adr_2  }}
+            {% endif %}
+            {% if  address.label_adr_3 %}
+            {{ address.label_adr_3  }}
+            {% endif %}
+            {% if  address.label_adr_etr %}
+            {{ address.label_adr_etr  }}
+            {% endif %}
+            {% if  address.com_bdi %}
+            {{ address.com_bdi.cod_bdi  }}
+            {{ address.com_bdi.lib_ach  }}
+            {% endif %}
+
+
+            {% if  address.code_pays %}
+            {{ address.code_pays  }}
+            {% endif %}
+            </td>
+        </tr>
+        <tr class="fields">
+            <td><b>Téléphone:</b></td>
+            <td>{{ address.listed_number }}</td>
+        </tr>
+        {% endif %}      
+    {% endfor %}
+    
+    <tr class="fields">
+        <td><b>E-mail : </b></td>
+        <td>{{ individu.personal_email }}</td>
+    </tr>
+</table>
+<br>
+<div class="alert">
+    CE DOSSIER EST  à envoyer avant le : </br>
+    {{ voeu.step.fin_equivalence }} </br>
+    (Cachet de la poste faisant foi)</br>
+</div>
+
+    <h3>
+    L’équivalence n’est accordée qu’une seule fois, lors de l’accès au cursus de licence, pour l’année
+        {{ annee_univ }} à l’IED. Si la décision d’équivalence vous accorde la validation d’éléments constitutifs (EC),
+ ces derniers sont acquis pour toute la durée des études en {{ voeu.step.grade }} à l’IED
+    </h3>
+
+</div>
+<div id="footerContent" class="footer">
+   <table>
+       <tr>
+           <td>Dossier généré le {% now "SHORT_DATETIME_FORMAT" %}</td>
+           <td>1/{{ num_page }}</td>
+       </tr>
+   </table>
+
+</div>
+
+
+</body>
+</html>

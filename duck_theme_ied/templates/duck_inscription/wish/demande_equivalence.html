@@ -1,0 +1,16 @@
+{% extends "wish/base_wish.html" %}
+{% load lib_pal floppyforms%}
+{% block titre_form %}<legend>Demande d'équivalence</legend>{% endblock %}
+{% block contenu %}
+<p>
+    Vous avez la possiblilité de faire une demande d'équivalence.
+    Une demande d'équivalence peut vous apporter <strong>une dispense d'un ou de plusieurs ECTS</strong> (European Credits Transfer System).
+</p>
+<div class="alert alert-info">
+    La procédure de préinscription ne pourra se poursuivre qu'à <strong>l'issue du résultat</strong> de la commission pédagogique.
+</div>
+{% form form %}
+<div class="form-actions">
+        <input id="submit-id-verifier" class="btn btn-primary btn btn-success" type="submit" value="Suite" name="Verifier">
+   </div>
+ {% endblock %}

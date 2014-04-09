@@ -1,0 +1,58 @@
+{% extends "wish/base_wish.html" %}
+{% block contenu %}
+    <div class="well">
+    <legend style="text-align: center">Dossier d'inscription en {{ wish.step.label_formation }}</legend>
+    {% if wish.step.limite_etu  and not wish.is_ok and not wish.is_reins_formation %}
+        <div class="alert alert-warning">
+        Il reste {{ wish.place_dispo }} places
+        </div>
+    {% endif %}
+    <div class="form-horizontal">
+{% if wish.valide %}
+
+        <p>Votre vœu a bien été validé, vous devez <strong>imprimer</strong> votre dossier
+
+
+    {% if wish.centre_gestion.centre_gestion == 'ied' %}
+    et suivre les consignes qui y sont indiquées pour l'envoyer <strong>complet</strong> avant le {{ wish.date_limite_envoi|date:"d/m/Y"}}.</p>
+    <p>Aucun dossier incomplet ne sera pris en compte.</p>
+    {% else %}
+       . Suivez les consignes qui vous ont été données par le gestionnaire de la formation permanente
+            ou contactez-le pour savoir la suite à donner à votre dossier d'inscription :
+       </p>
+        <div>
+        Sophie GHANNAM
+        <address>
+        Assistante administrative Alternance et Reprise d’études
+        Tél : 01 49 40 65 98 Fax : 01 49 40 65 57
+        sophie.ghannam@univ-paris8.fr
+        </address>
+        <address>
+        Université Paris 8 – Service Formation Permanente
+        2, rue de la Liberté
+        93526 Saint-Denis Cedex
+        Tél : 0 820 20 51 00  
+        www.fp.univ-paris8.fr
+         </address>
+        </div>
+    {% endif %}
+    <div class="alert alert-info">Vous serez mis au courant par courrier électronique des étapes du traitement de votre dossier.</div>
+
+
+    <div class="form-actions">
+    <a href="{% url "inscription_pdf" wish.pk %}" class="btn btn-primary">Imprimer votre dossier d'inscription</a>
+    </div>
+{% else %}
+
+    <div class="alert alert-success"><strong>Validez</strong> votre vœu afin de pouvoir imprimer votre dossier d'inscription pour son envoi définitif.</div>
+    <div class="alert alert-danger">La validation du voeu, l'impression du dossier et son envoi doivent être faits
+        avant le <b>{{ wish.date_limite_envoi}}.</b></div>
+    <div class="form-actions">
+        <p><a href="{% url "inscription" wish.pk%}?valide=ok" class="btn btn-success">Valider votre vœu</a></p>
+
+        <p><a href="{% url "delete_wish" pk=wish.pk %}" class="btn btn-danger">Supprimer le vœu</a></p>
+    </div>
+{% endif %}
+</div>
+</div>
+{% endblock %}

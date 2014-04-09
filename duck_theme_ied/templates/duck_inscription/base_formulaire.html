@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+{{ form.media }}
+<h3>
+    Veuillez remplir soigneusement les formulaires suivants :
+</h3>
+
+
+<form id="form" class="form-horizontal panel panel-default" method="post" novalidate="novalidate">{% csrf_token %}
+<div class="panel-heading">
+    <div class="page-header">
+        <h1 class="text-center">{% block titre_form %}{% endblock %}</h1>
+    </div>
+    {% block form %}{% endblock %}
+</div>
+</form>
+    {% block form_script %}{% endblock %}
+{% endblock %}

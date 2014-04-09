@@ -1,0 +1,160 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <style type="text/css">
+
+        @page {
+            margin-left: 2cm;
+            margin-right: 1cm;
+            text-align: justify;
+            margin-top: 2cm;
+            margin-bottom: 2cm;
+        }
+        img{
+            zoom:60%;
+        }
+        #logo_p8{
+            zoom:30%;
+            text-align: right;
+        }
+        .barcode{
+            margin-bottom:10pt;
+            text-align: right;
+        }
+        #info tr{
+            padding-top:3pt;
+        }
+        table{
+
+            margin-top: 5px;
+        }
+        body{
+            margin-bottom:0;
+            margin-left:0;
+            margin-right:0;
+            margin-top:0;
+            padding-bottom:0;
+            padding-left:0;
+            padding-right:0;
+            padding-top:0;
+            font-size: 12px;
+            text-align: justify;
+
+        }
+        h3{
+            padding-bottom:0;
+            padding-top:0;
+        }
+        br{
+            padding-bottom:0;
+            padding-top:0;
+        }
+        .border_top{
+            border-top-style:medium;
+            border-top-width:1px;
+            border-top-color:#000000;
+        }
+        .border_bottom{
+            border-bottom-style:medium;
+            border-bottom-width:1px;
+            border-bottom-color:#000000;
+        }
+
+        .table_border{
+            padding-left: 10px;
+            padding-right: 10px;
+            border-left-style:medium;
+            border-left-width:1px;
+            border-left-color:#000000;
+            border-right-style:medium;
+            border-right-width:1px;
+            border-right-color:#000000;
+
+        }
+        div.table_border > p{
+            margin-top: 0px;
+            margin-bottom: 0px;
+            padding-top: 0px;
+            padding-bottom: 0px;
+        }
+        td.first{
+            border-top-style:medium;
+            border-top-color:black;
+            border-top-width: 1px;
+
+        }
+        td.last{
+            border-bottom-style:medium;
+            border-bottom-color:black;
+            border-bottom-width: 1px;
+
+        }
+
+        .adresse{
+            font-size: 10px;
+        }
+
+
+        td.droite{
+            border-right-style:medium;
+            border-right-color:black;
+            border-right-width: 1px;
+        }
+        td.gauche{
+            border-left-style:medium;
+            border-left-color:black;
+            border-left-width: 1px;
+        }
+        .padding{
+            text-align: left;
+            padding-right: 3px;
+            /*padding-bottom: 5px;*/
+            padding-top: 5px;
+            padding-left: 5px;
+        }
+        .not_magin{
+            margin-top: 0;
+        }
+    </style>
+
+</head>
+<body>
+
+<table>
+    <tr>
+        <td><img id="logo_p8" src="{{ static }}/logop8.jpg" /></td>
+{% if not wish.is_auditeur %}
+        <td><pdf:barcode  value="{{ individu.code_opi }}" type="code128"  align="right" align="baseline" humanreadable="1" barwidth="2" barheight="40" fontsize="16" /></td>
+{% endif %}
+        <td class="barcode"><img id="logo_ied" src="{{ static }}/logo-ied.jpg"/></td>
+    </tr>
+</table>
+<table>
+    <tr>
+        <td class="adresse"><p>
+        UNIVERSITE PARIS 8<br/>
+        Institut d'Enseignement à Distance <br/>
+        Service de la Scolarité – Bâtiment D <br/>
+        2 rue de la Liberté – 93526 SAINT DENIS cedex<br/>
+        tel : 01 49 40 72 00, fax : 01 49 40 72 04,<br/>internet : www.iedparis8.net<br/>
+        </p>
+        </td>
+        <td>
+            <pdf:barcode  value="{{ wish.code_dossier }}" type="code128"  align="left" align="baseline" humanreadable="1" barwidth="2" barheight="40" fontsize="16" />
+        </td>
+    </tr>
+</table>
+{#<div class="adresse">#}
+{#    <p>#}
+{#        UNIVERSITE PARIS 8<br/>#}
+{#        Institut d'Enseignement à Distance <br/>#}
+{#        Service de la Scolarité – Bâtiment D <br/>#}
+{#        2 rue de la Liberté – 93526 SAINT DENIS cedex<br/>#}
+{#        tel : 01 49 40 72 00, fax : 01 49 40 72 04,<br/>internet : www.iedparis8.net<br/>#}
+{#    </p>#}
+{#</div>#}
+{% if not wish.is_auditeur %}
+<hr />
+Réservé à l'administration : - n° d'étudiant :{{ wish.individu.student_code|default_if_none:"…………….." }}          - date d'inscription :……………………………
+<hr />
+{% endif %}

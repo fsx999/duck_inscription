@@ -1,0 +1,266 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<style type="text/css">
+{% if wish.can_be_changed %}
+@page {
+margin-top: 2cm;
+margin-left: 2cm;
+margin-right: 1cm;
+margin-bottom: 2cm;
+text-align: justify;
+    @frame footer {
+    -pdf-frame-content: footerContent;
+    bottom: 1cm;
+    margin-left: 1cm;
+    margin-right: 1cm;
+    height: 1cm;
+  }
+}
+{% else %}
+@page {
+margin-top: 2cm;
+margin-left: 2cm;
+margin-right: 1cm;
+margin-bottom: 2cm;
+text-align: justify;
+    @frame footer {
+    -pdf-frame-content: footerContent;
+    bottom: 1cm;
+    margin-left: 1cm;
+    margin-right: 1cm;
+    height: 1cm;
+  }
+}
+{% endif %}
+
+
+.center{
+    text-align: center;
+}
+.strong{
+    font-weight: bold;
+}
+
+img{
+    zoom:60%;
+    }
+
+.info tr{
+    padding-top:3pt;
+}
+.barcode{
+    margin-bottom:10pt;
+    text-align: right;
+    }
+
+body{
+    margin-bottom:0;
+    margin-left:0;
+    margin-right:0;
+    margin-top:0;
+    padding-bottom:0;
+    padding-left:0;
+    padding-right:0;
+    padding-top:0;
+    font-size: 12px;
+    text-align: justify;
+
+    }
+h3{
+    padding-bottom:0;
+    padding-top:0;
+    }
+br{
+    padding-bottom:0;
+    padding-top:0;
+    }
+
+.titre_pdf{
+    text-align: center;
+
+    margin-bottom:0;
+    margin-left:0;
+    margin-right:0;
+    margin-top:0;
+    padding-bottom:0;
+    padding-left:0;
+    padding-right:0;
+    padding-top:0;
+
+    }
+h2.titre_pdf{
+    text-align: center;
+
+    }
+h3.titre_pdf{
+    text-align: center;
+    }
+
+.photo {
+    text-align: center;
+    width: 110px;
+    padding-bottom: 45px;
+    padding-left: 0px;
+    margin-bottom: 10px;
+    border-top-style:medium;
+    border-top-width:1px;
+    border-top-color:#000000;
+
+    border-bottom-style:medium;
+    border-bottom-width:1px;
+    border-bottom-color:#000000;
+
+    border-left-style:medium;
+    border-left-color:black;
+    border-left-width: 1px;
+
+    border-right-style:medium;
+    border-right-color:black;
+    border-right-width: 1px;
+}
+.fields{
+    text-align: left;
+}
+/*n'ouvelle modif'*/
+#logo_p8{
+    zoom:30%;
+    text-align: right;
+}
+
+h3.entete{
+    padding-top: 4px;
+    line-height: 15px;
+    background-color: #777777;
+    text-align: center;
+    font-style: italic;
+}
+ul{
+    margin-left: 0px;
+    padding-left: 0px;
+}
+
+.font_gris{
+    background-color: #97a2b0;
+}
+table{
+    margin-bottom: 10px;
+}
+.padding{
+    padding-top: 10px;
+    padding-left: 10px;
+    padding-bottom: 10px;
+    padding-right: 10px;
+}
+.margin10{
+  padding-left: 5px;
+}
+.table_border{
+    border-top-style:medium;
+    border-top-width:1px;
+    border-top-color:#000000;
+    border-bottom-style:medium;
+    border-bottom-width:1px;
+    border-bottom-color:#000000;
+    border-left-style:medium;
+    border-left-width:1px;
+    border-left-color:#000000;
+    border-right-style:medium;
+    border-right-width:1px;
+    border-right-color:#000000;
+
+}
+
+td{
+    padding-left: 5px;
+}
+</style>
+
+</head>
+
+
+
+
+<body>
+    <table>
+        <tr>
+            {% if wish.centre_gestion.centre_gestion == 'ied' %}
+            <td><img id="logo_p8" src="{{ static }}/logop8.jpg" /></td>
+            {% else %}
+            <td><img id="logo_p8" src="{{ static }}/logo_fp.jpg"/></td>
+            {% endif %}
+            <td class="barcode"><img id="logo_ied" src="{{ static }}/logo-ied.jpg"/></td>
+
+
+
+        </tr>
+    </table>
+<br>
+<br>
+<br>
+<br>
+
+<p>
+    Je, soussigné (e) (Nom) {{ wish.individu.last_name }} (Prénom) {{ wish.individu.first_name1 }} {{ wish.individu.first_name2 }}
+    {{ wish.individu.first_name3 }}
+
+</p>
+    Demeurant  au :
+    {{ wish.individu.get_adresse_annuelle|safe }}
+<p>
+    {% if wish.student.student_code %}
+        indiquez votre numéro de carte d’étudiant de Paris 8 (si vous êtes déjà en sa possession):<br>
+        {{ wish.student.student_code }}
+
+    {% endif %}
+</p>
+<p>
+   inscription pour l'année universitaire 2013 – 2014 (précisez la formation et l’année d’études) :<br>
+   {{ wish.step.label }}
+</p>
+<p>
+Autorise /
+
+N'autorise pas (rayez la mention inutile)
+</p>
+
+    <p>
+        l’université Paris 8 à utiliser ma photographie d'identité reproduite sur la carte d'étudiant pour la création de tous
+supports imprimés, audiovisuels, informatiques, internet à usage interne.
+
+    </p>
+<p style="color: red">A remplir également par votre représentant légal si vous êtes mineur(e) au moment de votre inscription :
+</p>
+<p>
+    Je, soussigné (e) (Nom) .......................................................................... (Prénom) .................................................... ,
+</p>
+
+    <p>domicilié(e) n° ..................... rue .................................................................................................................................
+</p>
+
+    <p>code postal............................ ville ................................................................................................................................ ,
+</p>
+
+    <p>déclare être le parent ou le représentant légal du mineur nommé ci-dessus et :
+</p>
+
+    <p><p>
+Autorise /
+
+N'autorise pas (rayez la mention inutile)
+</p></p>
+
+    <p>l’université Paris 8 à utiliser sa photographie d'identité reproduite sur la carte d'études pour la création de tous
+supports imprimés, audiovisuels, informatiques, internet à usage interne à l'établissement, notamment les
+documents nécessaires à l'activité pédagogique, comme les trombinoscopes.
+</p>
+
+<p>
+    Fait à .......................................... le : {{ now|date:'d/m/Y' }}
+
+</p>
+
+    <p>Signature de l'étudiant(e) ET de son représentant légal si vous êtes mineur(e) au moment de l’inscription :
+</p>
+</body>
+</html>

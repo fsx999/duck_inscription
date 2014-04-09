@@ -1,0 +1,118 @@
+{% load staticfiles %}
+{% load lib_inscription %}
+{% load compress %}
+<!DOCTYPE html>
+<html lang="fr">
+    <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>{% block title %}Gestion IED{% endblock %}</title>
+        {% block meta %}{% endblock %}
+        <link rel="shortcut icon" type="image/x-icon" href="{{ STATIC_URL }}images/favicon.ico" />
+  
+
+        {% compress js %}
+        <script src="{% static "js/jquery.min.js" %}"></script>
+        <script src="{% static "bootstrap3/js/bootstrap.min.js" %}"></script>
+        <script src="{% static "js/jquery.validate.min.js" %}"></script>
+        <script src="{% static "js/additional-methods.min.js" %}"></script>
+        <script src="{% static "js/messages_fr.js" %}"></script>
+
+        {% endcompress %}
+
+        {% compress css %}
+        <link rel="stylesheet" href="{% static "bootstrap3/css/bootstrap.min.css"%}">
+        <link rel="stylesheet" href="{% static "css/chosen.css"%}">
+        <link rel="stylesheet" href="{% static "css/jquery-ui.css"%}">
+        <link rel="stylesheet" href="{% static "css/main.css"%}">
+        {% endcompress %}
+        {% include 'autocomplete_light/static.html' %}
+        {% block css %} {% endblock %}
+        {% block extra_css %}
+        {% endblock %}
+
+
+        {% block javascript %}{% endblock %}
+   <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+      <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <script>
+        $.validator.setDefaults({
+    errorElement: "span",
+    errorClass: "help-block",
+    highlight: function (element, errorClass, validClass) {
+        $(element).closest('.form-group').removeClass('has-success').addClass('has-error');
+    },
+    unhighlight: function (element, errorClass, validClass) {
+       $(element).closest('.form-group').removeClass('has-error').addClass('has-success');
+    },
+    errorPlacement: function (error, element) {
+        if (element.parent('.input-group').length || element.prop('type') === 'checkbox' || element.prop('type') === 'radio') {
+            error.insertAfter(element.parent());
+        } else {
+            error.insertAfter(element);
+        }
+    }
+});
+
+    </script>
+    </head>
+   <body class="ied">
+     <div class="container white ">
+         {% block entete %}
+         <img id="entete_img" class="center-block" src="{{ STATIC_URL }}images/ied_preins_annee.jpg"/>
+
+        <div class="navbar navbar-inverse">
+            <div class="container-fluid">
+            <div class="collapse navbar-collapse">
+
+                    <div class="navbar-header active">
+                        <a href="{% url "accueil" %}" class="navbar-brand active"><i class="glyphicon glyphicon-home"></i> Accueil</a>
+                    </div>
+                    <ul class="nav navbar-nav">
+                        <li class="active "></li>
+                        <li class="divider-vertical"></li>
+
+                    </ul>
+
+
+                    {% if user.is_authenticated %}
+                        <p class="navbar-text navbar-right"><a href="{% url "auth_logout" %}" class="navbar-link"><i class="glyphicon glyphicon-off"></i> Déconnexion ({{ user.username }})</a></p>
+                    {% endif %}
+
+                
+                </div>
+            </div>
+        </div>
+
+            {% endblock %}
+
+         <script type="text/javascript">
+             $(document).ready(function(){
+                 $("#home").addClass("active");
+             });
+         </script>
+         <h2 class="page-header" style="text-align: center">Année universitaire {% annee_en_cour %}</h2>
+            <div class="well justify">
+            {% block content %} {% endblock %}
+            </div>
+
+            <footer class="footer_0">
+            {% block pied %}
+                <p id="footer_option">
+                <a href="https://www.iedparis8.net/">Institut d'Enseignement à Distance</a> IED - 2, rue de la Liberté - 93 526 SAINT-DENIS Cedex - France | standard téléphonique : 01 49 40 72 (postes : 00 | 01 | 02 | 51)
+                    <img class="no_shadow" alt="fax : 01 49 40 72 04" src="{{ STATIC_URL }}images/fax_ied.gif" />
+                </p>
+                <p id="footer_mention">Copyright &copy; IED Paris 8, 2006-2013 - tous droits réservés</p>
+                <a id="ns" name="ns">&nbsp;</a>
+
+            {% endblock %}
+            </footer>
+
+        </div>
+
+    </body>
+</html>
+        

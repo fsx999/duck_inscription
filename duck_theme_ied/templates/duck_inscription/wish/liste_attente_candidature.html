@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% load floppyforms%}
+{% block content %}
+    {% if not wish.liste_attente %}
+<form id="form" class=" form-horizontal well" method="post" novalidate="novalidate">{% csrf_token %}
+<legend style="text-align: center">Liste d\'attente</legend>
+    <p>L'accès à votre voeu  de formation (<b>{{ wish.step.label }}</b>
+            nécessite le passage par l'étape de la candidature.
+             Cette candidature étant fermées depuis le <b>{{ wish.step.fin_candidature }}</b></p>
+        {% form form %}
+  <div class="form-actions">
+ <input  class="btn btn-primary" type="submit" value="Valider" name="valide">
+      </div>
+       </form>
+    {% else %}
+        <p>Vous êtes sur une liste d'attente d'accès.</p>
+        <p>Un e-mail vous informera de la suite accordée à votre dossier de candidature.</p>
+    {% endif %}
+
+
+
+
+    <a href={% url 'home' %}>Retour à la liste des voeux</a></p>
+{% endblock %}

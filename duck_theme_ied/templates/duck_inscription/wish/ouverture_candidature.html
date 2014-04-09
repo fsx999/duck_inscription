@@ -1,0 +1,10 @@
+{% extends "wish/base_wish.html" %}
+{% block contenu %}
+
+    <div class="well">
+        <legend>Demande de candidature</legend>
+        <p>Votre souhait d'inscription concernant la formation <strong>{{ wish.step.label }}</strong> a bien été pris en compte.</p>
+        <p>Une demande de candidature est nécessaire pour poursuivre.</p>
+        <div class="alert alert-info"> La procédure de demande de candidature sera en ligne le <strong>{{ wish.step.debut_candidature }}</strong>.</div>
+    </div>
+{% endblock %}
