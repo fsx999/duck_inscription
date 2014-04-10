@@ -129,4 +129,3 @@ if DEBUG:
     COMPRESS_ENABLED = False
 else:
     COMPRESS_ENABLED = True
-print EMAIL_HOST, EMAIL_USE_TLS,
