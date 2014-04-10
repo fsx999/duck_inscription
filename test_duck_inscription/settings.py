@@ -122,7 +122,7 @@ try:
         INSTALLED_APPS += DEV_APPS
         MIDDLEWARE_CLASSES += ('debug_toolbar.middleware.DebugToolbarMiddleware',) +\
                               MIDDLEWARE_CLASSES +('devserver.middleware.DevServerMiddleware',)
-except ImportError:
+except (ImportError, NameError):
     pass
 if DEBUG:
     COMPRESS_ENABLED = False
