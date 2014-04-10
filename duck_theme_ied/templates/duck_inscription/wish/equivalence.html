@@ -1,7 +1,7 @@
-{% extends "wish/base_wish.html" %}
+{% extends "duck_inscription/wish/base_wish.html" %}
 {% block contenu %}
     <div class="well">
-    <legend style="text-align: center">Demande d'équivalence en {{ wish.step.label_formation }}</legend>
+    <legend style="text-align: center">Demande d'équivalence en {{ wish.etape.label_formation }}</legend>
     <div class="form-horizontal">
 {% if wish.valide %}
 
@@ -11,7 +11,7 @@
     <div class="alert alert-info">À l'issue de ce traitement, vous obtiendrez une réponse par
         courrier electronique et serez orienté automatiquement vers l'étape suivante de votre inscription.</div>
     <div class="form-actions">
-    <a href="{% url 'equivalence_pdf' wish.pk %}" class="btn btn-primary">Imprimer votre dossier d'équivalence</a>
+{#    <a href="{% url 'equivalence_pdf' wish.pk %}" class="btn btn-primary">Imprimer votre dossier d'équivalence</a>#}
     </div>
 {% else %}
 

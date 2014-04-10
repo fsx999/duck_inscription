@@ -15,22 +15,26 @@
 <script type="text/javascript">
     $(document).ready(function(){
         function show_hide(){
-            $("#div_id_step").toggle($('#id_grades').val()!="");
+            $("#div_id_etape").toggle($('#id_diplome').val()!="");
+            if($('#id_diplome').val()==""){
+                $("#id_etape").html('');
+            }
         }
         function get_step(value){//ajax pour récuper les steps
-{#            $.get("{% url 'liste_etape' %}", {'diplome':value},function(data){#}
-{#                if (data == 'echec'){#}
-{#					$("#div_id_step").hide();#}
-{#					$("#id_step").html('');#}
-{#				}#}
-{#				else {#}
-{#					$("#div_id_step").show();#}
-{#					$("#id_step").replaceWith(data);#}
-{#				}#}
-{#            });#}
+            $.get("{% url 'liste_etape' %}", {'diplome':value},function(data){
+                if (data == 'echec'){
+					$("#div_id_step").hide();
+					$("#id_etape").html('');
+				}
+				else {
+					$("#div_id_etape").show();
+					$("#id_etape").replaceWith(data);
+				}
+            });
         }
         show_hide();
-        $("#id_grades").change(function(element){
+        get_step($("#id_diplome").val());
+        $("#id_diplome").change(function(element){
             show_hide();
             get_step($(this).val());
         });

@@ -29,6 +29,17 @@ class SettingAnneeUni(AnneeUni):
 class SettingsEtape(Etape):
     label = models.CharField('Label', max_length=120, null=True)
     diplome = models.ForeignKey('DiplomeEtape', null=True, blank=True)
+    required_equivalence = models.BooleanField(default=True)
+    date_ouverture_equivalence = models.DateTimeField(null=True, blank=True)
+    date_fermeture_equivalence = models.DateTimeField(null=True, blank=True)
+    date_ouverture_candidature = models.DateTimeField(null=True, blank=True)
+    date_fermeture_candidature = models.DateTimeField(null=True, blank=True)
+    label_formation = models.CharField(max_length=120, null=True, blank=True)
+    annee = models.ForeignKey(SettingAnneeUni, default=2014)
+    document_equivalence = models.FileField(upload_to='document_equivalence',
+                                            verbose_name=u"Document d'équivalence", null=True, blank=True)
+    document_candidature = models.FileField(upload_to='document_candidature',
+                                            verbose_name=u"Document de candidature", null=True, blank=True)
 
     class Meta:
         app_label = 'duck_inscription'

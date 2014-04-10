@@ -4,11 +4,12 @@ from django.core.urlresolvers import reverse
 from django.http import HttpResponse
 
 from django.shortcuts import redirect
-from django.views.generic import TemplateView
+from django.views.generic import TemplateView, View
 from django.views.generic.edit import FormView
 from floppyforms import ModelChoiceField
-
-from duck_inscription.forms import WishGradeForm
+import xworkflows
+import json
+from duck_inscription.forms import WishGradeForm, ListeDiplomeAccesForm, DemandeEquivalenceForm
 from duck_inscription.models import Wish, SettingsEtape
 
 __author__ = 'paul'
@@ -24,9 +25,9 @@ class NewWishView(FormView):
 
         if not individu.wishes.filter(etape=etape).count() == 0:
             return redirect(reverse("accueil"))
-        wish = Wish(etape=etape, individu=individu)
+        wish = Wish.objects.get_or_create(etape=etape, individu=individu)[0]
         wish.save()
-        wish.dispatch()
+        wish.ouverture_equivalence()
         return redirect(wish.get_absolute_url())
 
 
@@ -35,97 +36,103 @@ class StepView(TemplateView):
         if self.request.GET.get("diplome", "") != "":
             step_wish = []
             for wish in self.request.user.individu.wishes.all():
-                step_wish.append(wish.step.pk)
+                step_wish.append(wish.etape.pk)
 
             etape = ModelChoiceField(queryset=SettingsEtape.objects.filter(
                 diplome=self.request.GET.get("diplome")).exclude(pk__in=step_wish).order_by('label'),
             )
-            return HttpResponse(etape.widget.render(name='step', value='', attrs={'id': 'id_step', 'class': "required"}))
+            return HttpResponse(etape.widget.render(name='etape', value='', attrs={'id': 'id_etape', 'class': "required"}))
 
         return HttpResponse('echec')
+
+
+class DeleteWish(View):
+    def get(self, request, *args, **kwargs):
+        self.request.user.individu.wishes.filter(pk=kwargs.get('pk', None)).delete()
+        return redirect(reverse("accueil"))
+
+
+class OuvertureEquivalence(TemplateView):
+    template_name = "duck_inscription/wish/ouverture_equivalence.html"
+
+    def get_context_data(self, **kwargs):
+        context = super(OuvertureEquivalence, self).get_context_data(**kwargs)
+        context['date'] = self.request.user.individu.wishes.get(pk=self.kwargs['pk']).etape.date_ouverture_equivalence
+        return context
+
+    def get(self, request, *args, **kwargs):
+        wish = self.request.user.individu.wishes.get(pk=self.kwargs['pk'])
+        try:
+            wish.liste_diplome()
+            return redirect(wish.get_absolute_url())
+        except xworkflows.base.ForbiddenTransition:
+            return super(OuvertureEquivalence, self).get(request, *args, **kwargs)
+
+
+class ListeDiplomeAccesView(FormView):
+    template_name = "duck_inscription/wish/liste_diplome_acces.html"
+    form_class = ListeDiplomeAccesForm
+
+    def get_context_data(self, **kwargs):
+        context = super(ListeDiplomeAccesView, self).get_context_data(**kwargs)
+        try:
+            context['wish'] = self.request.user.individu.wishes.get(pk=self.kwargs['pk'])
+        except Wish.DoesNotExist:
+            return redirect(reverse("accueil"))
+        return context
+
+    def get_form(self, form_class):
+        wish = self.request.user.individu.wishes.get(pk=self.kwargs['pk'])
+        return form_class(step=wish.etape, **self.get_form_kwargs())
+
+    def get(self, request, *args, **kwargs):
+        form_class = self.get_form_class()
+        try:
+            form = self.get_form(form_class)
+        except Wish.DoesNotExist:
+            return redirect(reverse("accueil"))
+        return self.render_to_response(self.get_context_data(form=form))
+
+    def post(self, request, *args, **kwargs):
+        form_class = self.get_form_class()
+        try:
+            form = self.get_form(form_class)
+        except Wish.DoesNotExist:
+            return redirect(reverse("home"))
+        if form.is_valid():
+            return self.form_valid(form)
+        else:
+            return self.form_invalid(form)
+
+    def form_invalid(self, form):
+        return super(ListeDiplomeAccesView, self).form_invalid(form)
+
+    def form_valid(self, form):
+        data = form.cleaned_data
+        wish = self.request.user.individu.wishes.get(pk=self.kwargs['pk'])
+        wish.diplome_acces = data['liste_diplome']
+        wish.demande_equivalence()
+        return redirect(wish.get_absolute_url())
+
+
+class DemandeEquivalenceView(FormView):
+    template_name = "duck_inscription/wish/demande_equivalence.html"
+    form_class = DemandeEquivalenceForm
+
+    def form_valid(self, form):
+        data = form.cleaned_data
+        wish = self.request.user.individu.wishes.get(pk=self.kwargs['pk'])
+        if json.loads(data['demande_equivalence'].lower()):
+            wish.equivalence()
+        else:
+            wish.ouverture_candidature()
+        # wish.dispatch()
+        return redirect(wish.get_absolute_url())
 #
 #
-# class DeleteWish(View):
-#
-#     def get(self, request, *args, **kwargs):
-#         #self.request.user.individu.wishes.filter(pk=kwargs.get('pk', None)).delete()
-#         return redirect(reverse("home"))
-#
-#
-# class ListeDiplomeAccesView(FormView):
-#     template_name = "wish/liste_diplome_acces.html"
-#     form_class = ListeDiplomeAccesForm
-#
-#     def get_context_data(self, **kwargs):
-#         context = super(ListeDiplomeAccesView, self).get_context_data(**kwargs)
-#         try:
-#             context['wish'] = self.request.user.individu.wishes.get(pk=self.kwargs['pk'])
-#         except Wish.DoesNotExist:
-#             return redirect(reverse("home"))
-#         return context
-#
-#     def get_form(self, form_class):
-#         wish = self.request.user.individu.wishes.get(pk=self.kwargs['pk'])
-#         return form_class(step=wish.step, **self.get_form_kwargs())
-#
-#     def get(self, request, *args, **kwargs):
-#         form_class = self.get_form_class()
-#         try:
-#             form = self.get_form(form_class)
-#         except Wish.DoesNotExist:
-#             return redirect(reverse("home"))
-#         return self.render_to_response(self.get_context_data(form=form))
-#
-#     def post(self, request, *args, **kwargs):
-#         form_class = self.get_form_class()
-#         try:
-#             form = self.get_form(form_class)
-#         except Wish.DoesNotExist:
-#             return redirect(reverse("home"))
-#         if form.is_valid():
-#             return self.form_valid(form)
-#         else:
-#             return self.form_invalid(form)
-#
-#     def form_invalid(self, form):
-#         return super(ListeDiplomeAccesView, self).form_invalid(form)
-#
-#     def form_valid(self, form):
-#         data = form.cleaned_data
-#         wish = self.request.user.individu.wishes.get(pk=self.kwargs['pk'])
-#         wish.diplome_acces = data['liste_diplome']
-#
-#         wish.dispatch()
-#
-#         return redirect(wish.get_absolute_url())
-#
-#
-# class DemandeEquivalenceView(FormView):
-#     template_name = "wish/demande_equivalence.html"
-#     form_class = DemandeEquivalenceForm
-#
-#     def form_valid(self, form):
-#         data = form.cleaned_data
-#         wish = self.request.user.individu.wishes.get(pk=self.kwargs['pk'])
-#         wish.demande_equivalence = True if data['demande_equivalence'] == u"True" else False
-#         wish.dispatch()
-#         return redirect(wish.get_absolute_url())
-#
-#
-# class OuvertureEquivalence(TemplateView):
-#     template_name = "wish/ouverture_equivalence.html"
-#
-#     def get_context_data(self, **kwargs):
-#         context = super(OuvertureEquivalence, self).get_context_data(**kwargs)
-#         context['date'] = self.request.user.individu.wishes.get(pk=self.kwargs['pk']).step.debut_equivalence
-#         return context
-#
-#     def get(self, request, *args, **kwargs):
-#         wish = self.request.user.individu.wishes.get(pk=self.kwargs['pk'])
-#
-#         if wish.dispatch():
-#             return redirect(wish.get_absolute_url())
-#         return super(OuvertureEquivalence, self).get(request, *args, **kwargs)
+
+
+
 #
 #
 # class ListeAttenteEquivalenceView(FormView):
@@ -160,19 +167,19 @@ class StepView(TemplateView):
 #         return redirect(wish.get_absolute_url())
 #
 #
-# class EquivalenceView(TemplateView):
-#     template_name = "wish/equivalence.html"
-#
-#     def get(self, request, *args, **kwargs):
-#         wish = request.user.individu.wishes.get(pk=self.kwargs['pk'])
-#         if request.GET.get("valide", False):
-#             wish.valide = True
-#             wish.save()
-#         context = self.get_context_data()
-#         context['wish'] = wish
-#         return self.render_to_response(context)
-#
-#         #        return super(EquivalenceView, self).get(request, *args, **kwargs)
+class EquivalenceView(TemplateView):
+    template_name = "duck_inscription/wish/equivalence.html"
+
+    def get(self, request, *args, **kwargs):
+        wish = request.user.individu.wishes.get(pk=self.kwargs['pk'])
+        if request.GET.get("valide", False):
+            wish.valide = True
+            wish.save()
+        context = self.get_context_data()
+        context['wish'] = wish
+        return self.render_to_response(context)
+
+        #        return super(EquivalenceView, self).get(request, *args, **kwargs)
 #
 #
 # class EquivalencePdfView(TemplateView):
@@ -241,21 +248,21 @@ class StepView(TemplateView):
 #         return result
 #
 #
-# class OuvertureCandidature(TemplateView):
-#     template_name = "wish/ouverture_candidature.html"
-#
-#     def get_context_data(self, **kwargs):
-#         context = super(OuvertureCandidature, self).get_context_data(**kwargs)
-#         context['date'] = self.request.user.individu.wishes.get(pk=self.kwargs['pk']).step.debut_candidature
-#         context['wish'] = self.request.user.individu.wishes.get(pk=self.kwargs['pk'])
-#         return context
-#
-#     def get(self, request, *args, **kwargs):
-#         wish = self.request.user.individu.wishes.get(pk=self.kwargs['pk'])
-#
-#         if wish.dispatch():
-#             return redirect(wish.get_absolute_url())
-#         return super(OuvertureCandidature, self).get(request, *args, **kwargs)
+class OuvertureCandidature(TemplateView):
+    template_name = "duck_inscription/wish/ouverture_candidature.html"
+
+    def get_context_data(self, **kwargs):
+        context = super(OuvertureCandidature, self).get_context_data(**kwargs)
+        context['date'] = self.request.user.individu.wishes.get(pk=self.kwargs['pk']).etape.date_ouverture_candidature
+        context['wish'] = self.request.user.individu.wishes.get(pk=self.kwargs['pk'])
+        return context
+
+    def get(self, request, *args, **kwargs):
+        wish = self.request.user.individu.wishes.get(pk=self.kwargs['pk'])
+
+        # if wish.dispatch():
+        #     return redirect(wish.get_absolute_url())
+        return super(OuvertureCandidature, self).get(request, *args, **kwargs)
 #
 #
 # class NoteMasterView(FormView):
@@ -296,24 +303,24 @@ class StepView(TemplateView):
 #         return super(ListeAttenteEquivalenceView, self).get(request, *args, **kwargs)
 #
 #
-# class OuverturePaiementView(TemplateView):
-#     template_name = "wish/ouverture_paiement.html"
-#
-#     def get_context_data(self, **kwargs):
-#         context = super(OuverturePaiementView, self).get_context_data(**kwargs)
-#         context['wish'] = self.request.user.individu.wishes.get(pk=self.kwargs['pk'])
-#         return context
-#
-#     def get(self, request, *args, **kwargs):
-#         context = self.get_context_data(**kwargs)
-#         wish = context['wish']
-#         if wish.etape == 'ouverture_paiement' or wish.dispatch_etape == 'ouverture_paiement' and wish.etape != wish.dispatch_etape:
-#             wish.etape = wish.dispatch_etape = 'ouverture_paiement'
-#             wish.save()
-#         if wish.dispatch():
-#
-#             return redirect(wish.get_absolute_url())
-#         return self.render_to_response(context)
+class OuverturePaiementView(TemplateView):
+    template_name = "duck_inscription/wish/ouverture_paiement.html"
+
+    def get_context_data(self, **kwargs):
+        context = super(OuverturePaiementView, self).get_context_data(**kwargs)
+        context['wish'] = self.request.user.individu.wishes.get(pk=self.kwargs['pk'])
+        return context
+
+    def get(self, request, *args, **kwargs):
+        context = self.get_context_data(**kwargs)
+        wish = context['wish']
+        # if wish.etape == 'ouverture_paiement' or wish.dispatch_etape == 'ouverture_paiement' and wish.etape != wish.dispatch_etape:
+        #     wish.etape = wish.dispatch_etape = 'ouverture_paiement'
+        #     wish.save()
+        # if wish.dispatch():
+        #
+        #     return redirect(wish.get_absolute_url())
+        return self.render_to_response(context)
 #
 #
 # class ChoixIedFpView(TemplateView):

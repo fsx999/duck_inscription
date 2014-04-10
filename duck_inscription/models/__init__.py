@@ -3,4 +3,5 @@ from __future__ import unicode_literals
 from .apogee_models import *
 from .individu_models import *
 from .wish_models import *
-__all__ = ['apogee_models', 'individu_models', 'wish_models']
+from .workflows_models import *
+__all__ = ['apogee_models', 'individu_models', 'wish_models', 'workflows_models']

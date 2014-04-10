@@ -1,5 +1,5 @@
-{% extends "wish/base_wish.html" %}
+{% extends "duck_inscription/wish/base_wish.html" %}
 {% block content %}
-    Les équivalences ne sont pas encore ouvertes : {{ date }}. <br>
-    Veuillez revenir ultérieument.
+    Les équivalences ne sont pas encore ouvertes. <br>
+    Veuillez revenir le {{ date|date:"d/m/Y" }} à {{ date|date:"H:i" }}.
 {% endblock %}

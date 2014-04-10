@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import floppyforms as forms
 from django_apogee.models import Diplome
-from duck_inscription.models import DiplomeEtape, SettingsEtape
+from duck_inscription.models import DiplomeEtape, SettingsEtape, ListeDiplomeAces
 
 
 __author__ = 'paul'
@@ -18,26 +18,26 @@ class WishGradeForm(forms.Form):
 
 
 
-# class ListeDiplomeAccesForm(forms.Form):
-#     liste_diplome = forms.ModelChoiceField(queryset=ListeDiplomeAces.objects.all())
+class ListeDiplomeAccesForm(forms.Form):
+    liste_diplome = forms.ModelChoiceField(queryset=ListeDiplomeAces.objects.all())
+
+    def __init__(self, *args, **kwargs):
+        step = kwargs.pop('step')
+        super(ListeDiplomeAccesForm, self).__init__(*args, **kwargs)
+        self.fields['liste_diplome'] = forms.ModelChoiceField(
+            queryset=step.diplome_aces.all(),
+            label=u"Diplôme d'accès",
+            empty_label=u"Aucun diplôme de la liste",
+            required=False
+        )
 #
-#     def __init__(self, *args, **kwargs):
-#         step = kwargs.pop('step')
-#         super(ListeDiplomeAccesForm, self).__init__(*args, **kwargs)
-#         self.fields['liste_diplome'] = forms.ModelChoiceField(
-#             queryset=step.diplome_step.all(),
-#             label=u"Diplôme d'accès",
-#             empty_label=u"Aucun diplôme de la liste",
-#             required=False
-#         )
 #
-#
-# class DemandeEquivalenceForm(forms.Form):
-#     demande_equivalence = forms.ChoiceField(choices=(('', '-------'), ('False', 'Non'), ('True', 'Oui')),
-#                                             label=u"Demande d'équivalence",
-#                                             help_text=u"(Renseignez si vous souhaitez faire une"
-#                                                       u" demande d'équivalence ou pas)")
-#
+class DemandeEquivalenceForm(forms.Form):
+    demande_equivalence = forms.ChoiceField(choices=(('', '-------'), ('False', 'Non'), ('True', 'Oui')),
+                                            label=u"Demande d'équivalence",
+                                            help_text=u"(Renseignez si vous souhaitez faire une"
+                                                      u" demande d'équivalence ou pas)")
+
 #
 # class ListeAttenteEquivalenceForm(forms.Form):
 #     demande_attente = forms.ChoiceField(choices=(('O', 'Oui'), ('N', 'Non')),

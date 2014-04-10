@@ -2,10 +2,12 @@
 import datetime
 from django.core.urlresolvers import reverse
 from django.db import models
-from django_apogee.models import Etape, CentreGestion, Individu, Diplome
-from duck_inscription.models import SettingAnneeUni
-
-
+from xworkflows import transition, after_transition, before_transition, on_enter_state, transition_check
+from django_apogee.models import CentreGestion, Diplome
+from duck_inscription.models import SettingAnneeUni, Individu, SettingsEtape
+from duck_inscription.models.workflows_models import WishWorkflow
+from django_xworkflows import models as xwf_models
+from django.utils.timezone import now
 __author__ = 'paul'
 
 
@@ -46,10 +48,7 @@ __author__ = 'paul'
 #     nb_paiement = models.IntegerField(u"Nombre paiement", default=3)
 #     demi_tarif = models.BooleanField(u"Demi tarif en cas de réins", default=False)
 #     semestre = models.BooleanField(u"Demie année", default=False)
-#     document_equivalence = models.FileField(upload_to='document_equivalence',
-#                                             verbose_name=u"Document d'équivalence", null=True, blank=True)
-#     document_candidature = models.FileField(upload_to='document_candidature',
-#                                             verbose_name=u"Document de candidature", null=True, blank=True)
+
 #     note = models.BooleanField('Note Master', default=False)
 #
 #     limite_etu = models.IntegerField(u"Capacité d'accueil", null=True, blank=True)
@@ -188,47 +187,13 @@ __author__ = 'paul'
 #             resultat['nb_dossier_apogee'] = u"Apogée indisponible"
 #         return resultat
 #
-#     class Meta:
-#         verbose_name = u"Etape des diplômes"
-#         verbose_name_plural = u"Etapes des diplômes"
-#         #        app_label="PAL"
-#         db_table = u'pal_steps'
-#         app_label = "inscription"
-#
-#
-# class CentreGestionModel(models.Model):
-#     centre_gestion = models.CharField('', max_length=3)
-#     label = models.CharField(max_length=100)
-#
-#     class Meta:
-#         verbose_name = u"Centre de gestion"
-#         verbose_name_plural = u"Centres de gestion"
-#         db_table = u'pal_centre_gestion'
-#         app_label = "inscription"
-#
-#     def __unicode__(self):
-#         return unicode(self.label)
-#
-#
-# class Etape(models.Model):
-#     name = models.CharField("Nom", max_length=100)
-#     ordre = models.IntegerField("ordre")
-#     label = models.CharField("Label", max_length=100)
-#
-#     def __unicode__(self):
-#         return self.label
-#
-#     class Meta:
-#         db_table = "wish_etape"
-#         verbose_name = u"Jalon"
-#         verbose_name_plural = u"Jalons"
-#         app_label = "inscription"
 
 
-class Wish(models.Model):
+
+class Wish(xwf_models.WorkflowEnabled, models.Model):
     code_dossier = models.AutoField('code dossier', primary_key=True)
     individu = models.ForeignKey(Individu, related_name='wishes', null=True)
-    etape = models.ForeignKey(Etape, verbose_name='Etape', null=True)
+    etape = models.ForeignKey(SettingsEtape, verbose_name='Etape', null=True)
     date = models.DateField("La date du vœux", auto_now_add=True)
     valide = models.BooleanField(default=False, blank=True)
     diplome_acces = models.ForeignKey('ListeDiplomeAces', default=None, blank=True, null=True,
@@ -238,8 +203,36 @@ class Wish(models.Model):
     is_reins = models.NullBooleanField(default=None, blank=True)
 
     date_validation = models.DateTimeField(null=True, blank=True)
+    state = xwf_models.StateField(WishWorkflow)
 
+    @on_enter_state('ouverture_equivalence')
+    def on_enter_state_ouverture_equivalence(self, res, *args, **kwargs):
+        if not self.etape.date_ouverture_equivalence:  # il n'y a pas d'équivalence on va en candidature
+            self.ouverture_candidature()
+        elif self.etape.date_ouverture_equivalence <= now():  # l'équi est ouverte
+            self.liste_diplome()
 
+    @on_enter_state('liste_diplome')
+    def on_enter_liste_diplome(self, *args, **kwargs):
+        if self.etape.date_ouverture_equivalence:
+            if not self.etape.diplome_aces.count():
+                self.demande_equivalence()
+
+    @transition_check('liste_diplome')
+    def check_liste_diplome(self):
+        if self.etape.date_ouverture_equivalence <= now():
+            return True
+        return False
+
+    @on_enter_state('demande_equivalence')
+    def on_enter_state_demande_equivalence(self, res, *args, **kwargs):
+        if self.etape.required_equivalence and not self.diplome_acces:  # l'équivalence est obligatoire et il n'y pas de diplome
+            self.equivalence()
+
+    @on_enter_state('ouverture_candidature')
+    def on_enter_state_ouverture_candidature(self, res, *args, **kwargs):
+        if not self.etape.date_ouverture_candidature:  # il n'y a pas de candidature
+            self.ouverture_inscription()
 
     # def not_place(self):
     #     if self.step.limite_etu and not self.is_ok and not self.place_dispo():
@@ -271,14 +264,14 @@ class Wish(models.Model):
     #         self.valide = True
     #     self.save()
     #
-    # def save(self, force_insert=False, force_update=False, using=None):
-    #     if not self.code_dossier:
-    #         nb = Wish.objects.count()
-    #         if nb != 0:
-    #             self.code_dossier = Wish.objects.all().order_by('-code_dossier')[0].code_dossier + 1
-    #         else:
-    #             self.code_dossier = 10000000
-    #     super(Wish, self).save(force_insert, force_update, using)
+    def save(self, force_insert=False, force_update=False, using=None):
+        if not self.code_dossier:
+            nb = Wish.objects.count()
+            if nb != 0:
+                self.code_dossier = Wish.objects.all().order_by('-code_dossier')[0].code_dossier + 1
+            else:
+                self.code_dossier = 10000000
+        super(Wish, self).save(force_insert, force_update, using)
     #
     # def save_auditeur(self):
     #     if self.is_auditeur:
@@ -315,16 +308,14 @@ class Wish(models.Model):
     # def can_demi_annee(self):
     #     return self.step.can_demi_annee(self.is_reins_formation())
     #
-    # def name_url(self):
-    #     if self.is_auditeur:
-    #         name_url = u"Auditeur libre en %s" % self.step.label
-    #     else:
-    #         name_url = unicode(self.step.label)
-    #     return name_url
+
+    def name_url(self):
+        name_url = unicode(self.etape.label)
+        return name_url
     #
-    # @models.permalink
-    # def get_absolute_url(self):
-    #     return self.etape, [str(self.id)]
+    @models.permalink
+    def get_absolute_url(self):
+        return self.state.name, [str(self.pk)]
     #
     # def is_reins_formation(self):
     #     if self.is_reins is None:
@@ -598,7 +589,7 @@ class Wish(models.Model):
 #
 class ListeDiplomeAces(models.Model):
     label = models.CharField("nom du diplome d'acces", max_length=100)
-    step = models.ForeignKey(Etape, related_name="diplome_step", null=True)
+    etape = models.ForeignKey(SettingsEtape, related_name="diplome_aces", null=True)
 
     def __unicode__(self):
         return self.label
