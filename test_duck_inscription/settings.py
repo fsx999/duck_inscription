@@ -12,7 +12,6 @@ https://docs.djangoproject.com/en/1.6/ref/settings/
 import os
 
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.6/howto/deployment/checklist/
 
@@ -117,14 +116,17 @@ from django.conf import settings
 TEMPLATE_CONTEXT_PROCESSORS = settings.TEMPLATE_CONTEXT_PROCESSORS + ("django.core.context_processors.request",)
 
 try:
+    # import local_settings
     from local_settings import *
     if DEBUG:
         INSTALLED_APPS += DEV_APPS
         MIDDLEWARE_CLASSES += ('debug_toolbar.middleware.DebugToolbarMiddleware',) +\
-                              MIDDLEWARE_CLASSES +('devserver.middleware.DevServerMiddleware',)
+                              MIDDLEWARE_CLASSES + ('devserver.middleware.DevServerMiddleware',)
+
 except (ImportError, NameError):
-    pass
+    print "cououou"
 if DEBUG:
     COMPRESS_ENABLED = False
 else:
     COMPRESS_ENABLED = True
+print EMAIL_HOST, EMAIL_USE_TLS,
