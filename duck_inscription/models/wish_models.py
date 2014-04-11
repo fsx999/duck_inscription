@@ -3,7 +3,7 @@ import datetime
 from django.core.urlresolvers import reverse
 from django.db import models
 from xworkflows import transition, after_transition, before_transition, on_enter_state, transition_check
-from django_apogee.models import CentreGestion, Diplome
+from django_apogee.models import CentreGestion, Diplome, InsAdmEtp
 from duck_inscription.models import SettingAnneeUni, Individu, SettingsEtape
 from duck_inscription.models.workflows_models import WishWorkflow
 from django_xworkflows import models as xwf_models
@@ -207,6 +207,9 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
 
     @on_enter_state('ouverture_equivalence')
     def on_enter_state_ouverture_equivalence(self, res, *args, **kwargs):
+        if self.is_reins_formation():
+            self.ouverture_inscription()
+            return
         if not self.etape.date_ouverture_equivalence:  # il n'y a pas d'équivalence on va en candidature
             self.ouverture_candidature()
         elif self.etape.date_ouverture_equivalence <= now():  # l'équi est ouverte
@@ -234,6 +237,12 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
         if not self.etape.date_ouverture_candidature:  # il n'y a pas de candidature
             self.ouverture_inscription()
 
+    def is_reins_formation(self):
+        if self.is_reins is None:
+            diplomes = self.etape.diplome.settingsetape_set.all().values_list('pk', flat=True)
+            self.is_reins = InsAdmEtp.objects.filter(cod_ind__cod_etu=self.individu.student_code, cod_etp__in=diplomes).count() != 0
+            self.save()
+        return self.is_reins
     # def not_place(self):
     #     if self.step.limite_etu and not self.is_ok and not self.place_dispo():
     #         return True
@@ -271,6 +280,8 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
                 self.code_dossier = Wish.objects.all().order_by('-code_dossier')[0].code_dossier + 1
             else:
                 self.code_dossier = 10000000
+        if not self.is_reins:
+            self.is_reins_formation
         super(Wish, self).save(force_insert, force_update, using)
     #
     # def save_auditeur(self):
