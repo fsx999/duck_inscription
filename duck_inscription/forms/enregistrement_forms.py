@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 
 from django.utils.translation import ugettext_lazy as _
 
-from captcha.fields import CaptchaField
 from django.contrib.auth.models import User
 from registration.forms import RegistrationFormTermsOfService
 from django.contrib.auth.forms import AuthenticationForm, PasswordResetForm
@@ -109,8 +108,8 @@ class LoginIED(AuthenticationForm):
 
 
 class PasswordRest(PasswordResetForm):
-    captcha = CaptchaField(label="Veuillez saisir le mot dans l'image",
-                           help_text="(respectez les majuscules et les minuscules)")
+    # captcha = CaptchaField(label="Veuillez saisir le mot dans l'image",
+    #                        help_text="(respectez les majuscules et les minuscules)")
     email = forms.EmailField(label="Entrez l'adresse e-mail de votre inscription :", max_length=75)
 
     # class Media:

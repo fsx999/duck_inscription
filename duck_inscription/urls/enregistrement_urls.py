@@ -17,6 +17,6 @@ urlpatterns = patterns(
     url(r'^register/$',
         RegistrationView.as_view(form_class=EmailRegistrationForm),
         name='registration_register'),
-
+    url('^password_reset_done', 'django.contrib.auth.views.password_reset_done', name='password_reset_done'),
     (r'', include('registration.backends.default.urls')),
 )
