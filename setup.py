@@ -10,4 +10,5 @@ setup(name='duck_inscription', version='0.1', packages=['duck_inscription'], url
                         'django-simple-captcha',
                         'django-floppyforms',
                         'django_xworkflows',
-                        'django-extra-views'])
+                        'django-extra-views',
+                        'django-wkhtmltopdf'])

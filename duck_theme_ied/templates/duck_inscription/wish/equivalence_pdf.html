@@ -1,4 +1,4 @@
-{% load lib_pal %}
+{% load lib_inscription %}
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
@@ -131,7 +131,7 @@ h3.titre_pdf{
 <div class="titre_pdf">
 <h2 class="titre_pdf">ANNÉE UNIVERSITAIRE {% annee_en_cour %}</h2>
 <h2 class="titre_pdf">DEMANDE D’EQUIVALENCE POUR UNE ADMISSION EN</h2>
-<h2 class="titre_pdf" >{{ voeu.step.label_formation  }} par enseignement à distance</h2>
+<h2 class="titre_pdf" >{{ voeu.etape.label_formation  }} par enseignement à distance</h2>
 
 
 <h2 class="titre_pdf">(Validation des études)</h2>
@@ -208,13 +208,13 @@ h3.titre_pdf{
 <br>
 <div class="alert">
     CE DOSSIER EST  à envoyer avant le : </br>
-    {{ voeu.step.fin_equivalence }} </br>
+    {{ voeu.etape.date_fermeture_equivalence|date:"d/m/Y" }} </br>
     (Cachet de la poste faisant foi)</br>
 </div>
 
     <h3>
     L’équivalence n’est accordée qu’une seule fois, lors de l’accès au cursus de licence, pour l’année
-        {{ annee_univ }} à l’IED. Si la décision d’équivalence vous accorde la validation d’éléments constitutifs (EC),
+        {% annee_en_cour %} à l’IED. Si la décision d’équivalence vous accorde la validation d’éléments constitutifs (EC),
  ces derniers sont acquis pour toute la durée des études en {{ voeu.step.grade }} à l’IED
     </h3>
 

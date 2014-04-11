@@ -30,6 +30,7 @@ class SettingsEtape(Etape):
     label = models.CharField('Label', max_length=120, null=True)
     diplome = models.ForeignKey('DiplomeEtape', null=True, blank=True)
     required_equivalence = models.BooleanField(default=True)
+    is_inscription_ouverte = models.BooleanField('ouverture campagne inscription', default=True)
     date_ouverture_equivalence = models.DateTimeField(null=True, blank=True)
     date_fermeture_equivalence = models.DateTimeField(null=True, blank=True)
     date_ouverture_candidature = models.DateTimeField(null=True, blank=True)
@@ -54,6 +55,7 @@ class SettingsEtape(Etape):
 @python_2_unicode_compatible
 class DiplomeEtape(models.Model):
     label = models.CharField('Label web', max_length=120, null=True)
+    is_inscription_ouverte = models.BooleanField('ouverture campagne inscription', default=True)
 
     class Meta:
         app_label = 'duck_inscription'

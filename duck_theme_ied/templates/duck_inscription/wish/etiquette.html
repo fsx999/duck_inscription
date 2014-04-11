@@ -56,9 +56,9 @@ body {
 <div id="middleContent" class="middle">
     <div class="barcode"><pdf:barcode  value="{{ voeu.code_dossier }}" type="code128"  align="right" humanreadable="1" barwidth="2" barheight="40" fontsize="16"/></div>
     {% if voeu.is_auditeur %}
-        {% include "include/adresse_ied.html" with ETAPE="Auditeur libre" %}
+        {% include "duck_inscription/include/adresse_ied.html" with ETAPE="Auditeur libre" %}
     {% else %}
-        {% include "include/adresse_ied.html" with ETAPE=voeu.etape|capfirst %}
+        {% include "duck_inscription/include/adresse_ied.html" with ETAPE=voeu.state.name|capfirst %}
     {% endif %}
 </div>
 

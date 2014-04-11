@@ -9,10 +9,10 @@ __author__ = 'paul'
 
 
 class WishGradeForm(forms.Form):
-    diplome = forms.ModelChoiceField(queryset=DiplomeEtape.objects.all(), label=u"Diplôme :",
+    diplome = forms.ModelChoiceField(queryset=DiplomeEtape.objects.exclude(is_inscription_ouverte=False), label=u"Diplôme :",
                                     help_text=u"(Veuillez choisir un diplôme)")
 
-    etape = forms.ModelChoiceField(queryset=SettingsEtape.objects.all(), label=u"Niveau :",
+    etape = forms.ModelChoiceField(queryset=SettingsEtape.objects.exclude(is_inscription_ouverte=False), label=u"Niveau :",
                                   help_text=u"(Veuillez choisier le niveau de votre diplôme)")
 
 

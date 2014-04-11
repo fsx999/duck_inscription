@@ -10,6 +10,7 @@ https://docs.djangoproject.com/en/1.6/ref/settings/
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
+from django.conf.global_settings import gettext_noop
 
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 # Quick-start development settings - unsuitable for production
@@ -24,9 +25,13 @@ DEBUG = True
 TEMPLATE_DEBUG = True
 
 ALLOWED_HOSTS = []
-
+LANGUAGES = (('fr', gettext_noop('French')),)
+DATE_FORMAT = "d/m/Y"
+DATE_INPUT_FORMATS = ("%d/%m/%Y",)
+SHORT_DATETIME_FORMAT = "d/m/Y"
 STATIC_ROOT = os.path.join(BASE_DIR, '../static').replace('\\', '/')
 MEDIA_ROOT = os.path.join(BASE_DIR, '../static_tel').replace('\\', '/')
+
 
 # Application definition
 
@@ -49,6 +54,8 @@ INSTALLED_APPS = (
     'floppyforms',
     'django_xworkflows',
     'autocomplete_light',
+    'wkhtmltopdf',
+    'xhtml2pdf'
 )
 
 
@@ -130,3 +137,5 @@ if DEBUG:
     COMPRESS_ENABLED = False
 else:
     COMPRESS_ENABLED = False
+
+WKHTMLTOPDF_CMD = BASE_DIR+'/wkhtmltopdf'

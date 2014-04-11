@@ -30,6 +30,6 @@ register.filter('human_readable', human_readable)
 def annee_en_cour():
     annee = SettingAnneeUni.objects.annee_inscription_en_cours.cod_anu
     if annee:
-        return "{} / {}".format(int(annee) - 1, annee)
+        return "{} / {}".format(annee, int(annee) + 1)
     return "Fermé"
 

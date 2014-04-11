@@ -1,9 +1,13 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
+import StringIO
+from PyPDF2 import PdfFileReader, PdfFileWriter
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse
 
 from django.shortcuts import redirect
+from django.template import RequestContext
+from django.template.loader import render_to_string
 from django.views.generic import TemplateView, View
 from django.views.generic.edit import FormView
 from floppyforms import ModelChoiceField
@@ -11,6 +15,10 @@ import xworkflows
 import json
 from duck_inscription.forms import WishGradeForm, ListeDiplomeAccesForm, DemandeEquivalenceForm
 from duck_inscription.models import Wish, SettingsEtape
+from xhtml2pdf import pdf as pisapdf
+from xhtml2pdf import pisa
+from duck_inscription.templatetags.lib_inscription import annee_en_cour
+from settings import BASE_DIR
 
 __author__ = 'paul'
 
@@ -36,10 +44,11 @@ class StepView(TemplateView):
         if self.request.GET.get("diplome", "") != "":
             step_wish = []
             for wish in self.request.user.individu.wishes.all():
-                step_wish.append(wish.etape.pk)
+                for step in wish.etape.diplome.settingsetape_set.all():
+                    step_wish.append(step.pk)
 
             etape = ModelChoiceField(queryset=SettingsEtape.objects.filter(
-                diplome=self.request.GET.get("diplome")).exclude(pk__in=step_wish).order_by('label'),
+                diplome=self.request.GET.get("diplome")).exclude(pk__in=step_wish).exclude(is_inscription_ouverte=False).order_by('label'),
             )
             return HttpResponse(etape.widget.render(name='etape', value='', attrs={'id': 'id_etape', 'class': "required"}))
 
@@ -182,72 +191,72 @@ class EquivalenceView(TemplateView):
         #        return super(EquivalenceView, self).get(request, *args, **kwargs)
 #
 #
-# class EquivalencePdfView(TemplateView):
-#     template_name = "wish/etiquette.html"
-#     etape = "equivalence"  # à surcharger pour candidature
-#
-#     def get_context_data(self, **kwargs):
-#         context = super(EquivalencePdfView, self).get_context_data(**kwargs)
-#         context['individu'] = self.request.user.individu
-#         context['voeu'] = self.request.user.individu.wishes.get(pk=self.kwargs['pk'])
-#         context['static'] = PROJECT_DIR + '/documents/static/images/'
-#         context['annee_univ'] = '%s-%s' % (ANNEE_UNIV, ANNEE_UNIV + 1)
-#
-#         return context
-#
-#     def get_template_names(self):
-#         tempate_names = super(EquivalencePdfView, self).get_template_names()
-#         tempate_names.append('wish/%s_pdf.html' % self.etape)  # permet d'avoir la meme classe pour candidature
-#         return tempate_names
-#
-#     def get_file(self):
-#         """
-#         Il faut la surcharger pour les candidatures
-#         Doit retourner le l'url du doccument du doccument a fussionner
-#         """
-#         step = self.request.user.individu.wishes.get(pk=self.kwargs['pk']).step
-#
-#         return step.document_equivalence
-#
-#     def render_to_response(self, context, **response_kwargs):
-#         response = HttpResponse(mimetype='application/pdf')
-#         response['Content-Disposition'] = 'attachment; filename=%s_%s.pdf' % (self.etape, context['voeu'].step.name)
-#         try:
-#             url_doc = self.get_file().file
-#         except Wish.DoesNotExist:
-#             return redirect(self.request.user.individu.get_absolute_url())
-#         url_doc.open('r')
-#
-#         context['num_page'] = self._num_page(url_doc)  # on indique le nombre de page pour la page 1
-#
-#         pdf = pisapdf.pisaPDF()
-#         for template in self.get_template_names():
-#             pdf.addDocument(pisa.CreatePDF(render_to_string(template, context, context_instance=RequestContext(
-#                 self.request))))  # on construit le pdf
-#             #il faut fusionner la suite
-#         pdf.addFromFile(self.do_pdf(url_doc))
-#
-#         pdf.join(response)
-#         return response
-#
-#     def _num_page(self, url_doc):
-#         return PdfFileReader(url_doc).getNumPages()
-#
-#
-#     def do_pdf(self, file):
-#         """
-#         retourne un pdf sans la première page
-#         """
-#         result = StringIO.StringIO()
-#         output = PdfFileWriter()
-#         input1 = PdfFileReader(file)
-#         for x in range(1, input1.getNumPages()):
-#             output.addPage(input1.getPage(x))
-#         output.write(result)
-#
-#         return result
-#
-#
+class EquivalencePdfView(TemplateView):
+    template_name = "duck_inscription/wish/etiquette.html"
+    etape = "equivalence"  # à surcharger pour candidature
+
+    def get_context_data(self, **kwargs):
+        context = super(EquivalencePdfView, self).get_context_data(**kwargs)
+        context['individu'] = self.request.user.individu
+        context['voeu'] = self.request.user.individu.wishes.get(pk=self.kwargs['pk'])
+        context['static'] = BASE_DIR + '/duck_theme_ied/static/images/'
+        context['annee_univ'] = annee_en_cour()
+
+        return context
+
+    def get_template_names(self):
+        tempate_names = super(EquivalencePdfView, self).get_template_names()
+        tempate_names.append('duck_inscription/wish/%s_pdf.html' % self.etape)  # permet d'avoir la meme classe pour candidature
+        return tempate_names
+
+    def get_file(self):
+        """
+        Il faut la surcharger pour les candidatures
+        Doit retourner le l'url du doccument du doccument a fussionner
+        """
+        step = self.request.user.individu.wishes.get(pk=self.kwargs['pk']).etape
+
+        return step.document_equivalence
+
+    def render_to_response(self, context, **response_kwargs):
+        response = HttpResponse(mimetype='application/pdf')
+        response['Content-Disposition'] = 'attachment; filename=%s_%s.pdf' % (self.etape, context['voeu'].etape.cod_etp)
+        try:
+            url_doc = self.get_file().file
+        except Wish.DoesNotExist:
+            return redirect(self.request.user.individu.get_absolute_url())
+        url_doc.open('r')
+
+        context['num_page'] = self._num_page(url_doc)  # on indique le nombre de page pour la page 1
+
+        pdf = pisapdf.pisaPDF()
+        for template in self.get_template_names():
+            pdf.addDocument(pisa.CreatePDF(render_to_string(template, context, context_instance=RequestContext(
+                self.request))))  # on construit le pdf
+            #il faut fusionner la suite
+        pdf.addFromFile(self.do_pdf(url_doc))
+
+        pdf.join(response)
+        return response
+
+    def _num_page(self, url_doc):
+        return PdfFileReader(url_doc).getNumPages()
+
+
+    def do_pdf(self, file):
+        """
+        retourne un pdf sans la première page
+        """
+        result = StringIO.StringIO()
+        output = PdfFileWriter()
+        input1 = PdfFileReader(file)
+        for x in range(1, input1.getNumPages()):
+            output.addPage(input1.getPage(x))
+        output.write(result)
+
+        return result
+
+
 class OuvertureCandidature(TemplateView):
     template_name = "duck_inscription/wish/ouverture_candidature.html"
 

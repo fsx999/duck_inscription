@@ -3,7 +3,7 @@ from django.conf.urls import patterns, url
 from django.contrib.auth.decorators import login_required
 from duck_inscription.utils import wish_verif_etape_and_login
 from duck_inscription.views import NewWishView, StepView, ListeDiplomeAccesView, DemandeEquivalenceView, EquivalenceView, \
-    DeleteWish, OuvertureCandidature, OuvertureEquivalence, OuverturePaiementView
+    DeleteWish, OuvertureCandidature, OuvertureEquivalence, OuverturePaiementView, EquivalencePdfView
 
 
 urlpatterns = patterns('',
@@ -18,8 +18,8 @@ urlpatterns = patterns('',
                            wish_verif_etape_and_login(OuvertureEquivalence.as_view()), name="ouverture_equivalence"),
                        url(r'^equivalence/(?P<pk>\d+)/$', wish_verif_etape_and_login(EquivalenceView.as_view()),
                            name="equivalence"),
-                       #                        url(r'^equivalence_pdf/(?P<pk>\d+)/$', login_required(EquivalencePdfView.as_view()),
-                       #                            name="equivalence_pdf"),
+                                              url(r'^equivalence_pdf/(?P<pk>\d+)/$', login_required(EquivalencePdfView.as_view()),
+                                                  name="equivalence_pdf"),
                        #
                        #                        url(r'^liste_attente_equivalence/(?P<pk>\d+)/$',
                        #                            wish_verif_etape_and_login(ListeAttenteEquivalenceView.as_view()),
