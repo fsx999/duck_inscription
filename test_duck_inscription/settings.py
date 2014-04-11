@@ -26,6 +26,7 @@ TEMPLATE_DEBUG = True
 ALLOWED_HOSTS = []
 
 STATIC_ROOT = os.path.join(BASE_DIR, '../static').replace('\\', '/')
+MEDIA_ROOT = os.path.join(BASE_DIR, '../static_tel').replace('\\', '/')
 
 # Application definition
 

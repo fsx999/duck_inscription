@@ -62,6 +62,8 @@ class LabelModelChoiceField(forms.ModelChoiceField):
             return "%s" % obj.lib_ach
         if hasattr(obj, 'lib_thb'):
             return "%s" % obj.lib_thb
+        if hasattr(obj, 'lib_fam'):
+            return "%s" % obj.lib_fam
 
 
 class EtablissementWidget(forms.Select):
@@ -169,9 +171,8 @@ class CodeEtudiantForm(forms.Form):
         data = super(CodeEtudiantForm, self).clean()
         code_etu = data.get("code_etu", 0)
         date_naissance = data.get("date_naissance", date.today())
-        gt0 = GMT0()
-        arg = {'tzinfo': gt0}
-        date_naissance = datetime(*(date_naissance.timetuple()[:6]), **arg)
+
+        date_naissance = datetime(*(date_naissance.timetuple()[:6]))
         if not Individu.objects.filter(cod_etu=code_etu, date_nai_ind=date_naissance):
             raise forms.ValidationError(u"Le numéro étudiant et la date de naissance ne correspondent pas")
         return data
