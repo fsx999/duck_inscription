@@ -119,6 +119,15 @@ class Individu(xwf_models.WorkflowEnabled, models.Model):
     def __str__(self):
         return u"%s %s" % (self.last_name, self.first_name1)
 
+    def save(self, force_insert=False, force_update=False, using=None):
+        if not self.code_opi:
+            individus = Individu.objects.filter(code_opi__isnull=False).order_by('-code_opi')
+            if len(individus) > 0:
+                self.code_opi = individus[0].code_opi + 1
+            else:
+                self.code_opi = 7700000
+        return super(Individu, self).save(force_insert, force_update, using)
+
     @models.permalink
     def get_absolute_url(self):
         return self.state.name,
