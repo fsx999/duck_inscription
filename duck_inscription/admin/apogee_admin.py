@@ -21,6 +21,7 @@ class ListeDiplomeAcesInline(admin.TabularInline):
 
 
 class EtapeAdmin(admin.ModelAdmin):
+    list_display = ('__str__', 'diplome')
     inlines = [ListeDiplomeAcesInline]
     fieldsets = (
         ("Description", {

@@ -48,9 +48,6 @@ class SettingsEtape(Etape):
 
     def __str__(self):
         result = self.label or ""
-        if not self.diplome:
-            result += ' None'
-
         return result
 
 
