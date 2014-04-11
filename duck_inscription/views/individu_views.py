@@ -114,6 +114,7 @@ class InfoPersoView(UpdateView):
     form_class = InfoPersoForm
     template_name = "duck_inscription/individu/info_peso.html"
 # 2895018275V
+
     def get_context_data(self, **kwargs):
         context = super(InfoPersoView, self).get_context_data(**kwargs)
         context['individu'] = self.request.user.individu

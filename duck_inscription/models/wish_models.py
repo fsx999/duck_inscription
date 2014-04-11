@@ -240,7 +240,10 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
     def is_reins_formation(self):
         if self.is_reins is None:
             diplomes = self.etape.diplome.settingsetape_set.all().values_list('pk', flat=True)
-            self.is_reins = InsAdmEtp.objects.filter(cod_ind__cod_etu=self.individu.student_code, cod_etp__in=diplomes).count() != 0
+            if self.individu.student_code:
+                self.is_reins = InsAdmEtp.objects.filter(cod_ind__cod_etu=self.individu.student_code, cod_etp__in=diplomes).count() != 0
+            else:
+                self.is_reins = False
             self.save()
         return self.is_reins
     # def not_place(self):
