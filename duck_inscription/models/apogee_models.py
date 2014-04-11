@@ -47,7 +47,11 @@ class SettingsEtape(Etape):
         verbose_name_plural = 'Settings Etapes'
 
     def __str__(self):
-        return self.label or ""
+        result = self.label or ""
+        if not self.diplome:
+            result += ' None'
+
+        return result
 
 
 @python_2_unicode_compatible
