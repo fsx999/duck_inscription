@@ -189,7 +189,6 @@ __author__ = 'paul'
 #
 
 
-
 class Wish(xwf_models.WorkflowEnabled, models.Model):
     code_dossier = models.AutoField('code dossier', primary_key=True)
     individu = models.ForeignKey(Individu, related_name='wishes', null=True)

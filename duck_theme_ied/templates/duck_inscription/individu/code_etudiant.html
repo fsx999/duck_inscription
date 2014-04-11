@@ -25,9 +25,11 @@
         <div id="id_verification">
             {% form form %}
 
-            <div class="form-actions">
+            <div class="form-group">
+            <div class="col-sm-offset-3 col-sm-8">
                 {% if premiere_connection %}<a id="id_reset" class="btn btn-primary" href="#">Revenir</a>{% endif %}
                 <input id="submit-id-verifier" class="btn btn-primary btn btn-primary" type="submit" value="Suite" name="Verifier">
+            </div>
             </div>
         </div>
     </form>
