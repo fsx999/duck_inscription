@@ -34,4 +34,4 @@ if settings.DEBUG:
     )
     urlpatterns += staticfiles_urlpatterns()
 
-GRAPPELLI_SWITCH_USER = True
+

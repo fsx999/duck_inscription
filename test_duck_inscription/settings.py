@@ -102,7 +102,7 @@ USE_TZ = False  # Important, toujours False
 
 STATIC_URL = '/static/'
 
-COMPRESS_OFFLINE = True
+COMPRESS_OFFLINE = False
 
 TEMPLATE_DIRS = (
     os.path.join(BASE_DIR, 'templates').replace('\\', '/'),
