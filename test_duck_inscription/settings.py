@@ -124,8 +124,8 @@ try:
                               MIDDLEWARE_CLASSES + ('devserver.middleware.DevServerMiddleware',)
 
 except (ImportError, NameError):
-    print "cououou"
+    pass
 if DEBUG:
     COMPRESS_ENABLED = False
 else:
-    COMPRESS_ENABLED = True
+    COMPRESS_ENABLED = False
