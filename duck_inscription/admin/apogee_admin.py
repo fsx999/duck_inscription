@@ -24,7 +24,8 @@ class EtapeAdmin(admin.ModelAdmin):
     inlines = [ListeDiplomeAcesInline]
     fieldsets = (
         ("Description", {
-            'fields': ('cod_etp', 'label')
+            'fields': ('cod_etp', 'label', 'diplome')
+
         }),
         ("Equivalence", {
             'classes': ('collapse',),
