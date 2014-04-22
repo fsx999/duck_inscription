@@ -7,6 +7,7 @@ from django.shortcuts import redirect
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import RedirectView, FormView, View, UpdateView, TemplateView
 from extra_views import InlineFormSetView
+from xworkflows import InvalidTransitionError
 from duck_inscription.forms.individu_forms import CodeEtudiantForm, InfoPersoForm, AdresseForm, AdresseBaseFormSet, \
     RecapitulatifIndividuForm, GMT0
 from duck_inscription.models.individu_models import Individu as IndividuInscription, AdresseIndividu
@@ -80,7 +81,10 @@ class CodeEtuManquant(FormView):
 @login_required()
 def not_inscrit_universite(request):
     individu = request.user.individu
-    individu.modif_individu()
+    try:
+        individu.modif_individu()
+    except InvalidTransitionError:
+        pass
     return redirect(individu.get_absolute_url())
 
 
