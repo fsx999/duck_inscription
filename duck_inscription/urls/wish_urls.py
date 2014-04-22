@@ -7,8 +7,8 @@ from duck_inscription.views import NewWishView, StepView, ListeDiplomeAccesView,
 
 
 urlpatterns = patterns('',
-                       url(r'^nouveau_voeu/$', NewWishView.as_view(), name='new_wish'),
-                       url(r'^liste_etape/$', StepView.as_view(), name="liste_etape"),
+                       url(r'^nouveau_voeu/$',login_required( NewWishView.as_view()), name='new_wish'),
+                       url(r'^liste_etape/$',login_required( StepView.as_view()), name="liste_etape"),
                        url(r'^supprimer_voeu/(?P<pk>\d+)/$', login_required(DeleteWish.as_view()), name="delete_wish"),
                        url(r'^liste_diplome/(?P<pk>\d+)/$', wish_verif_etape_and_login(ListeDiplomeAccesView.as_view()),
                            name="liste_diplome"),
