@@ -128,13 +128,19 @@ TEMPLATE_CONTEXT_PROCESSORS = settings.TEMPLATE_CONTEXT_PROCESSORS + ("django.co
 
 try:
     # import local_settings
-    from local_settings import *
+    from test_duck_inscription.local_settings import *
+
+except ImportError:
+    print "pas de local settings"
+
+try:
     if DEBUG:
         INSTALLED_APPS += DEV_APPS
         MIDDLEWARE_CLASSES = ('debug_toolbar.middleware.DebugToolbarMiddleware',) +\
                               MIDDLEWARE_CLASSES + ('devserver.middleware.DevServerMiddleware',)
-except (ImportError, NameError):
+except NameError:
     pass
+
 if DEBUG:
     COMPRESS_ENABLED = False
 else:

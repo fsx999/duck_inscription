@@ -22,6 +22,7 @@ Commandes
         sudo apt-get install mercurial
         pip install -r requirement.txt
         pip install gunicorn
+        sudo apt-get install supervisor nginx
 
 
 #) Configuration :
@@ -35,6 +36,7 @@ Commandes
 
     .. code-block:: python
 
+        # coding=utf-8
         EMAIL_HOST = host.server.email
         EMAIL_USE_TLS = True # en cas de ssl, sinon False
         EMAIL_PORT = 2525 # port du serveur de mail
