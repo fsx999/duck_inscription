@@ -36,6 +36,8 @@ MEDIA_ROOT = os.path.join(BASE_DIR, '../static_tel').replace('\\', '/')
 # Application definition
 
 INSTALLED_APPS = (
+    'xadmin',
+    'crispy_forms',
     'django_xworkflows.xworkflow_log',
     'duck_theme_ied',
     'django.contrib.admin',
@@ -55,7 +57,8 @@ INSTALLED_APPS = (
     'django_xworkflows',
     'autocomplete_light',
     'wkhtmltopdf',
-    'xhtml2pdf'
+    'xhtml2pdf',
+
 )
 
 
@@ -128,9 +131,8 @@ try:
     from local_settings import *
     if DEBUG:
         INSTALLED_APPS += DEV_APPS
-        MIDDLEWARE_CLASSES += ('debug_toolbar.middleware.DebugToolbarMiddleware',) +\
+        MIDDLEWARE_CLASSES = ('debug_toolbar.middleware.DebugToolbarMiddleware',) +\
                               MIDDLEWARE_CLASSES + ('devserver.middleware.DevServerMiddleware',)
-
 except (ImportError, NameError):
     pass
 if DEBUG:

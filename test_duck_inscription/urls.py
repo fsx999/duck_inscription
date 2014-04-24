@@ -2,6 +2,8 @@ import autocomplete_light
 autocomplete_light.autodiscover()
 from django.conf import settings
 from django.conf.urls import patterns, include, url
+import xadmin
+xadmin.autodiscover()
 
 from django.contrib import admin
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
@@ -9,19 +11,20 @@ from duck_inscription.forms.enregistrement_forms import LoginIED
 
 from duck_inscription.views.enregistrement_views import UserView, EmailView
 
-admin.autodiscover()
+# admin.autodiscover()
 
 urlpatterns = patterns('',
     # Examples:
     url(r'^autocomplete/', include('autocomplete_light.urls')),
     (r'^$', 'django.contrib.auth.views.login', {'template_name': 'registration/login.html',
                                                 'authentication_form': LoginIED}),
-    url(r'^admin/', include(admin.site.urls)),
+    # url(r'^admin/', include(admin.site.urls)),
     (r'^compte/', include('duck_inscription.urls.enregistrement_urls')),
     (r'^individu/', include('duck_inscription.urls.individu_urls')),
     (r'^voeu/', include('duck_inscription.urls.wish_urls')),
     url(r'^test_user/$', UserView.as_view(), name='test_user'),
     url(r'^test_email/$', EmailView.as_view(), name='test_email'),
+    url(r'xadmin/', include(xadmin.site.urls)),
 )
 urlpatterns += patterns('',
     url(r'^captcha/', include('captcha.urls')),
