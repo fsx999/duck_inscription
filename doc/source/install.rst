@@ -133,6 +133,7 @@ Commandes
     configuration de nginx
 
     .. code-block:: bash
+
         mkdir ~/html
         mkdir ~/projet/static
         mkdir ~/projet/static_tel
