@@ -15,4 +15,4 @@ Commandes
 
     .. code-block:: bash
 
-
+        git clone https://github.com/fsx999/duck_inscription.git
