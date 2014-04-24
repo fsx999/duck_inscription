@@ -18,3 +18,6 @@ Commandes
         cd ~/project
         git clone https://github.com/fsx999/duck_inscription.git
         cd duck_inscription
+        source ~/.Envs/django_projet/bin/activate
+        sudo apt-get install mercurial
+        pip install -r requirement.txt
