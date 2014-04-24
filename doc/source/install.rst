@@ -37,7 +37,7 @@ Commandes
     .. code-block:: python
 
         # coding=utf-8
-        EMAIL_HOST = host.server.email
+        EMAIL_HOST = 'host.server.email'
         EMAIL_USE_TLS = True # en cas de ssl, sinon False
         EMAIL_PORT = 2525 # port du serveur de mail
         EMAIL_HOST_USER = "utilisateur du compte"
@@ -65,3 +65,49 @@ Commandes
             },
         }
         COMPOSANTE = '034'  # le code de la composante qui utilise l'application (code apogee)
+
+    application des migration
+
+    .. code-block:: bash
+
+        ./manage.py syncdb
+        ./manage.py migrate
+
+    initialisation de la base (différente de django_apogee)
+
+    .. code-block:: bash
+
+        ./manage.py initialisation_inscription
+        ./manage.py shell_plus
+
+    dans la console le code python suivant
+
+    .. code-block:: python
+
+         annee = SettingAnneeUni.objects.get(cod_anu=2014)  # changer par l'année en cours
+         annee.inscription = True
+         annee.save()
+
+
+#) Configuration supervisor
+
+
+    .. code-block:: bash
+
+        mkdir ~/logs
+        cd /etc/supervisor/conf.d
+        sudo vim preins.conf
+
+
+    Il faut remplasser tous les user par le bon user
+
+    .. code-block:: bash
+
+        [program:preins]
+        command=/home/$user/.Envs/django_projet/bin/gunicorn -n gunicorn_preins -w 3 -t 30 -b unix:/tmp/gunicorn_preins.sock -p /tmp/gunicorn_preins.pid --log-level debug --error-logfile /home/$user/logs/error_gunicorn_preins.log --settings test_duck_inscription.settings test_duck_inscription.wsgi:application
+        directory=/home/$user/.Envs/django_projet/bin
+        environment=PATH="/home/$user/.Envs/django_projet/bin"
+        user=$user
+        autostart=true
+        autorestart=true
+        redirect_stderr=true
