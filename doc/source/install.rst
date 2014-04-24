@@ -183,20 +183,17 @@ Commandes
         }
 
 
-        ensuite
+    ensuite
 
-        .. code-block:: bash
+    .. code-block:: bash
 
-            cd ../sites-enabled/
-            sudo rm default
-            sudo ln -s ../sites-available/preins preins
-            sudo service nginx restart
+        cd ../sites-enabled/
+        sudo rm default
+        sudo ln -s ../sites-available/preins preins
+        sudo service nginx restart
 
-        .. code-block:: bash
+    .. code-block:: bash
 
-            source ~/.Envs/django_projet/bin/activate
-            cd ~/projet/duck_inscription
-            ./manage.py collectstatic
-
-
-
+        source ~/.Envs/django_projet/bin/activate
+        cd ~/projet/duck_inscription
+        ./manage.py collectstatic
