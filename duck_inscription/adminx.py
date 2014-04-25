@@ -83,16 +83,20 @@ class WishAdmin(object):
     #     return False
 
 
-class IndividuXadmin(views.ModelAdminView):
+class IndividuXadmin(object):
     site_title = 'Consultation des dossiers étudiants'
     show_bookmarks = False
-    fields = ('code_opi','last_name', 'first_name1', 'birthday')
+    fields = ('code_opi','last_name', 'first_name1', 'birthday', 'user')
     list_export = []
     list_per_page = 10
     search_fields = ('last_name', 'first_name1', 'code_opi', 'wishes__code_dossier')
+    list_exclude = ('id', 'state', 'personal_email_save', 'opi_save', 'year')
+    # show_detail_fields = ['user']
 
     def has_add_permission(self):
         return False
+
+
 
     def has_delete_permission(self, obj=None):
         return False
