@@ -127,20 +127,20 @@ from django.conf import settings
 TEMPLATE_CONTEXT_PROCESSORS = settings.TEMPLATE_CONTEXT_PROCESSORS + ("django.core.context_processors.request",)
 
 try:
-    import local_settings
-    from local_settings import *
+    import bo_local_settings
+    from bo_local_settings import *
 
 except ImportError:
-    local_settings = object
+    bo_local_settings = object
     print "pas de local settings"
 
 try:
     if DEBUG:
-        DEV_APPS = getattr(local_settings, 'DEV_APPS', ())
+        DEV_APPS = getattr(bo_local_settings, 'DEV_APPS', ())
         INSTALLED_APPS += DEV_APPS
         MIDDLEWARE_CLASSES = ('debug_toolbar.middleware.DebugToolbarMiddleware',) +\
                               MIDDLEWARE_CLASSES + ('devserver.middleware.DevServerMiddleware',)
-    INSTALLED_APPS = getattr(local_settings, 'FIRST_APPS', ()) + INSTALLED_APPS + getattr(local_settings,
+    INSTALLED_APPS = getattr(bo_local_settings, 'FIRST_APPS', ()) + INSTALLED_APPS + getattr(local_settings,
                                                                                           'LAST_APPS', ())
 
 except NameError:
