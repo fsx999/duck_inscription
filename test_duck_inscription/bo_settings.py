@@ -140,7 +140,7 @@ try:
         INSTALLED_APPS += DEV_APPS
         MIDDLEWARE_CLASSES = ('debug_toolbar.middleware.DebugToolbarMiddleware',) +\
                               MIDDLEWARE_CLASSES + ('devserver.middleware.DevServerMiddleware',)
-    INSTALLED_APPS = getattr(bo_local_settings, 'FIRST_APPS', ()) + INSTALLED_APPS + getattr(local_settings,
+    INSTALLED_APPS = getattr(bo_local_settings, 'FIRST_APPS', ()) + INSTALLED_APPS + getattr(bo_local_settings,
                                                                                           'LAST_APPS', ())
 
 except NameError:
