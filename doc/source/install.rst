@@ -66,6 +66,16 @@ Commandes
         }
         COMPOSANTE = '034'  # le code de la composante qui utilise l'application (code apogee)
 
+        # si besoin en dev :
+        # DEV_APPS = ('devserver', 'debug_toolbar')
+
+        # Pour ajouter des applications au début de la liste
+        # FIRST_APPS = ('mes_application',)  # par exemple ajouter une application pour changer les templates
+
+        # Pour ajouter des applications à la fin de la liste
+        # LAST_APPS = ()
+
+
     application des migration
 
     .. code-block:: bash
