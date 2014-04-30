@@ -1,0 +1,351 @@
+{% load lib_inscription %}
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<style type="text/css">
+
+@page {
+margin-left: 1cm;
+margin-right: 1cm;
+margin-top: 1cm;
+text-align: justify;
+    @frame footer {
+    -pdf-frame-content: footerContent;
+    bottom: 1cm;
+    margin-left: 1cm;
+    margin-right: 1cm;
+    height: 1cm;
+    font-size: 14px;
+    }
+}
+
+
+
+
+
+img{
+    display:inline;
+    float:left;
+    }
+
+#info tr{
+    padding-top:5pt;
+}
+#codebar{
+    margin-top: 0pt;
+    }
+#oui{
+    paddin-top:2px;
+    text-align: right;
+    }
+
+body{
+    margin-bottom:0;
+    margin-left:0;
+    margin-right:0;
+    margin-top:0;
+    padding-bottom:0;
+    padding-left:0;
+    padding-right:0;
+    padding-top:0;
+    font-size: 16px;
+    text-align: justify;
+    
+    }
+h3{
+    padding-bottom:0;
+    padding-top:0;
+    }
+br{
+    padding-bottom:0;
+    padding-top:0;
+    }
+#code_barre{
+    display: inline;
+    position: relative;
+    float: right;
+}
+.titre_pdf{
+    text-align: center;
+
+    margin-bottom:0;
+    margin-left:0;
+    margin-right:0;
+    margin-top:0;
+    padding-bottom:0;
+    padding-left:0;
+    padding-right:0;
+    padding-top:0;
+    
+    }
+.center_text{
+    text-align:center;
+    padding-top: 10px;
+}
+h2.titre_pdf{
+    text-align: center;
+
+    }
+h3.titre_pdf{
+    font-size: 16px;
+    }
+.case{
+    padding-bottom:0;
+    padding-top:0;
+
+}
+.special_div{
+    padding-top: 10px;
+    padding-right: 10px;
+    padding-bottom: 10px;
+    padding-left: 10px;
+}
+.pading_left_right{
+    padding-right: 5px;
+}
+.holder_for_infos{
+    padding: 10px;
+}
+.petit{
+    font-size: 8px;
+}
+.bordered_info_etudiant{
+    text-align: center;
+    border-width:1px;
+    border-style: solid;
+    font-size: 14px;
+    padding-top: 3px;
+
+}
+.bordered_info_etudiant2{
+    text-align: center;
+    border-width:1px;
+    border-style: solid;
+    font-size: 14px;
+    padding-top: 3px;
+}
+.big_border{
+    border-width:2px;
+    border-style: solid;
+}
+.place_holder{
+    text-size:12px;
+}
+.bordered_adress{
+    position:absolute;
+    height: 150px ;
+    width: 100px;
+    left:100px;
+    top:150px;
+    text-align: center;
+    border-width:2px;
+    border-style: solid;
+}
+.alert{
+    text-align: center;
+    background: #CCCCCC;
+    padding-bottom:10px;
+    padding-top:10px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    border-bottom-style:medium;
+    border-left-style:medium;
+    border-right-style:medium;
+    border-top-style:medium;
+    }
+.toto{
+    position: absolute;
+   
+    top: 200px;
+}
+
+.footer {
+    font-size: 14px;
+    text-align: right;
+}
+#date {
+    text-align: left;
+}
+#logo_ied {
+    zoom: 15%;
+}
+</style>
+
+</head>
+
+
+
+
+<body>
+<div class="toto">
+{#     <pdf:barcode  value="{{ voeu.code_dossier }}" type="code128"  align="baseline" humanreadable="1" barwidth="1" barheight="20" fontsize="12"/>#}
+</div>
+<div>
+    <table id="codebar">
+        <tr>
+        <td>
+            <img id="logo_ied" src="{{ static }}logo_ied.jpeg" />
+        </td>
+        <td class="case">
+            <h3 class="titre_pdf">ATTESTATION&nbsp;D'ÉQUIVALENCE {% annee_en_cour %}</h3>
+            <p class="petit">décrets n° 81-621 du 18 mai 1981 et n° 85-906 du 23 août 1985</p>
+        </td>
+        <td id="oui">
+{#            <pdf:barcode  value="{{ voeu.code_dossier }}" type="code128"  align="baseline" humanreadable="1" barwidth="1" barheight="20" fontsize="12"/>#}
+        </td>
+        </tr>
+    </table>
+</div>
+
+{#<div class="titre_pdf">#}
+{##}
+{#    <h2 class="titre_pdf">ANNÉE UNIVERSITAIRE {% annee_en_cour %}</h2>#}
+{#    <h2 class="titre_pdf">DEMANDE D’EQUIVALENCE POUR UNE ADMISSION EN</h2>#}
+{#    <h2 class="titre_pdf" >{{ voeu.etape.label_formation  }} par enseignement à distance</h2>#}
+{#    <h2 class="titre_pdf">(Validation des études)</h2>#}
+{##}
+{#</div>#}
+
+<div class="etiquette">
+    <table>
+        <tr>
+            <td>
+               <div >
+                   <table>
+                        <tr>
+                            <td><div class="bordered_info_etudiant"> N°&nbspDE&nbspCARTE&nbspD'ÉTUDES </div> </td>
+                            <td><div class="bordered_info_etudiant2"> {{ individu.student_code  }}</div></td>
+                        </tr>
+                   </table>
+                   <table>
+                       <tr>
+                           <td class="place_holder">  <br> </td>
+                           <td class="place_holder">   </td>
+
+                        </tr>
+                   </table>
+                   <table>
+                        <tr>
+                            <td><div class="bordered_info_etudiant">DATE DE NAISSANCE </div> </td>
+                            <td><div class="bordered_info_etudiant2"> {{ individu.birthday  }}</div></td>
+                        </tr>
+                   </table>
+
+                   <table>
+                        <tr>
+                            <td><div class="bordered_info_etudiant"> LIEU DE NAISSANCE </div> </td>
+                            <td><div class="bordered_info_etudiant2"> {{ individu.code_pays_birth  }}</div></td>
+                        </tr>
+                   </table>
+
+{#                        <p> N° DE CARTE D'ÉTUDES </p>#}
+{#                        <p> DATE DE NAISSANCE </p>#}
+{#                        <p> LIEU DE NAISSANCE </p>#}
+
+               </div>
+            </td>
+            <td>
+                 <div class="bordered_adress">
+                    {{ individu.last_name|upper  }}
+                    {{ individu.first_name1|upper  }}
+                        <br>
+                    {% for address in individu.adresses.all %}
+                        {% if address.type == '1' %}
+                                            {% if address.label_adr_1 %}
+                                            {{ address.label_adr_1|upper  }}
+                                            {% endif %}
+                                            {% if  address.label_adr_2 %}
+                                            {{ address.label_adr_2|upper  }}
+                                            {% endif %}
+                                            {% if  address.label_adr_3 %}
+                                            {{ address.label_adr_3|upper }}
+                                            {% endif %}
+                                            {% if  address.label_adr_etr %}
+                                            {{ address.label_adr_etr|upper  }}
+                                            {% endif %}
+                                            {% if  address.com_bdi %}
+                                                <br>
+                                            {{ address.com_bdi.cod_bdi|upper  }}
+                                                <br>
+                                            {{ address.com_bdi.lib_ach|upper  }}
+                                                <br>
+                                            {% endif %}
+                                         {% endif %}
+                                    {% endfor %}
+                 </div>
+            </td>
+        </tr>
+    </table>
+
+
+
+</div>
+{#<table id="info" border="1">#}
+{#    <tr class="fields">#}
+{#        <td><b>Nom : </b></td>#}
+{#        <td>{{ individu.last_name|capfirst  }}</td>#}
+{#    </tr>#}
+{#    {% if  individu.common_name %}#}
+{#    <tr class="fields">#}
+{#        <td><b>Nom d'épouse:</b> </td>#}
+{#        <td>{{ individu.common_name|capfirst  }}</td>#}
+{#    </tr>#}
+{#    {% endif %}#}
+{#    <tr class="fields">#}
+{#        <td><b>Prénom : </b></td>#}
+{#        <td>{{ individu.first_name1|capfirst  }}</td>#}
+{#    </tr>#}
+{#    <tr class="fields">#}
+{#        <td><b>Date de naissance : </b></td>#}
+{#        <td>{{ individu.birthday|date:"d F Y" }}</td>#}
+{#    </tr>#}
+{##}
+{#    <tr class="fields">#}
+{#        <td><b>Nationalité : </b></td>#}
+{#        <td>{{ individu.code_pays_nationality.lib_nat|capfirst   }}</td>#}
+{#    </tr>#}
+{#    {% for address in individu.adresses.all %}#}
+{#    #}
+{#        {% if address.type == '1' %}#}
+{#        <tr class="fields">#}
+{#            <td valign="top"><b>Adresse:</b> </td>#}
+{#            <td valign="top">#}
+{#            {% if address.label_adr_1 %}#}
+{#            {{ address.label_adr_1  }}#}
+{#            {% endif %}#}
+{#            {% if  address.label_adr_2 %}#}
+{#            {{ address.label_adr_2  }}#}
+{#            {% endif %}#}
+{#            {% if  address.label_adr_3 %}#}
+{#            {{ address.label_adr_3  }}#}
+{#            {% endif %}#}
+{#            {% if  address.label_adr_etr %}#}
+{#            {{ address.label_adr_etr  }}#}
+{#            {% endif %}#}
+{#            {% if  address.com_bdi %}#}
+{#            {{ address.com_bdi.cod_bdi  }}#}
+{#            {{ address.com_bdi.lib_ach  }}#}
+{#            {% endif %}#}
+{##}
+{##}
+{#            {% if  address.code_pays %}#}
+{#            {{ address.code_pays  }}#}
+{#            {% endif %}#}
+{#            </td>#}
+{#        </tr>#}
+{#        <tr class="fields">#}
+{#            <td><b>Téléphone:</b></td>#}
+{#            <td>{{ address.listed_number }}</td>#}
+{#        </tr>#}
+{#        {% endif %}      #}
+{#    {% endfor %}#}
+{#    #}
+{#    <tr class="fields">#}
+{#        <td><b>E-mail : </b></td>#}
+{#        <td>{{ individu.personal_email }}</td>#}
+{#    </tr>#}
+{#</table>#}
+
+
+</body>
+</html>

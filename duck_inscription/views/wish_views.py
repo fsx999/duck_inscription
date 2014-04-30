@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 import StringIO
-from PyPDF2 import PdfFileReader, PdfFileWriter
+from tempfile import TemporaryFile, NamedTemporaryFile
+from PyPDF2 import PdfFileReader, PdfFileWriter, PdfFileMerger
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse
 
@@ -11,6 +12,7 @@ from django.template.loader import render_to_string
 from django.views.generic import TemplateView, View
 from django.views.generic.edit import FormView
 from floppyforms import ModelChoiceField
+from wkhtmltopdf.views import PDFTemplateResponse, PDFTemplateView
 import xworkflows
 import json
 from duck_inscription.forms import WishGradeForm, ListeDiplomeAccesForm, DemandeEquivalenceForm
@@ -230,12 +232,31 @@ class EquivalencePdfView(TemplateView):
         context['num_page'] = self._num_page(url_doc)  # on indique le nombre de page pour la page 1
 
         pdf = pisapdf.pisaPDF()
+        merger = PdfFileMerger()
         for template in self.get_template_names():
             pdf.addDocument(pisa.CreatePDF(render_to_string(template, context, context_instance=RequestContext(
                 self.request))))  # on construit le pdf
             #il faut fusionner la suite
-        pdf.addFromFile(self.do_pdf(url_doc))
 
+        pdf.addFromFile(self.do_pdf(url_doc))
+        ##
+        example_template = "duck_inscription/wish/attestation_equivalence_pdf.html"
+        # pdf.addDocument(pisa.CreatePDF(render_to_string(context['voeu'].etape.nom_template,
+        #                                                 context,
+        #                                                 context_instance=RequestContext(self.request))))
+        #test purpose only
+
+        pdf.addFromString(PDFTemplateResponse(request=self.request,
+                                       template=[example_template,]
+                                       ).rendered_content)
+
+        # print(doc_test)
+
+        # pdf.addDocument(pisa.CreatePDF(render_to_string(example_template,
+        #                                                 context,
+        #                                                 context_instance=RequestContext(self.request))))
+
+        #pdf.addFromFile(context['voeu'].etape.grille_evaluation)
         pdf.join(response)
         return response
 
