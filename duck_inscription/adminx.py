@@ -32,7 +32,7 @@ class MainDashboard(object):
     widgets = [
         [
             {"type": "qbutton", "title": "Scolarité", "btns": [{'title': "Inscription", 'url': 'inscription'},
-                {}]},
+                ]},
         ]
     ]
     site_title = 'Backoffice'
@@ -85,13 +85,13 @@ class IndividuXadmin(object):
 
     site_title = 'Consultation des dossiers étudiants'
     show_bookmarks = False
-    fields = ('code_opi', 'last_name', 'first_name1', 'birthday', 'personal_email')
+    fields = ('code_opi', 'last_name', 'first_name1', 'birthday', 'personal_email', 'state')
     readonly_fields = ('code_opi', 'last_name', 'first_name1', 'birthday', 'personal_email')
     list_display =('__unicode__', 'last_name')
     list_export = []
     list_per_page = 10
     search_fields = ('last_name', 'first_name1', 'code_opi', 'wishes__code_dossier')
-    list_exclude = ('id', 'state', 'personal_email_save', 'opi_save', 'year')
+    list_exclude = ('id', 'personal_email_save', 'opi_save', 'year')
     list_select_related = None
     use_related_menu = False
     inlines = [WishInline]
