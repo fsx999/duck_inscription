@@ -1,0 +1,33 @@
+{% extends "xadmin/base_site.html" %}
+
+{% load static %}
+{% block title %}
+Gestion de la réception des dossiers
+{% endblock %}
+{% block contenu %}
+
+
+        <div class="well">
+        <h1>Gestion de la réception des dossiers (équivalences, candidatures, inscriptions)</h1>
+           </div>
+        <form class="form-horizontal" action="" method="post">
+            {% csrf_token %}
+            <div class="well">
+{#            {% include "include/bootstrap_input.html" with field=form.code_dossier value="Code barre : " %}#}
+            </div>
+{#            {% include "include/bootstrap_submit.html" with value="Envoyer" %}#}
+        </form>
+        <section class="well">
+            {% if result and email %}
+                <div class="success">L'email de confirmation à bien été envoyé à {{ email }}</div>
+            {% elif not result and email %}
+                <div class="errors">Un email a déjà été envoyé à {{ email }}
+                {% if message %}
+                 <br/>{{ message }}
+                {% endif %} </div>
+            {% endif %}
+
+        </section>
+
+    <script type="text/javascript" src="{%  static "backoffice/js/dossier_receptionne.js" %}"></script>
+{% endblock %}

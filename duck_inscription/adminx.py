@@ -1,22 +1,38 @@
 # coding=utf-8
 from __future__ import unicode_literals
+from django.core.exceptions import PermissionDenied
+from django.core.urlresolvers import reverse, reverse_lazy
+from xadmin.models import UserWidget, UserSettings
 import xadmin
 from xadmin import views
-from duck_inscription.models import Individu
+from xadmin.plugins.details import DetailsPlugin
+from duck_inscription.models import Individu, SettingsEtape
 from .models import Wish
 
 from xadmin.sites import site
+from xadmin.views import filter_hook
+from xadmin.views.dashboard import WidgetDataError
+
+
+class IncriptionDashBoard(views.website.IndexView):
+    widgets = [
+        [
+            {"type": "qbutton", "title": "Inscription", "btns": [
+                                                                 {'title': 'Dossier inscription', 'model': Individu}
+            ]},
+        ]
+    ]
+    site_title = 'Backoffice'
+    title = 'Accueil'
+    widget_customiz = False
+
+xadmin.site.register_view(r'inscription/$', IncriptionDashBoard,  'inscription')
+
 class MainDashboard(object):
     widgets = [
         [
-            {"type": "html", "title": "Test Widget", "content": "<h3> Welcome to Xadmin! </h3>"},
-
-
-        ],
-        [
-            {"type": "qbutton", "title": "Quick Start", "btns": [{'title': "Google", 'url': "http://www.google.com"},
-                                                                 {'model': Individu}
-            ]},
+            {"type": "qbutton", "title": "Scolarité", "btns": [{'title': "Inscription", 'url': 'inscription'},
+                {}]},
         ]
     ]
     site_title = 'Backoffice'
@@ -27,79 +43,67 @@ xadmin.site.register(views.website.IndexView, MainDashboard)
 
 
 
+
 class BaseSetting(object):
     use_bootswatch = True
+
 
 xadmin.site.register(views.BaseAdminView, BaseSetting)
 
 
 class GlobalSetting(object):
     menu_style = 'accordion'
+    global_search_models = [Individu]
+    global_add_models = []
 
-    def get_site_menu(self):
-        return ({
-            "title": 'cocouu',
-            'menus': ({
-                'title': 'test',
-                'url': 'http://google.fr'
-            },)
-        },)
 xadmin.site.register(views.CommAdminView, GlobalSetting)
 
 
-
-class WishAdmin(object):
+class WishInline(object):
 
     def email(self, obj):
-        return '{}'.format(obj.individu.personal_email)
-    email.short_description = 'email'
-    email.is_column = True
+        return obj.individu.personal_email
 
-    list_display = ('individu', 'etape', 'email')
-    search_fields = ['individu__last_name', 'individu__first_name1', 'code_dossier']
-    list_filter = ['etape']
+    def reins(self, obj):
+        if obj.is_reins:
+            return 'oui'
+        else:
+            return 'non'
+    reins.short_description = 'Réinscription'
+
+    model = Wish
+    extra = 0
+    style = 'table'
+    fields = ['email', 'annee']
+    readonly_fields = ['etape', 'email', 'diplome_acces', 'centre_gestion', 'reins', 'state',
+                       'suivi_dossier', 'date_validation', 'valide']
+    exclude = ('annee', 'is_reins')
+    can_delete = False
     hidden_menu = True
-    actions = None
-    save_as = False
-    export = None
-    fields = ['individu', 'etape', 'is_reins', 'state', 'email']
-
-    readonly_fields = ['individu', 'etape', 'is_reins', 'date_validation', 'state', 'email']
-    # exclude = ('centre_gestion', 'diplome_acces', 'valide', 'annee')
-    list_export = []
-    show_bookmarks = False
-    list_per_page = 10
-
-
-
-    def get_readonly_fields(self):
-        # if self.request.user.is_superuser:
-        #     return ()
-        return self.readonly_fields
-
-
-
-    # def has_change_permission(self, obj=None):
-    #     return False
-
 
 class IndividuXadmin(object):
+
     site_title = 'Consultation des dossiers étudiants'
     show_bookmarks = False
-    fields = ('code_opi','last_name', 'first_name1', 'birthday', 'user')
+    fields = ('code_opi', 'last_name', 'first_name1', 'birthday', 'personal_email')
+    readonly_fields = ('code_opi', 'last_name', 'first_name1', 'birthday', 'personal_email')
+    list_display =('__unicode__', 'last_name')
     list_export = []
     list_per_page = 10
     search_fields = ('last_name', 'first_name1', 'code_opi', 'wishes__code_dossier')
     list_exclude = ('id', 'state', 'personal_email_save', 'opi_save', 'year')
-    # show_detail_fields = ['user']
+    list_select_related = None
+    use_related_menu = False
+    inlines = [WishInline]
+    hidden_menu = True
+
 
     def has_add_permission(self):
         return False
-
 
 
     def has_delete_permission(self, obj=None):
         return False
 
 xadmin.site.register(Individu, IndividuXadmin)
-xadmin.site.register(Wish, WishAdmin)
+xadmin.site.register(SettingsEtape)

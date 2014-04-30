@@ -156,7 +156,7 @@ class InfoPersoView(UpdateView):
         taille_individu = IndividuApogee.objects.filter(
             lib_nom_pat_ind=data['last_name'].upper(),
             lib_pr1_ind=data['first_name1'].upper(),
-            date_nai_ind=data['birthday']).count()
+            date_nai_ind=data['birthday']).exclude(cod_etu__isnull=True).count()
         if taille_individu and not individu.student_code:
             individu.code_etud_manquant()
         else:

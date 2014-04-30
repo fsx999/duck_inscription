@@ -5,7 +5,7 @@ from django.db import models
 from xworkflows import transition, after_transition, before_transition, on_enter_state, transition_check
 from django_apogee.models import CentreGestion, Diplome, InsAdmEtp
 from duck_inscription.models import SettingAnneeUni, Individu, SettingsEtape
-from duck_inscription.models.workflows_models import WishWorkflow
+from duck_inscription.models.workflows_models import WishWorkflow, SuiviDossierWorkflow
 from django_xworkflows import models as xwf_models
 from django.utils.timezone import now
 __author__ = 'paul'
@@ -203,6 +203,7 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
 
     date_validation = models.DateTimeField(null=True, blank=True)
     state = xwf_models.StateField(WishWorkflow)
+    suivi_dossier = xwf_models.StateField(SuiviDossierWorkflow)
 
     @on_enter_state('ouverture_equivalence')
     def on_enter_state_ouverture_equivalence(self, res, *args, **kwargs):
@@ -245,6 +246,8 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
                 self.is_reins = False
             self.save()
         return self.is_reins
+
+
     # def not_place(self):
     #     if self.step.limite_etu and not self.is_ok and not self.place_dispo():
     #         return True
