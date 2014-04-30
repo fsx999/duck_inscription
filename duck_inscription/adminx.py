@@ -18,21 +18,23 @@ class IncriptionDashBoard(views.website.IndexView):
     widgets = [
         [
             {"type": "qbutton", "title": "Inscription", "btns": [
-                                                                 {'title': 'Dossier inscription', 'model': Individu}
+                {'title': 'Reception', 'url': 'dossier_receptionne'},
+                {'title': 'Dossier inscription', 'model': Individu}
             ]},
         ]
     ]
     site_title = 'Backoffice'
     title = 'Accueil'
     widget_customiz = False
-
 xadmin.site.register_view(r'inscription/$', IncriptionDashBoard,  'inscription')
 
 class MainDashboard(object):
     widgets = [
         [
-            {"type": "qbutton", "title": "Scolarité", "btns": [{'title': "Inscription", 'url': 'inscription'},
-                ]},
+            {"type": "qbutton", "title": "Scolarité", "btns": [
+
+                {'title': "Inscription", 'url': 'inscription'},
+            ]},
         ]
     ]
     site_title = 'Backoffice'
@@ -87,7 +89,7 @@ class IndividuXadmin(object):
     show_bookmarks = False
     fields = ('code_opi', 'last_name', 'first_name1', 'birthday', 'personal_email', 'state')
     readonly_fields = ('code_opi', 'last_name', 'first_name1', 'birthday', 'personal_email')
-    list_display =('__unicode__', 'last_name')
+    list_display = ('__unicode__', 'last_name')
     list_export = []
     list_per_page = 10
     search_fields = ('last_name', 'first_name1', 'code_opi', 'wishes__code_dossier')
