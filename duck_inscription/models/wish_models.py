@@ -11,7 +11,7 @@ from duck_inscription.models import SettingAnneeUni, Individu, SettingsEtape
 from duck_inscription.models.workflows_models import WishWorkflow, SuiviDossierWorkflow
 from django_xworkflows import models as xwf_models
 from django.utils.timezone import now
-from test_duck_inscription import settings
+from django.conf import settings
 
 __author__ = 'paul'
 
@@ -262,7 +262,7 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
             etape = u"d'inscripiton"
         else:
             raise Exception(u"Etape inconnu")
-        site = Site.objects.get(id=settings.SITE_ID)
+        site = settings.INSCRIPTION_URL
         template = Mail.objects.get(name='email_reception')
         if settings.DEBUG:
             email_destination = ("paul.guichon@iedparis8.net",)
@@ -270,10 +270,11 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
             email_destination = (self.individu.personal_email,)
 
         mail = template.make_message(
-            context={'site': site, 'etape': etape}
+            context={'site': site, 'etape': etape},
+            recipients=email_destination
         )
         mail.send()
-        return True
+
 
     # def not_place(self):
     #     if self.step.limite_etu and not self.is_ok and not self.place_dispo():

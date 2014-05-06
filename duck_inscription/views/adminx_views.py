@@ -21,10 +21,12 @@ class DossierReceptionView(FormView):
 
             context['email'] = wish.individu.personal_email
             context['form'] = self.get_form_class()()
-            # wish.equivalence_receptionner()
-            context['result'] = wish.envoi_email_reception()
+            wish.equivalence_receptionner()
+            wish.envoi_email_reception()
+            context['message'] = u'''<div class="text-success">Le dossier {}
+             avec l\'email {} est bien trairé</div>'''.format(wish.code_dossier, wish.individu.personal_email)
         except Wish.DoesNotExist:
-            context['message'] = u"Le dossier numéro %s n'existe pas" % (code_dossier,)
+            context['message'] = u'<div class="text-danger">Le dossier numéro {} n\'existe pas"</div>'.format(code_dossier)
         except InvalidTransitionError as e:
             context['message'] = u'<div class="text-danger">Dossier déjà traité</div>'
         # except Exception, e:

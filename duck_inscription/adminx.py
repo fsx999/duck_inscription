@@ -83,8 +83,8 @@ class WishInline(object):
     can_delete = False
     hidden_menu = True
 
-class IndividuXadmin(object):
 
+class IndividuXadmin(object):
     site_title = 'Consultation des dossiers étudiants'
     show_bookmarks = False
     fields = ('code_opi', 'last_name', 'first_name1', 'birthday', 'personal_email', 'state')

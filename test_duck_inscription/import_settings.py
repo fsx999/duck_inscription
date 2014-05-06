@@ -27,7 +27,7 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'django.contrib.sites',
+    # 'django.contrib.sites',
     'duck_inscription',
     'django_extensions',
     'django_apogee',
