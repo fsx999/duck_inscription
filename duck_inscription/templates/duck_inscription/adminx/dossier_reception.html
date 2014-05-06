@@ -1,10 +1,12 @@
 {% extends "xadmin/base_site.html" %}
 
-{% load static %}
+{% load static floppyforms %}
 {% block title %}
 Gestion de la réception des dossiers
 {% endblock %}
-{% block contenu %}
+{% block navbar %}{% endblock %}
+{% block content-nav %}{% endblock %}
+{% block content %}
 
 
         <div class="well">
@@ -13,19 +15,17 @@ Gestion de la réception des dossiers
         <form class="form-horizontal" action="" method="post">
             {% csrf_token %}
             <div class="well">
-{#            {% include "include/bootstrap_input.html" with field=form.code_dossier value="Code barre : " %}#}
+                {% form form %}
             </div>
-{#            {% include "include/bootstrap_submit.html" with value="Envoyer" %}#}
+            <div class="form-group">
+                <div class="col-sm-offset-3 col-sm-10">
+            <button type="submit" class="btn btn-success">Valider</button>
+                    </div></div>
         </form>
         <section class="well">
-            {% if result and email %}
-                <div class="success">L'email de confirmation à bien été envoyé à {{ email }}</div>
-            {% elif not result and email %}
-                <div class="errors">Un email a déjà été envoyé à {{ email }}
-                {% if message %}
-                 <br/>{{ message }}
-                {% endif %} </div>
-            {% endif %}
+
+                {{ message|safe}}
+
 
         </section>
 

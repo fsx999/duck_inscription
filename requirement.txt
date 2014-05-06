@@ -47,3 +47,4 @@ wsgiref==0.1.2
 xhtml2pdf==0.0.5
 xworkflows==1.0.3
 yolk==0.4.3
+django-mailrobot

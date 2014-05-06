@@ -1,13 +1,18 @@
 # -*- coding: utf-8 -*-
 import datetime
+from django.contrib.sites.models import Site
 from django.core.urlresolvers import reverse
 from django.db import models
+from django.template.loader import render_to_string
+from mailrobot.models import Mail
 from xworkflows import transition, after_transition, before_transition, on_enter_state, transition_check
 from django_apogee.models import CentreGestion, Diplome, InsAdmEtp
 from duck_inscription.models import SettingAnneeUni, Individu, SettingsEtape
 from duck_inscription.models.workflows_models import WishWorkflow, SuiviDossierWorkflow
 from django_xworkflows import models as xwf_models
 from django.utils.timezone import now
+from test_duck_inscription import settings
+
 __author__ = 'paul'
 
 
@@ -247,6 +252,28 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
             self.save()
         return self.is_reins
 
+    def envoi_email_reception(self):
+        if self.state.name == "equivalence":
+            etape = u"d'équivalence"
+
+        elif self.state.name == "candidature":
+            etape = u"de candidature"
+        elif self.etape == u"inscription":
+            etape = u"d'inscripiton"
+        else:
+            raise Exception(u"Etape inconnu")
+        site = Site.objects.get(id=settings.SITE_ID)
+        template = Mail.objects.get(name='email_reception')
+        if settings.DEBUG:
+            email_destination = ("paul.guichon@iedparis8.net",)
+        else:
+            email_destination = (self.individu.personal_email,)
+
+        mail = template.make_message(
+            context={'site': site, 'etape': etape}
+        )
+        mail.send()
+        return True
 
     # def not_place(self):
     #     if self.step.limite_etu and not self.is_ok and not self.place_dispo():
