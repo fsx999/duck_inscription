@@ -1,29 +1,20 @@
 {% extends "base.html" %}
 {% load floppyforms %}
 {% block content %}
-{% if not wish.liste_attente %}
-<form id="form" class=" form-horizontal well" method="post">
-{% csrf_token %}
+
+
     <p>
 L'accès à votre voeu de formation (
-<b>{{ wish.step.label }}</b>
+<b>{{ wish.etape.label }}</b>
 nécessite le passage par l'étape de l'équivalence. Cette inscription est fermée depuis le
-<b>{{ wish.step.fin_equivalence }}.</b>
+<b>{{ wish.etape.date_fermeture_equivalence|date:'d/m/Y' }}.</b>
 </p>
-    <legend style="text-align: center">Liste d'attente</legend>
-{% form form %}
-<div class="form-actions">
-<input id="submit-id-verifier" class="btn btn-primary btn btn-success" type="submit" value="Suite" name="Verifier">
-</div>
- </form>
-
-{% else %}
- <p>Vous êtes sur une liste d'attente d'accès.</p>
-<p>Un e-mail vous informera de la suite accordée à votre dossier d'équivalence.</p>
-{% endif %}
 
 
 
+ <strong>Vous êtes sur une liste d'attente d'accès.</strong>
+<p>Un e-mail vous informera s'il y a une suite à votre dossier.</p>
+    <hr/>
 
-    <p><a href={% url 'home' %}>Retour à la liste des voeux</a></p>
+    <p><a class="btn btn-primary" href={% url 'accueil' %}>Retour à la liste des voeux</a></p>
 {% endblock %}

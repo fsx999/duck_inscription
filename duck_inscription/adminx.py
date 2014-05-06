@@ -1,17 +1,10 @@
 # coding=utf-8
 from __future__ import unicode_literals
-from django.core.exceptions import PermissionDenied
-from django.core.urlresolvers import reverse, reverse_lazy
-from xadmin.models import UserWidget, UserSettings
-import xadmin
 from xadmin import views
-from xadmin.plugins.details import DetailsPlugin
+import xadmin
 from duck_inscription.models import Individu, SettingsEtape
 from .models import Wish
-
-from xadmin.sites import site
 from xadmin.views import filter_hook
-from xadmin.views.dashboard import WidgetDataError
 
 
 class IncriptionDashBoard(views.website.IndexView):
@@ -28,6 +21,7 @@ class IncriptionDashBoard(views.website.IndexView):
     widget_customiz = False
 xadmin.site.register_view(r'inscription/$', IncriptionDashBoard,  'inscription')
 
+
 class MainDashboard(object):
     widgets = [
         [
@@ -42,8 +36,6 @@ class MainDashboard(object):
     widget_customiz = False
 
 xadmin.site.register(views.website.IndexView, MainDashboard)
-
-
 
 
 class BaseSetting(object):
@@ -80,9 +72,15 @@ class WishInline(object):
     readonly_fields = ['etape', 'email', 'diplome_acces', 'centre_gestion', 'reins',
                        'date_validation', 'valide']
     exclude = ('annee', 'is_reins')
-    can_delete = False
+    can_delete = True
     hidden_menu = True
 
+    @filter_hook
+    def get_readonly_fields(self):
+        if self.request.user.is_superuser:
+            return self.readonly_fields
+        else:
+            return self.readonly_fields + ['state', 'suivi_dossier']
 
 class IndividuXadmin(object):
     site_title = 'Consultation des dossiers étudiants'
@@ -99,10 +97,8 @@ class IndividuXadmin(object):
     inlines = [WishInline]
     hidden_menu = True
 
-
     def has_add_permission(self):
         return False
-
 
     def has_delete_permission(self, obj=None):
         return False

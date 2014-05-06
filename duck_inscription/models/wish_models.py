@@ -217,8 +217,10 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
             return
         if not self.etape.date_ouverture_equivalence:  # il n'y a pas d'équivalence on va en candidature
             self.ouverture_candidature()
-        elif self.etape.date_ouverture_equivalence <= now():  # l'équi est ouverte
+        elif self.etape.date_ouverture_equivalence <= now() <= self.etape.date_fermeture_equivalence:  # l'équi est ouverte
             self.liste_diplome()
+        elif self.etape.date_fermeture_equivalence <= now():  # équi ferme
+            self.liste_attente_equivalence()
 
     @on_enter_state('liste_diplome')
     def on_enter_liste_diplome(self, *args, **kwargs):

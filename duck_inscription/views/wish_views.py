@@ -13,7 +13,8 @@ from django.views.generic.edit import FormView
 from floppyforms import ModelChoiceField
 import xworkflows
 import json
-from duck_inscription.forms import WishGradeForm, ListeDiplomeAccesForm, DemandeEquivalenceForm
+from duck_inscription.forms import WishGradeForm, ListeDiplomeAccesForm, DemandeEquivalenceForm, \
+    ListeAttenteEquivalenceForm
 from duck_inscription.models import Wish, SettingsEtape
 from xhtml2pdf import pdf as pisapdf
 from xhtml2pdf import pisa
@@ -137,45 +138,18 @@ class DemandeEquivalenceView(FormView):
             wish.ouverture_candidature()
         # wish.dispatch()
         return redirect(wish.get_absolute_url())
-#
-#
 
 
+class ListeAttenteEquivalenceView(TemplateView):
+    template_name = 'duck_inscription/wish/liste_attente_equivalence.html'
 
-#
-#
-# class ListeAttenteEquivalenceView(FormView):
-#     template_name = 'wish/liste_attente_equivalence.html'
-#     form_class = ListeAttenteEquivalenceForm
-#
-#     def get_context_data(self, **kwargs):
-#         context = super(ListeAttenteEquivalenceView, self).get_context_data(**kwargs)
-#         if hasattr(self, 'wish'):
-#             context['wish'] = self.wish
-#         else:
-#             self.wish = context['wish'] = self.request.user.individu.wishes.get(pk=self.kwargs['pk'])
-#         return context
-#
-#     def get(self, request, *args, **kwargs):
-#         if not hasattr(self, 'wish'):
-#             self.wish = self.request.user.individu.wishes.get(pk=self.kwargs['pk'])
-#         if datetime.date.today() > self.wish.step.fin_attente_equivalence:
-#             #self.wish.delete()
-#             return redirect(reverse('fin_liste_attente_equivalence'))
-#         return super(ListeAttenteEquivalenceView, self).get(request, *args, **kwargs)
-#
-#     def form_valid(self, form):
-#         wish = self.get_context_data()['wish']
-#         demande_attente = form.cleaned_data['demande_attente']
-#         if demande_attente == 'O':
-#             wish.liste_attente = True
-#             wish.save()
-#         else:
-#             #wish.delete()
-#             return redirect(reverse('home'))
-#         return redirect(wish.get_absolute_url())
-#
-#
+
+    def get_context_data(self, **kwargs):
+        context = super(ListeAttenteEquivalenceView, self).get_context_data(**kwargs)
+        context['wish'] = self.request.user.individu.wishes.get(pk=self.kwargs['pk'])
+        return context
+
+
 class EquivalenceView(TemplateView):
     template_name = "duck_inscription/wish/equivalence.html"
 
