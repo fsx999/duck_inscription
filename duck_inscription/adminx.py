@@ -70,7 +70,7 @@ class WishInline(object):
     style = 'table'
     fields = ['email', 'annee']
     readonly_fields = ['etape', 'email', 'diplome_acces', 'centre_gestion', 'reins',
-                       'date_validation', 'valide']
+                       'date_validation', 'valide', 'get_transition_log']
     exclude = ('annee', 'is_reins')
     can_delete = True
     hidden_menu = True
@@ -82,11 +82,21 @@ class WishInline(object):
         else:
             return self.readonly_fields + ['state', 'suivi_dossier']
 
+    def get_transition_log(self, obj):
+        reponse = '<table>'
+        for transition in obj.transitions_logs:
+            reponse += '<tr><td>{}</td><td>{}</td></tr>'.format(transition.transition, transition.timestamp.strftime('%d/%m/%Y %H:%M:%S'))
+        reponse += '</table>'
+        return reponse
+    get_transition_log.short_description = 'parcours'
+    get_transition_log.allow_tags = True
+
+
 class IndividuXadmin(object):
     site_title = 'Consultation des dossiers étudiants'
     show_bookmarks = False
     fields = ('code_opi', 'last_name', 'first_name1', 'birthday', 'personal_email', 'state')
-    readonly_fields = ('code_opi', 'last_name', 'first_name1', 'birthday', 'personal_email')
+    readonly_fields = ('code_opi', 'last_name', 'first_name1', 'birthday', 'personal_email', 'get_transition_log')
     list_display = ('__unicode__', 'last_name')
     list_export = []
     list_per_page = 10
@@ -102,6 +112,22 @@ class IndividuXadmin(object):
 
     def has_delete_permission(self, obj=None):
         return False
+
+    @filter_hook
+    def get_readonly_fields(self):
+        if self.request.user.is_superuser:
+            return self.readonly_fields
+        else:
+            return self.readonly_fields + ('state', )
+
+    def get_transition_log(self, obj):
+        reponse = '<table>'
+        for transition in obj.transitions_logs:
+            reponse += '<tr><td>{}</td><td>{}</td></tr>'.format(transition.transition, transition.timestamp.strftime('%d/%m/%Y %H:%M:%S'))
+        reponse += '</table>'
+        return reponse
+    get_transition_log.short_description = 'parcours'
+    get_transition_log.allow_tags = True
 
 xadmin.site.register(Individu, IndividuXadmin)
 xadmin.site.register(SettingsEtape)

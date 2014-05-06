@@ -4,6 +4,7 @@ from django.contrib.sites.models import Site
 from django.core.urlresolvers import reverse
 from django.db import models
 from django.template.loader import render_to_string
+from django_xworkflows.xworkflow_log.models import TransitionLog
 from mailrobot.models import Mail
 from xworkflows import transition, after_transition, before_transition, on_enter_state, transition_check
 from django_apogee.models import CentreGestion, Diplome, InsAdmEtp
@@ -277,7 +278,9 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
         )
         mail.send()
 
-
+    @property
+    def transitions_logs(self):
+        return TransitionLog.objects.filter(content_id=self.code_dossier).order_by('timestamp')
     # def not_place(self):
     #     if self.step.limite_etu and not self.is_ok and not self.place_dispo():
     #         return True

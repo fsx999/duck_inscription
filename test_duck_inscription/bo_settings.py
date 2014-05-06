@@ -9,6 +9,7 @@ https://docs.djangoproject.com/en/1.6/ref/settings/
 """
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
+from django.core.urlresolvers import reverse_lazy
 from import_settings import *
 
 
@@ -37,7 +38,7 @@ WSGI_APPLICATION = 'test_duck_inscription.bo_wsgi.application'
 
 
 
-LOGIN_URL = 'auth_login'
+LOGIN_URL = '/'
 
 from django.conf import settings
 TEMPLATE_CONTEXT_PROCESSORS = settings.TEMPLATE_CONTEXT_PROCESSORS + ("django.core.context_processors.request",)
