@@ -100,7 +100,7 @@ class IndividuXadmin(object):
     list_display = ('__unicode__', 'last_name')
     list_export = []
     list_per_page = 10
-    search_fields = ('last_name', 'first_name1', 'common_name', 'code_opi', 'wishes__code_dossier')
+    search_fields = ('last_name', 'first_name1', 'common_name', 'student_code', 'code_opi', 'wishes__code_dossier')
     list_exclude = ('id', 'personal_email_save', 'opi_save', 'year')
     list_select_related = None
     use_related_menu = False
