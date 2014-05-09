@@ -259,8 +259,11 @@ class NoteMasterView(FormView):
 
     def form_valid(self, form):
         wish = self.request.user.individu.wishes.get(pk=self.kwargs['pk'])
-        if getattr(wish, 'notemastermodel', None):
-            form.instance.pk = wish.notemastermodel.pk
+        try:
+            if getattr(wish, 'notemastermodel', None):
+                form.instance.pk = wish.notemastermodel.pk
+        except Wish.DoesNotExist:
+            pass
         form.instance.wish = wish
         form.save()
         try:
