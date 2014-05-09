@@ -1,5 +1,8 @@
 # coding=utf-8
 from __future__ import unicode_literals
+from crispy_forms.bootstrap import TabHolder, Tab
+from xadmin.layout import Main, Fieldset, Container, Side
+from xadmin.plugins.inline import Inline
 from xadmin import views
 import xadmin
 from duck_inscription.models import Individu, SettingsEtape
@@ -129,5 +132,37 @@ class IndividuXadmin(object):
     get_transition_log.short_description = 'parcours'
     get_transition_log.allow_tags = True
 
+
+class SettingsEtapeXadmin(object):
+    exclude = ('lib_etp', 'cod_cyc', 'cod_cur', 'annee')
+    form_layout = (
+        Main(
+            Fieldset('Etape',
+                     'cod_etp',
+                     'diplome',
+                     'label',
+                     'label_formation'),
+            TabHolder(
+                Tab('Equivalence',
+                    Fieldset('',
+                             'date_ouverture_equivalence',
+                             'date_fermeture_equivalence',
+                             'document_equivalence')),
+                Tab('Candidature',
+                    Fieldset('',
+                             'date_ouverture_candidature',
+                             'date_fermeture_candidature',
+                             'note_maste',
+                             'document_candidature')),
+
+
+            )
+        ),
+        Side(Fieldset('Settings',
+                      'required_equivalence',
+                      'is_inscription_ouverte'))
+    )
+
+
 xadmin.site.register(Individu, IndividuXadmin)
-xadmin.site.register(SettingsEtape)
+xadmin.site.register(SettingsEtape, SettingsEtapeXadmin)

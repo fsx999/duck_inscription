@@ -16,7 +16,7 @@ from wkhtmltopdf.views import PDFTemplateResponse, PDFTemplateView
 import xworkflows
 import json
 from duck_inscription.forms import WishGradeForm, ListeDiplomeAccesForm, DemandeEquivalenceForm, \
-    ListeAttenteEquivalenceForm
+    ListeAttenteEquivalenceForm, NoteMasterForm, ListeAttenteCandidatureForm
 from duck_inscription.models import Wish, SettingsEtape
 from xhtml2pdf import pdf as pisapdf
 from xhtml2pdf import pisa
@@ -256,56 +256,59 @@ class OuvertureCandidature(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(OuvertureCandidature, self).get_context_data(**kwargs)
-        context['date'] = self.request.user.individu.wishes.get(pk=self.kwargs['pk']).etape.date_ouverture_candidature
-        context['wish'] = self.request.user.individu.wishes.get(pk=self.kwargs['pk'])
+        try:
+            context['wish'] = self.wish
+        except AttributeError:
+            context['wish'] = self.request.user.individu.wishes.get(pk=self.kwargs['pk'])
         return context
 
     def get(self, request, *args, **kwargs):
-        wish = self.request.user.individu.wishes.get(pk=self.kwargs['pk'])
+        self.wish = self.request.user.individu.wishes.get(pk=self.kwargs['pk'])
+        try:
+            self.wish.note_master()
+            return redirect(self.wish.get_absolute_url())
+        except xworkflows.ForbiddenTransition:
+            return super(OuvertureCandidature, self).get(request, *args, **kwargs)
 
-        # if wish.dispatch():
-        #     return redirect(wish.get_absolute_url())
-        return super(OuvertureCandidature, self).get(request, *args, **kwargs)
-#
-#
-# class NoteMasterView(FormView):
-#     form_class = NoteMasterForm
-#     template_name = "wish/note_master.html"
-#
-#     def form_valid(self, form):
-#         wish = self.request.user.individu.wishes.get(pk=self.kwargs['pk'])
-#         form.instance.wish = wish
-#         form.save()
-#         if wish.dispatch():
-#             return redirect(wish.get_absolute_url())
-#         return super(NoteMasterView, self).form_valid(form)
-#
-#
-# class CandidatureView(EquivalenceView):
-#     template_name = "wish/candidature.html"
-#
-#
-# class CandidaturePdfView(EquivalencePdfView):
-#     etape = "candidature"
-#
-#     def get_file(self):
-#         """
-#         Il faut la surcharger pour les candidatures
-#         Doit retourner le l'url du doccument du doccument a fussionner
-#         """
-#         step = self.request.user.individu.wishes.get(pk=self.kwargs['pk']).step
-#
-#         return step.document_candidature
-#
-#
-# class ListeAttenteCandidatureView(ListeAttenteEquivalenceView):
-#     template_name = 'wish/liste_attente_candidature.html'
-#     form_class = ListeAttenteCandidatureForm
-#
-#     def get(self, request, *args, **kwargs):
-#         return super(ListeAttenteEquivalenceView, self).get(request, *args, **kwargs)
-#
-#
+
+class NoteMasterView(FormView):
+    form_class = NoteMasterForm
+    template_name = "duck_inscription/wish/note_master.html"
+
+    def form_valid(self, form):
+        wish = self.request.user.individu.wishes.get(pk=self.kwargs['pk'])
+        form.instance.wish = wish
+        form.save()
+        if wish.dispatch():
+            return redirect(wish.get_absolute_url())
+        return super(NoteMasterView, self).form_valid(form)
+
+
+class CandidatureView(EquivalenceView):
+    template_name = "duck_inscription/wish/candidature.html"
+
+
+class CandidaturePdfView(EquivalencePdfView):
+    etape = "candidature"
+
+    def get_file(self):
+        """
+        Il faut la surcharger pour les candidatures
+        Doit retourner le l'url du doccument du doccument a fussionner
+        """
+        step = self.request.user.individu.wishes.get(pk=self.kwargs['pk']).step
+
+        return step.document_candidature
+
+
+class ListeAttenteCandidatureView(ListeAttenteEquivalenceView):
+    template_name = 'wish/liste_attente_candidature.html'
+    form_class = ListeAttenteCandidatureForm
+
+    def get(self, request, *args, **kwargs):
+        return super(ListeAttenteEquivalenceView, self).get(request, *args, **kwargs)
+
+
 class OuverturePaiementView(TemplateView):
     template_name = "duck_inscription/wish/ouverture_paiement.html"
 

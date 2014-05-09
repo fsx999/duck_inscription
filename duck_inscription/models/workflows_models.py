@@ -33,6 +33,9 @@ class WishWorkflow(xwf_models.Workflow):
         ('equivalence', 'Dossier équivalence'),
         ('liste_attente_equivalence', 'Dossier en liste attente équivalence'),
         ('ouverture_candidature', 'Ouverture candidature'),
+        ('note_master', 'Note master'),
+        ('candidature', 'Candidature'),
+        ('liste_attente_candidature', 'Dossier en liste attente candidature'),
         ('ouverture_inscription', 'Ouverture inscription')
     )
 
@@ -44,7 +47,10 @@ class WishWorkflow(xwf_models.Workflow):
         ('liste_attente_equivalence', 'ouverture_equivalence', 'liste_attente_equivalence'),
         ('ouverture_candidature', ('creation', 'ouverture_equivalence', 'equivalence', 'demande_equivalence'),
          'ouverture_candidature'),
-        ('ouverture_inscription', ('creation', 'ouverture_equivalence', 'ouverture_candidature'), 'ouverture_inscription'),
+        ('note_master', 'ouverture_candidature', 'note_master'),
+        ('candidature', ('note_master', 'ouverture_candidature'), 'candidature'),
+        ('ouverture_inscription', ('creation', 'ouverture_equivalence', 'ouverture_candidature'),
+         'ouverture_inscription'),
     )
 
     initial_state = 'creation'
