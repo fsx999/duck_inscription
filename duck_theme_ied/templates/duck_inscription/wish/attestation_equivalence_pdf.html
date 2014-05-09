@@ -1,0 +1,471 @@
+{% load lib_inscription staticfiles%}
+<!DOCTYPE html>
+<html>
+<head>
+{#    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">#}
+
+<style type="text/css">
+
+@page {
+margin-left: 0cm;
+margin-right: 0cm;
+margin-top: 0.5cm;
+text-align: justify;
+}
+
+
+@font-face {
+            font-family: "code_bare";
+            src: url({{ url_font }});
+        }
+        .code_barre{
+            font-family: "code_bare";
+            font-size: 12pt;
+        }
+
+
+
+img{
+    display:inline;
+    float:left;
+    }
+
+#info tr{
+    padding-top:5pt;
+}
+#codebar{
+    margin-top: 0pt;
+    }
+#oui{
+    paddin-top:2px;
+    text-align: right;
+    }
+
+body{
+    margin-bottom:0;
+    margin-left:0;
+    margin-right:0;
+    margin-top:0;
+    padding-bottom:0;
+    padding-left:0;
+    padding-right:0;
+    padding-top:0;
+    font-size: 16px;
+    text-align: justify;
+
+    }
+h3{
+    padding-bottom:0;
+    padding-top:0;
+    }
+br{
+    padding-bottom:0;
+    padding-top:0;
+    }
+#code_barre{
+    display: inline;
+    position: relative;
+    float: right;
+}
+.titre_pdf{
+    text-align: center;
+    position: absolute;
+    left: 250px;
+    top: 0px;
+
+    }
+.code_barre_div{
+    text-align: center;
+    position: absolute;
+    left:650px;
+    top:0px;
+}
+.center_text{
+    text-align:center;
+    padding-top: 10px;
+}
+h2.titre_pdf{
+    text-align: center;
+
+    }
+h3.titre_pdf{
+    font-size: 16px;
+    }
+.case{
+    padding-bottom:0;
+    padding-top:0;
+
+}
+.special_div{
+    padding-top: 20px;
+    padding-right: 10px;
+    padding-bottom: 10px;
+    padding-left: 10px;
+}
+
+.petit{
+    font-size: 8px;
+}
+.bordered_info_etudiant{
+    text-align: center;
+    border-width:1px;
+    border-style: solid;
+    font-size: 14px;
+    padding-top: 3px;
+
+}
+.div_texte_decision{
+    position: absolute;
+    top:150px;
+    left:-200px;
+
+}
+.texte_decisiion{
+    font-size: 14px;
+}
+.bordered_adress{
+    position: absolute;
+    left: 385px;
+    top:108px;
+    border-width:2px;
+    border-style: solid;
+    width: 329px;
+    height:135px;
+    text-align: center;
+}
+.bordered_big{
+    border-width:2px;
+    border-style: solid;
+}
+
+.pos_div_carte{
+    position:absolute;
+    left:8px;
+    top:133px;
+
+}
+.pos_div_date_lieux{
+    position:absolute;
+    left:8px;
+    top:175px;
+
+}
+
+.second_div_infos_spec{
+    width:350px;
+    height: 42px;
+    text-align: left;
+}
+.second_case2{
+    position: relative;
+    left: 200px;
+    width:150px;
+    top:-23px;
+    text-align: center;
+    border-bottom-style: solid;
+    border-bottom-width: 1px;
+}
+.second_case3{
+    position: relative;
+    left: 200px;
+    width:150px;
+    top:-46px;
+    text-align: center;
+    padding-top: 3px;
+    font-size: 12px;
+
+}
+.first_case2{
+    position: relative;
+    left: -1px;
+    top:-24px;
+    width: 200px;
+}
+.div_infos_spec{
+    width:350px;
+    height: 20px;
+    text-align: left;
+}
+
+.bordered_small{
+
+    border-width: 1px;
+    border-style: solid;
+
+}
+.first_case{
+    position: relative;
+    left: -1px;
+    top:-1px;
+    width: 200px;
+}
+.second_case{
+    position: relative;
+    left: 200px;
+    width:150px;
+    top:-24px;
+    text-align: center;
+
+}
+.centered_text{
+    text-align: center ;
+}
+.first_table{
+    position: absolute;
+    width: 800px;
+    left: 0px;
+    top:400px;
+    border: 1px;
+    border-style: solid;
+    border-color: #000000;
+    border-spacing:0px;
+
+}
+.second_table{
+    position: absolute;
+    width: 800px;
+    left: 0px;
+    top:625px;
+    border: 1px;
+    border-style: solid;
+    border-color: #000000;
+    border-spacing:0px;
+
+}
+.div_sub_text1_pos{
+    position: absolute;
+    left:0px;
+    top:525px;
+    width: 796px;
+    text-align: center;
+}
+.div_sub_text1_pos3{
+    position: absolute;
+    left:0px;
+    top:800px;
+    width: 380px;
+    height: 200px;
+    text-align: center;
+}
+.div_sub_text1_pos4{
+    position: absolute;
+    left:445px;
+    top:800px;
+    width: 350px;
+    height: 250px;
+    text-align: center;
+}
+
+.div_sub_text2_pos{
+    position: absolute;
+    height: 80;;
+    left:0px;
+    top:675px;
+    width: 796px;
+    text-align: center;
+}
+.logo_ied {
+    position: absolute;
+    left: 0px;
+    top:0px;
+    zoom: 38%;
+}
+.red_text{
+    color: red;
+}
+.blue_text{
+    color: blue;
+}
+
+.info_text{
+    font-size: 14px;
+}
+.pos_bla_text{
+    position: absolute;
+    left: 0px;
+    top:1000px;
+}
+.pos_site_text{
+    position: absolute;
+    left: 445px;
+    top:1050px;
+}
+.footer{
+    
+    position: absolute;
+    left: 25px;
+    top:1150px ;
+    font-size: 12px;
+    text-align: center;
+
+}
+
+
+</style>
+
+</head>
+
+
+
+
+<body>
+
+<img class="logo_ied" src="{% static 'images/logop8.jpg'%}">
+<div class="titre_pdf" >
+    <h3 >ATTESTATION&nbsp;D'ÉQUIVALENCE <br> {% annee_en_cour %}</h3>
+    <p class="petit">décrets n° 81-621 du 18 mai 1981 et n° 85-906 du 23 août 1985</p>
+</div>
+<div class="code_barre_div">
+    <span class="code_barre">*{{ voeu.code_dossier }}*</span> <br>
+    <p class="petit">{{ voeu.code_dossier }}</p>
+</div>
+<div class="bordered_big div_infos_spec pos_div_carte ">
+    <div class="bordered_small first_case">N° DE CARTE D'ÉTUDES</div>
+    <div class="second_case">{{ individu.student_code  }}</div>
+</div>
+<div class="bordered_big second_div_infos_spec pos_div_date_lieux ">
+    <div class="bordered_small first_case">DATE DE NAISSANCE</div>
+    <div class="second_case2">{{ individu.birthday  }}</div>
+    <div class="bordered_small first_case2">LIEU DE NAISSANCE</div>
+    <div class="second_case3">{{ individu.code_pays_birth  }},
+                              {{ individu.town_birth }}</div>
+</div>
+<div class="bordered_adress">
+    <div class="special_div">
+     {{ individu.last_name|upper  }}
+     {{ individu.first_name1|upper  }}
+                        <br>
+                    {% for address in individu.adresses.all %}
+                        {% if address.type == '1' %}
+                                            {% if address.label_adr_1 %}
+                                            {{ address.label_adr_1|upper  }}
+                                            {% endif %}
+                                            {% if  address.label_adr_2 %}
+                                            {{ address.label_adr_2|upper  }}
+                                            {% endif %}
+                                            {% if  address.label_adr_3 %}
+                                            {{ address.label_adr_3|upper }}
+                                            {% endif %}
+                                            {% if  address.label_adr_etr %}
+                                            {{ address.label_adr_etr|upper  }}
+                                            {% endif %}
+                                            {% if  address.com_bdi %}
+                                                <br>
+                                            {{ address.com_bdi.cod_bdi|upper  }}
+                                            {{ address.com_bdi.lib_ach|upper  }}
+                                                <br>
+                                            {{ address.code_pays.lib_pay|upper  }}
+                                            {% endif %}
+                                         {% endif %}
+                                    {% endfor %}
+    </div>
+
+    <div class="div_texte_decision">
+        <h3>DÉCISION&nbsp;DE&nbsp;LA&nbsp;COMMISSION&nbsp;PÉDAGOGIQUE</h3>
+        <p class="texte_decisiion">DÉCISION DE LA COMMISSION PÉDAGOGIQUE DE L'UFR&nbsp:<br>
+            INSTITUT D'ENSEIGNEMENT À DISTANCE<br>
+            ADMIS(E) À S'INSCRIRE EN LICENCE DE PSYCHOLOGIE</p>
+
+    </div>
+
+</div>
+
+<div>
+    <table class="first_table">
+        <tr class="bordered_small">
+          <td class="bordered_small">
+              <input type="checkbox">
+          </td>
+          <td class="bordered_small">1e ANNÉE / ÉTAPE : L1NPSY</td>
+          <td class="bordered_small">DE 00 À 29 ECTS</td>
+        </tr>
+        <tr class="bordered_small">
+          <td class="bordered_small">
+              <input type="checkbox">
+          </td>
+          <td class="bordered_small">2e ANNÉE CONDITIONNELLE / ÉTAPE : L2NPSY</td>
+          <td class="bordered_small">DE 30 À 59 ECTS</td>
+        </tr>
+        <tr class="bordered_small">
+          <td class="bordered_small">
+              <input type="checkbox">
+          </td>
+          <td class="bordered_small">2e ANNÉE / ÉTAPE : L2NPSY</td>
+          <td class="bordered_small">DE 60 À 89 ECTS</td>
+        </tr>
+        <tr class="bordered_small">
+          <td class="bordered_small">
+              <input type="checkbox">
+          </td>
+          <td class="bordered_small">3e ANNÉE CONDITIONNELLE / ÉTAPE : L3NPSY</td>
+          <td class="bordered_small">DE 90 À 119 ECTS</td>
+        </tr>
+        <tr class="bordered_small">
+          <td class="bordered_small">
+              <input type="checkbox">
+          </td>
+          <td class="bordered_small">3e ANNÉE / ÉTAPE : L3NPSY</td>
+          <td class="bordered_small">120 ECTS ET PLUS</td>
+        </tr>
+    </table>
+    <div  class="bordered_big div_sub_text1_pos">
+            <p>
+                RELEVÉ DE DÉCISIONS CONCERNANT LA RÉPARTITION DES ÉLÉMENTS CONSTITUTIFS (EC)
+                <br>VOIR AU VERSO LE DÉTAIL DES EC ACCORDÉS
+            </p>
+    </div>
+</div>
+<div>
+    <table class="second_table">
+        <tr class="bordered_small">
+          <td class="bordered_small">
+              <input type="checkbox">
+          </td>
+          <td class="bordered_small centered_text">VOUS DEVEZ VALIDER LE CURSUS COMPLET</td>
+        </tr>
+        <tr class="bordered_small">
+          <td class="bordered_small">
+              <input type="checkbox">
+          </td>
+          <td class="bordered_small centered_text">EC ACCORDÉS EN DISPENSE (valable seulement pour l'année en cours):
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ECTS</td>
+        </tr>
+    </table>
+    <div  class="bordered_big div_sub_text2_pos">
+            <p>
+               ÉQUIVALENCE ACCORDÉE AU TITRE DE : LICENCE DE PSYCHOLOGIE 2014 /2015
+            </p>
+    </div>
+</div>
+<div  class="bordered_big div_sub_text1_pos3">
+            <p class="red_text"> ATTENTION</p>
+            <p class="info_text">VOUS DEVEZ JOINDRE UNE COPIE DE CE
+                                    DOCUMENT LORS DE VOTRE
+                                    INSCRIPTION ADMINITRATIVE
+                    <br><br><br>
+                    CETTE ATTESTATION N'EST VALABLE QUE SI
+                    L'INSCRIPTION ADMINISTRATIVE EST
+                    EFFECTUÉE DURANT L'ANNÉE UNIVERSITAIRE
+                    2014 / 2015
+            </p>
+</div>
+<div  class="bordered_big div_sub_text1_pos4">
+            <p class="info_text">FAIT À SAINT-DENIS,
+                LE  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/ 2014
+                <br><br><br>
+                    LE RESPONSABLE DE L'ÉQUIVALENCE :<br>
+                        (CACHET ET SIGNATURE)
+            </p>
+</div>
+<div class="pos_bla_text">
+    <p class="info_text">DIRECTION DES ÉTUDES ET DE LA VIE UNIVERSITAIRE</p>
+</div>
+<div class="pos_site_text">
+    <p class="blue_text">http://www.univ-paris8.fr/</p>
+</div>
+<div class="footer">
+    IED – INSTITUT&nbsp;D'ENSEIGNEMENT&nbsp;À&nbsp;DISTANCE&nbsp;–&nbsp;UNIVERSITÉ&nbsp;PARIS&nbsp;8&nbsp;–&nbsp;2
+        &nbsp;RUE&nbsp;DE&nbsp;LA&nbsp;LIBERTÉ&nbsp;–&nbsp;93526&nbsp;SAINT-DENIS&nbsp;CEDEX
+</div>
+</body>
+</html>

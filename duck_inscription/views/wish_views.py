@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 import StringIO
-from PyPDF2 import PdfFileReader, PdfFileWriter
+from tempfile import TemporaryFile, NamedTemporaryFile
+from PyPDF2 import PdfFileReader, PdfFileWriter, PdfFileMerger
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse
 
@@ -11,6 +12,7 @@ from django.template.loader import render_to_string
 from django.views.generic import TemplateView, View
 from django.views.generic.edit import FormView
 from floppyforms import ModelChoiceField
+from wkhtmltopdf.views import PDFTemplateResponse, PDFTemplateView
 import xworkflows
 import json
 from duck_inscription.forms import WishGradeForm, ListeDiplomeAccesForm, DemandeEquivalenceForm, \
@@ -19,7 +21,7 @@ from duck_inscription.models import Wish, SettingsEtape
 from xhtml2pdf import pdf as pisapdf
 from xhtml2pdf import pisa
 from duck_inscription.templatetags.lib_inscription import annee_en_cour
-from settings import BASE_DIR
+from django.conf import settings
 
 __author__ = 'paul'
 
@@ -173,8 +175,11 @@ class EquivalencePdfView(TemplateView):
         context = super(EquivalencePdfView, self).get_context_data(**kwargs)
         context['individu'] = self.request.user.individu
         context['voeu'] = self.request.user.individu.wishes.get(pk=self.kwargs['pk'])
-        context['static'] = BASE_DIR + '/duck_theme_ied/static/images/'
+        context['logo_p8'] = "file://" + settings.BASE_DIR + '/duck_theme_ied/static/images/logop8.jpg'
+        context['url_font'] = settings.BASE_DIR + '/duck_theme_ied/static/font/ConnectCode39.ttf'
+        context['url_static'] = settings.BASE_DIR + '/duck_theme_ied/static/images/'
         context['annee_univ'] = annee_en_cour()
+
 
         return context
 
@@ -199,19 +204,16 @@ class EquivalencePdfView(TemplateView):
             url_doc = self.get_file().file
         except Wish.DoesNotExist:
             return redirect(self.request.user.individu.get_absolute_url())
+        context['url_doc'] = url_doc
         url_doc.open('r')
 
         context['num_page'] = self._num_page(url_doc)  # on indique le nombre de page pour la page 1
 
-        pdf = pisapdf.pisaPDF()
-        for template in self.get_template_names():
-            pdf.addDocument(pisa.CreatePDF(render_to_string(template, context, context_instance=RequestContext(
-                self.request))))  # on construit le pdf
-            #il faut fusionner la suite
-        pdf.addFromFile(self.do_pdf(url_doc))
 
-        pdf.join(response)
-        return response
+        return context['voeu'].do_pdf_equi(flux=response,
+                                           templates=self.get_template_names(),
+                                           request=self.request,
+                                           context=context)
 
     def _num_page(self, url_doc):
         return PdfFileReader(url_doc).getNumPages()
