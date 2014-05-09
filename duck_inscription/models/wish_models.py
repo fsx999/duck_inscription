@@ -1,13 +1,19 @@
 # -*- coding: utf-8 -*-
 import datetime
+from django.contrib.sites.models import Site
 from django.core.urlresolvers import reverse
 from django.db import models
+from django.template.loader import render_to_string
+from django_xworkflows.xworkflow_log.models import TransitionLog
+from mailrobot.models import Mail
 from xworkflows import transition, after_transition, before_transition, on_enter_state, transition_check
 from django_apogee.models import CentreGestion, Diplome, InsAdmEtp
 from duck_inscription.models import SettingAnneeUni, Individu, SettingsEtape
 from duck_inscription.models.workflows_models import WishWorkflow, SuiviDossierWorkflow
 from django_xworkflows import models as xwf_models
 from django.utils.timezone import now
+from django.conf import settings
+
 __author__ = 'paul'
 
 
@@ -212,8 +218,10 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
             return
         if not self.etape.date_ouverture_equivalence:  # il n'y a pas d'équivalence on va en candidature
             self.ouverture_candidature()
-        elif self.etape.date_ouverture_equivalence <= now():  # l'équi est ouverte
+        elif self.etape.date_ouverture_equivalence <= now() <= self.etape.date_fermeture_equivalence:  # l'équi est ouverte
             self.liste_diplome()
+        elif self.etape.date_fermeture_equivalence <= now():  # équi ferme
+            self.liste_attente_equivalence()
 
     @on_enter_state('liste_diplome')
     def on_enter_liste_diplome(self, *args, **kwargs):
@@ -247,7 +255,32 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
             self.save()
         return self.is_reins
 
+    def envoi_email_reception(self):
+        if self.state.name == "equivalence":
+            etape = u"d'équivalence"
 
+        elif self.state.name == "candidature":
+            etape = u"de candidature"
+        elif self.etape == u"inscription":
+            etape = u"d'inscripiton"
+        else:
+            raise Exception(u"Etape inconnu")
+        site = settings.INSCRIPTION_URL
+        template = Mail.objects.get(name='email_reception')
+        if settings.DEBUG:
+            email_destination = ("paul.guichon@iedparis8.net",)
+        else:
+            email_destination = (self.individu.personal_email,)
+
+        mail = template.make_message(
+            context={'site': site, 'etape': etape},
+            recipients=email_destination
+        )
+        mail.send()
+
+    @property
+    def transitions_logs(self):
+        return TransitionLog.objects.filter(content_id=self.code_dossier).order_by('timestamp')
     # def not_place(self):
     #     if self.step.limite_etu and not self.is_ok and not self.place_dispo():
     #         return True

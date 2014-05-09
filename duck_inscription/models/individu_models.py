@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 from django.utils.encoding import python_2_unicode_compatible
 from django.db import models
 import unicodedata
+from django_xworkflows.xworkflow_log.models import TransitionLog
 from django_apogee.models import Departement, Pays, SitFam, SitMil, TypHandicap, TypHebergement, BacOuxEqu, AnneeUni, \
     ComBdi
 from django_xworkflows import models as xwf_models
@@ -131,6 +132,10 @@ class Individu(xwf_models.WorkflowEnabled, models.Model):
     @models.permalink
     def get_absolute_url(self):
         return self.state.name,
+
+    @property
+    def transitions_logs(self):
+        return TransitionLog.objects.filter(content_id=self.id).order_by('timestamp')
 
 
 class AdresseIndividu(models.Model):

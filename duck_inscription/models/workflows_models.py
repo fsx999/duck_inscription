@@ -31,6 +31,7 @@ class WishWorkflow(xwf_models.Workflow):
         ('liste_diplome', 'Liste Diplome équivalent'),
         ('demande_equivalence', 'Demande desir équivalence'),
         ('equivalence', 'Dossier équivalence'),
+        ('liste_attente_equivalence', 'Dossier en liste attente équivalence'),
         ('ouverture_candidature', 'Ouverture candidature'),
         ('ouverture_inscription', 'Ouverture inscription')
     )
@@ -40,6 +41,7 @@ class WishWorkflow(xwf_models.Workflow):
         ('liste_diplome', 'ouverture_equivalence', 'liste_diplome'),
         ('demande_equivalence', ('creation', 'liste_diplome'), 'demande_equivalence'),
         ('equivalence', ('creation', 'liste_diplome', 'demande_equivalence'), 'equivalence'),
+        ('liste_attente_equivalence', 'ouverture_equivalence', 'liste_attente_equivalence'),
         ('ouverture_candidature', ('creation', 'ouverture_equivalence', 'equivalence', 'demande_equivalence'),
          'ouverture_candidature'),
         ('ouverture_inscription', ('creation', 'ouverture_equivalence', 'ouverture_candidature'), 'ouverture_inscription'),

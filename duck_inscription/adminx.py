@@ -1,24 +1,33 @@
 # coding=utf-8
 from __future__ import unicode_literals
-from django.core.exceptions import PermissionDenied
-from django.core.urlresolvers import reverse, reverse_lazy
-from xadmin.models import UserWidget, UserSettings
-import xadmin
 from xadmin import views
-from xadmin.plugins.details import DetailsPlugin
+import xadmin
 from duck_inscription.models import Individu, SettingsEtape
 from .models import Wish
-
-from xadmin.sites import site
 from xadmin.views import filter_hook
-from xadmin.views.dashboard import WidgetDataError
 
 
 class IncriptionDashBoard(views.website.IndexView):
     widgets = [
         [
             {"type": "qbutton", "title": "Inscription", "btns": [
-                                                                 {'title': 'Dossier inscription', 'model': Individu}
+                {'title': 'Reception', 'url': 'dossier_receptionne'},
+                {'title': 'Dossier inscription', 'model': Individu}
+            ]},
+        ]
+    ]
+    site_title = 'Backoffice'
+    title = 'Accueil'
+    widget_customiz = False
+xadmin.site.register_view(r'inscription/$', IncriptionDashBoard,  'inscription')
+
+
+class MainDashboard(object):
+    widgets = [
+        [
+            {"type": "qbutton", "title": "Scolarité", "btns": [
+
+                {'title': "Inscription", 'url': 'inscription'},
             ]},
         ]
     ]
@@ -26,22 +35,7 @@ class IncriptionDashBoard(views.website.IndexView):
     title = 'Accueil'
     widget_customiz = False
 
-xadmin.site.register_view(r'inscription/$', IncriptionDashBoard,  'inscription')
-
-class MainDashboard(object):
-    widgets = [
-        [
-            {"type": "qbutton", "title": "Scolarité", "btns": [{'title': "Inscription", 'url': 'inscription'},
-                ]},
-        ]
-    ]
-    site_title = 'Backoffice'
-    title = 'Accueil'
-    widget_customiz = False
-
 xadmin.site.register(views.website.IndexView, MainDashboard)
-
-
 
 
 class BaseSetting(object):
@@ -75,40 +69,65 @@ class WishInline(object):
     extra = 0
     style = 'table'
     fields = ['email', 'annee']
-    readonly_fields = ['etape', 'email', 'diplome_acces', 'centre_gestion', 'reins', 'state',
-                       'suivi_dossier', 'date_validation', 'valide']
+    readonly_fields = ['etape', 'email', 'diplome_acces', 'centre_gestion', 'reins',
+                       'date_validation', 'valide', 'get_transition_log']
     exclude = ('annee', 'is_reins')
-    can_delete = False
+    can_delete = True
     hidden_menu = True
 
-class IndividuXadmin(object):
+    @filter_hook
+    def get_readonly_fields(self):
+        if self.request.user.is_superuser:
+            return self.readonly_fields
+        else:
+            return self.readonly_fields + ['state', 'suivi_dossier']
 
+    def get_transition_log(self, obj):
+        reponse = '<table>'
+        for transition in obj.transitions_logs:
+            reponse += '<tr><td>{}</td><td>{}</td></tr>'.format(transition.transition, transition.timestamp.strftime('%d/%m/%Y %H:%M:%S'))
+        reponse += '</table>'
+        return reponse
+    get_transition_log.short_description = 'parcours'
+    get_transition_log.allow_tags = True
+
+
+class IndividuXadmin(object):
     site_title = 'Consultation des dossiers étudiants'
     show_bookmarks = False
     fields = ('code_opi', 'last_name', 'first_name1', 'birthday', 'personal_email', 'state')
-    readonly_fields = ('code_opi', 'last_name', 'first_name1', 'birthday', 'personal_email')
-    list_display =('__unicode__', 'last_name')
+    readonly_fields = ('code_opi', 'last_name', 'first_name1', 'birthday', 'personal_email', 'get_transition_log')
+    list_display = ('__unicode__', 'last_name')
     list_export = []
     list_per_page = 10
-    search_fields = ('last_name', 'first_name1', 'code_opi', 'wishes__code_dossier')
+    search_fields = ('last_name', 'first_name1', 'common_name', 'student_code', 'code_opi', 'wishes__code_dossier')
     list_exclude = ('id', 'personal_email_save', 'opi_save', 'year')
     list_select_related = None
     use_related_menu = False
     inlines = [WishInline]
     hidden_menu = True
 
-
     def has_add_permission(self):
         return False
-
 
     def has_delete_permission(self, obj=None):
         return False
 
+    @filter_hook
+    def get_readonly_fields(self):
+        if self.request.user.is_superuser:
+            return self.readonly_fields
+        else:
+            return self.readonly_fields + ('state', )
 
-class SettingsEtapeXadmin(object):
-    exclude = ('cod_cyc', 'cod_cur', 'lib_etp')
-
+    def get_transition_log(self, obj):
+        reponse = '<table>'
+        for transition in obj.transitions_logs:
+            reponse += '<tr><td>{}</td><td>{}</td></tr>'.format(transition.transition, transition.timestamp.strftime('%d/%m/%Y %H:%M:%S'))
+        reponse += '</table>'
+        return reponse
+    get_transition_log.short_description = 'parcours'
+    get_transition_log.allow_tags = True
 
 xadmin.site.register(Individu, IndividuXadmin)
-xadmin.site.register(SettingsEtape, SettingsEtapeXadmin)
+xadmin.site.register(SettingsEtape)
