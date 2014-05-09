@@ -112,6 +112,7 @@ USE_TZ = False  # Important, toujours False
 
 
 STATIC_URL = '/static/'
+MEDIA_URL = '/static_tel/'
 
 COMPRESS_OFFLINE = False
 
@@ -152,3 +153,6 @@ else:
     COMPRESS_ENABLED = False
 
 WKHTMLTOPDF_CMD = BASE_DIR+'/wkhtmltopdf'
+DEBUG_TOOLBAR_CONFIG = {
+    'INTERCEPT_REDIRECTS': False
+}

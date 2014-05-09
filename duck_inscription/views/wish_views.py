@@ -20,7 +20,7 @@ from duck_inscription.models import Wish, SettingsEtape
 from xhtml2pdf import pdf as pisapdf
 from xhtml2pdf import pisa
 from duck_inscription.templatetags.lib_inscription import annee_en_cour
-from settings import BASE_DIR
+from django.conf import settings
 
 __author__ = 'paul'
 
@@ -201,8 +201,11 @@ class EquivalencePdfView(TemplateView):
         context = super(EquivalencePdfView, self).get_context_data(**kwargs)
         context['individu'] = self.request.user.individu
         context['voeu'] = self.request.user.individu.wishes.get(pk=self.kwargs['pk'])
-        context['static'] = BASE_DIR + '/duck_theme_ied/static/images/'
+        context['logo_p8'] = "file://" + settings.BASE_DIR + '/duck_theme_ied/static/images/logop8.jpg'
+        context['url_font'] = settings.BASE_DIR + '/duck_theme_ied/static/font/ConnectCode39.ttf'
+        context['url_static'] = settings.BASE_DIR + '/duck_theme_ied/static/images/'
         context['annee_univ'] = annee_en_cour()
+
 
         return context
 
@@ -239,19 +242,15 @@ class EquivalencePdfView(TemplateView):
             #il faut fusionner la suite
 
         pdf.addFromFile(self.do_pdf(url_doc))
-        ##
-        example_template = "duck_inscription/wish/attestation_equivalence_pdf.html"
-        # pdf.addDocument(pisa.CreatePDF(render_to_string(context['voeu'].etape.nom_template,
-        #                                                 context,
-        #                                                 context_instance=RequestContext(self.request))))
-        #test purpose only
-
-        pdf.addFromString(PDFTemplateResponse(request=self.request,
-                                       template=[example_template,]
-                                       ).rendered_content)
-
-        # print(doc_test)
-
+        etape = context['voeu'].etape
+        if etape.path_template_equivalence and etape.grille_de_equivalence:
+            #on verifie si il y a un template pour le model d'equivalence
+            # template = "duck_inscription/wish/{}".format(etape.path_template_equivalence)
+            template = "duck_inscription/wish/{}".format(etape.path_template_equivalence)
+            pdf.addFromString(PDFTemplateResponse(request=self.request,
+                                                  context=context,
+                                                  template=[template, ]).rendered_content)
+            # pdf.addFromFile(etape.grille_de_equivalence)
         # pdf.addDocument(pisa.CreatePDF(render_to_string(example_template,
         #                                                 context,
         #                                                 context_instance=RequestContext(self.request))))

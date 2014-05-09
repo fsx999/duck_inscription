@@ -105,5 +105,10 @@ class IndividuXadmin(object):
     def has_delete_permission(self, obj=None):
         return False
 
+
+class SettingsEtapeXadmin(object):
+    exclude = ('cod_cyc', 'cod_cur', 'lib_etp')
+
+
 xadmin.site.register(Individu, IndividuXadmin)
-xadmin.site.register(SettingsEtape)
+xadmin.site.register(SettingsEtape, SettingsEtapeXadmin)
