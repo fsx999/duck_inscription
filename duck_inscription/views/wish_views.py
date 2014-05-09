@@ -17,7 +17,7 @@ import xworkflows
 import json
 from duck_inscription.forms import WishGradeForm, ListeDiplomeAccesForm, DemandeEquivalenceForm, \
     ListeAttenteEquivalenceForm, NoteMasterForm, ListeAttenteCandidatureForm
-from duck_inscription.models import Wish, SettingsEtape
+from duck_inscription.models import Wish, SettingsEtape, NoteMasterModel
 from xhtml2pdf import pdf as pisapdf
 from xhtml2pdf import pisa
 from duck_inscription.templatetags.lib_inscription import annee_en_cour
@@ -262,7 +262,7 @@ class NoteMasterView(FormView):
         try:
             if getattr(wish, 'notemastermodel', None):
                 form.instance.pk = wish.notemastermodel.pk
-        except Wish.DoesNotExist:
+        except NoteMasterModel.DoesNotExist:
             pass
         form.instance.wish = wish
         form.save()
