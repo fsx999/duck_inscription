@@ -257,11 +257,15 @@ class NoteMasterView(FormView):
 
     def form_valid(self, form):
         wish = self.request.user.individu.wishes.get(pk=self.kwargs['pk'])
+        if wish.notemastermodel:
+            form.instance.pk = wish.notemastermodel.pk
         form.instance.wish = wish
         form.save()
-        if wish.dispatch():
+        try:
+            wish.candidature()
             return redirect(wish.get_absolute_url())
-        return super(NoteMasterView, self).form_valid(form)
+        except xworkflows.ForbiddenTransition:
+            return super(NoteMasterView, self).form_valid(form)
 
 
 class CandidatureView(EquivalenceView):
