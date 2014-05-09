@@ -259,7 +259,7 @@ class NoteMasterView(FormView):
 
     def form_valid(self, form):
         wish = self.request.user.individu.wishes.get(pk=self.kwargs['pk'])
-        if wish.notemastermodel:
+        if getattr(wish, 'notemastermodel', None):
             form.instance.pk = wish.notemastermodel.pk
         form.instance.wish = wish
         form.save()
