@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import floppyforms as forms
-from duck_inscription.models import DiplomeEtape, SettingsEtape, ListeDiplomeAces
+from duck_inscription.models import DiplomeEtape, SettingsEtape, ListeDiplomeAces, NoteMasterModel
 
 
 __author__ = 'paul'
@@ -36,21 +36,20 @@ class ListeAttenteEquivalenceForm(forms.Form):
     demande_attente = forms.ChoiceField(choices=(('O', 'Oui'), ('N', 'Non')),
                                         label=u"Voulez-vous être mis en liste d'attente ?")
 
-#
-#
-# class NoteMasterForm(forms.ModelForm):
-# moyenne_general = forms.FloatField(label=u"Moyenne générale", max_value=20, min_value=0, required=False)
-#     note_memoire = forms.FloatField(label=u"Note du mémoire", max_value=20, min_value=0, required=False)
-#     note_stage = forms.FloatField(label=u"Note du stage", max_value=20, min_value=0, required=False)
-#
-#     class Meta:
-#         model = NoteMasterModel
-#         fields = ('moyenne_general', 'note_memoire', 'note_stage')
-#
-#
-# class ListeAttenteCandidatureForm(forms.Form):
-#     demande_attente = forms.ChoiceField(choices=(('O', 'Oui'), ('N', 'Non')),
-#                                         label=u"Voulez-vous être mis en liste d'attente ?")
+
+class NoteMasterForm(forms.ModelForm):
+    moyenne_general = forms.FloatField(label=u"Moyenne générale", max_value=20, min_value=0, required=False)
+    note_memoire = forms.FloatField(label=u"Note du mémoire", max_value=20, min_value=0, required=False)
+    note_stage = forms.FloatField(label=u"Note du stage", max_value=20, min_value=0, required=False)
+
+    class Meta:
+        model = NoteMasterModel
+        fields = ('moyenne_general', 'note_memoire', 'note_stage')
+
+
+class ListeAttenteCandidatureForm(forms.Form):
+    demande_attente = forms.ChoiceField(choices=(('O', 'Oui'), ('N', 'Non')),
+                                        label=u"Voulez-vous être mis en liste d'attente ?")
 #
 #
 # class ListeAttenteInscriptionForm(forms.Form):

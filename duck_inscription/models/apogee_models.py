@@ -29,7 +29,7 @@ class SettingAnneeUni(AnneeUni):
 class SettingsEtape(Etape):
     label = models.CharField('Label', max_length=120, null=True)
     diplome = models.ForeignKey('DiplomeEtape', null=True, blank=True)
-    required_equivalence = models.BooleanField(default=True)
+    required_equivalence = models.BooleanField('Equivalence obligatoire', default=True)
     is_inscription_ouverte = models.BooleanField('ouverture campagne inscription', default=True)
     date_ouverture_equivalence = models.DateTimeField(null=True, blank=True)
     date_fermeture_equivalence = models.DateTimeField(null=True, blank=True)
@@ -41,6 +41,7 @@ class SettingsEtape(Etape):
                                             verbose_name=u"Document d'équivalence", null=True, blank=True)
     document_candidature = models.FileField(upload_to='document_candidature',
                                             verbose_name=u"Document de candidature", null=True, blank=True)
+    note_maste = models.BooleanField(default=False)
 
     class Meta:
         app_label = 'duck_inscription'

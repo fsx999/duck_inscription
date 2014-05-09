@@ -5,6 +5,6 @@
         <legend>Demande de candidature</legend>
         <p>Votre souhait d'inscription concernant la formation <strong>{{ wish.etape.label }}</strong> a bien été pris en compte.</p>
         <p>Une demande de candidature est nécessaire pour poursuivre.</p>
-        <div class="alert alert-info"> La procédure de demande de candidature sera en ligne le <strong>{{ date|date:"d/m/Y" }} à {{ date|date:"H:i" }}</strong>.</div>
+        <div class="alert alert-info"> La procédure de demande de candidature sera en ligne le <strong>{{ wish.etape.date_ouverture_candidature|date:"d/m/Y" }} à {{ wish.etape.date_ouverture_candidature|date:"H:i" }}</strong>.</div>
     </div>
 {% endblock %}

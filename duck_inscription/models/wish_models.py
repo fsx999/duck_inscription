@@ -213,6 +213,7 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
 
     @on_enter_state('ouverture_equivalence')
     def on_enter_state_ouverture_equivalence(self, res, *args, **kwargs):
+        # InsAdmEtp.objects.filter(cod_ind__cod_etu=self.individu.student_code, cod_etp=self.etape.cod_etp, ).count()
         if self.is_reins_formation():
             self.ouverture_inscription()
             return
@@ -244,6 +245,20 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
     def on_enter_state_ouverture_candidature(self, res, *args, **kwargs):
         if not self.etape.date_ouverture_candidature:  # il n'y a pas de candidature
             self.ouverture_inscription()
+        elif self.etape.date_ouverture_candidature <= now() <= self.etape.date_fermeture_candidature:  # l'équi est ouverte
+            self.note_master()
+        elif self.etape.date_fermeture_equivalence <= now():  # équi ferme
+            self.liste_attente_equivalence()
+
+    @on_enter_state('note_master')
+    def on_enter_state_note_master(self, res, *arg, **kwargs):
+        pass
+
+    @transition_check('note_master')
+    def check_note_master(self):
+        if self.etape.date_ouverture_candidature <= now():
+            return True
+        return False
 
     def is_reins_formation(self):
         if self.is_reins is None:
@@ -612,16 +627,16 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
     # get_pdf.allow_tags = True
 
 
-# class NoteMasterModel(models.Model):
-#     moyenne_general = models.FloatField(null=True, blank=True)
-#     note_memoire = models.FloatField(null=True, blank=True)
-#     note_stage = models.FloatField(null=True, blank=True)
-#     wish = models.OneToOneField(Wish)
-#
-#     class Meta:
-#         app_label = "inscription"
-#
-#
+class NoteMasterModel(models.Model):
+    moyenne_general = models.FloatField(null=True, blank=True)
+    note_memoire = models.FloatField(null=True, blank=True)
+    note_stage = models.FloatField(null=True, blank=True)
+    wish = models.OneToOneField(Wish)
+
+    class Meta:
+        app_label = "duck_inscription"
+
+
 # class EtapeDossier(models.Model):
 #     wish = models.ForeignKey(Wish)
 #     etape = models.ForeignKey(Etape)
