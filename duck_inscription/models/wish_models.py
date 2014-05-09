@@ -257,7 +257,8 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
 
     @on_enter_state('note_master')
     def on_enter_state_note_master(self, res, *arg, **kwargs):
-        pass
+        if not self.etape.note_maste:
+            self.candidature()
 
     @transition_check('note_master')
     def check_note_master(self):
