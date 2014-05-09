@@ -1,7 +1,7 @@
 {% extends "duck_inscription/wish/base_wish.html" %}
 {% block contenu %}
     <div class="well">
-        <legend style="text-align: center">Demande de candidature en {{ wish.step.label }}</legend>
+        <legend style="text-align: center">Demande de candidature en {{ wish.etape.label }}</legend>
         <div class="form-horizontal">
             {% if wish.valide %}
 
@@ -14,7 +14,7 @@
                 </div>
             {% else %}
                 {#    <h3 class="page-header" >Votre orientation pédagogique :</h3>#}
-                <p>Vous allez faire une validation de vos études en {{ wish.step.label_formation }}.
+                <p>Vous allez faire une validation de vos études en {{ wish.etape.label_formation }}.
                     À ce stade, la validation (ci-dessous) de ce vœu est <strong>définitive</strong> et aucune modification ne pourra y être apportée.</p>
                 <div class="alert alert-info"><strong>Validez</strong> votre vœu afin de pouvoir imprimer votre dossier de demande de candidature pour son envoi définitif.</div>
                 <div class="form-actions">

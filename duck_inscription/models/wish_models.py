@@ -365,6 +365,16 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
                                                   template=[template, ]).rendered_content)
             pdf.addFromFile(self.etape.grille_de_equivalence)
 
+    def do_pdf_candi(self, flux, templates, request, context):
+        pdf = pisapdf.pisaPDF()
+        for template in templates:
+            pdf.addDocument(pisa.CreatePDF(render_to_string(template, context, context_instance=RequestContext(
+                request))))  # on construit le pdf
+            #il faut fusionner la suite
+
+        pdf.addFromFile(self.do_pdf(context['url_doc']))
+        pdf.join(flux)
+        return flux
 
     def do_pdf(self, file):
         """

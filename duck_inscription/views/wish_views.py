@@ -282,10 +282,27 @@ class CandidaturePdfView(EquivalencePdfView):
         Il faut la surcharger pour les candidatures
         Doit retourner le l'url du doccument du doccument a fussionner
         """
-        step = self.request.user.individu.wishes.get(pk=self.kwargs['pk']).step
+        step = self.request.user.individu.wishes.get(pk=self.kwargs['pk']).etape
 
         return step.document_candidature
 
+    def render_to_response(self, context, **response_kwargs):
+        response = HttpResponse(mimetype='application/pdf')
+        response['Content-Disposition'] = 'attachment; filename=%s_%s.pdf' % (self.etape, context['voeu'].etape.cod_etp)
+        try:
+            url_doc = self.get_file().file
+        except Wish.DoesNotExist:
+            return redirect(self.request.user.individu.get_absolute_url())
+        context['url_doc'] = url_doc
+        url_doc.open('r')
+
+        context['num_page'] = self._num_page(url_doc)  # on indique le nombre de page pour la page 1
+
+
+        return context['voeu'].do_pdf_candi(flux=response,
+                                           templates=self.get_template_names(),
+                                           request=self.request,
+                                           context=context)
 
 class ListeAttenteCandidatureView(ListeAttenteEquivalenceView):
     template_name = 'wish/liste_attente_candidature.html'
