@@ -1,6 +1,7 @@
 # coding=utf-8
 from __future__ import unicode_literals
 from crispy_forms.bootstrap import TabHolder, Tab
+from django.core.urlresolvers import reverse
 from xadmin.layout import Main, Fieldset, Container, Side
 from xadmin.plugins.inline import Inline
 from xadmin import views
@@ -73,7 +74,7 @@ class WishInline(object):
     style = 'table'
     fields = ['email', 'annee']
     readonly_fields = ['etape', 'email', 'diplome_acces', 'centre_gestion', 'reins',
-                       'date_validation', 'valide', 'get_transition_log']
+                       'date_validation', 'valide', 'get_transition_log', 'print_dossier_equi']
     exclude = ('annee', 'is_reins')
     can_delete = True
     hidden_menu = True
@@ -93,6 +94,12 @@ class WishInline(object):
         return reponse
     get_transition_log.short_description = 'parcours'
     get_transition_log.allow_tags = True
+
+    def print_dossier_equi(self, obj):
+        url = reverse('impression_equivalence', kwargs={'pk': obj.pk})
+        return '<a href="{}" class="btn btn-primary">Impression</a>'.format(url)
+    print_dossier_equi.allow_tags = True
+    print_dossier_equi.short_description = 'Impression dossier équivalence'
 
 
 class IndividuXadmin(object):
@@ -147,13 +154,15 @@ class SettingsEtapeXadmin(object):
                     Fieldset('',
                              'date_ouverture_equivalence',
                              'date_fermeture_equivalence',
-                             'document_equivalence')),
+                             'document_equivalence',
+                             'path_template_equivalence',
+                             'grille_de_equivalence')),
                 Tab('Candidature',
                     Fieldset('',
                              'date_ouverture_candidature',
                              'date_fermeture_candidature',
                              'note_maste',
-                             'document_candidature')),
+                             'document_candidature',)),
 
 
             )

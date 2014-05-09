@@ -20,5 +20,8 @@ if settings.DEBUG:
 
     urlpatterns += patterns('', url(r'^__debug__/', include(debug_toolbar.urls)), )
     urlpatterns += staticfiles_urlpatterns()
+    urlpatterns += patterns('',
+        (r'^static_tel/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT, 'show_indexes':True}),
+)
 
 

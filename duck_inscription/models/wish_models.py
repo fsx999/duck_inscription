@@ -1,11 +1,15 @@
 # -*- coding: utf-8 -*-
 import datetime
+from StringIO import StringIO
+from PyPDF2 import PdfFileWriter, PdfFileReader
 from django.contrib.sites.models import Site
 from django.core.urlresolvers import reverse
 from django.db import models
+from django.template import RequestContext
 from django.template.loader import render_to_string
 from django_xworkflows.xworkflow_log.models import TransitionLog
 from mailrobot.models import Mail
+from wkhtmltopdf.views import PDFTemplateResponse
 from xworkflows import transition, after_transition, before_transition, on_enter_state, transition_check
 from django_apogee.models import CentreGestion, Diplome, InsAdmEtp
 from duck_inscription.models import SettingAnneeUni, Individu, SettingsEtape
@@ -13,7 +17,8 @@ from duck_inscription.models.workflows_models import WishWorkflow, SuiviDossierW
 from django_xworkflows import models as xwf_models
 from django.utils.timezone import now
 from django.conf import settings
-
+from xhtml2pdf import pdf as pisapdf
+from xhtml2pdf import pisa
 __author__ = 'paul'
 
 
@@ -336,6 +341,42 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
         if not self.is_reins:
             self.is_reins_formation
         super(Wish, self).save(force_insert, force_update, using)
+
+    def do_pdf_equi(self, flux, templates, request, context):
+        pdf = pisapdf.pisaPDF()
+        for template in templates:
+            pdf.addDocument(pisa.CreatePDF(render_to_string(template, context, context_instance=RequestContext(
+                request))))  # on construit le pdf
+            #il faut fusionner la suite
+
+        pdf.addFromFile(self.do_pdf(context['url_doc']))
+        self.add_decision_equi_pdf(pdf, request, context)
+        pdf.join(flux)
+        return flux
+
+    def add_decision_equi_pdf(self,pdf , request, context):
+        if self.etape.path_template_equivalence and self.etape.grille_de_equivalence:
+            #on verifie si il y a un template pour le model d'equivalence
+            # template = "duck_inscription/wish/{}".format(etape.path_template_equivalence)
+            template = "duck_inscription/wish/{}".format(self.etape.path_template_equivalence)
+            pdf.addFromString(PDFTemplateResponse(request=request,
+                                                  context=context,
+                                                  template=[template, ]).rendered_content)
+            pdf.addFromFile(self.etape.grille_de_equivalence)
+
+
+    def do_pdf(self, file):
+        """
+        retourne un pdf sans la première page
+        """
+        result = StringIO()
+        output = PdfFileWriter()
+        input1 = PdfFileReader(file)
+        for x in range(1, input1.getNumPages()):
+            output.addPage(input1.getPage(x))
+        output.write(result)
+
+        return result
     #
     # def save_auditeur(self):
     #     if self.is_auditeur:

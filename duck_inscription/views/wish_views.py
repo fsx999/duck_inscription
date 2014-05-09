@@ -204,34 +204,16 @@ class EquivalencePdfView(TemplateView):
             url_doc = self.get_file().file
         except Wish.DoesNotExist:
             return redirect(self.request.user.individu.get_absolute_url())
+        context['url_doc'] = url_doc
         url_doc.open('r')
 
         context['num_page'] = self._num_page(url_doc)  # on indique le nombre de page pour la page 1
 
-        pdf = pisapdf.pisaPDF()
-        merger = PdfFileMerger()
-        for template in self.get_template_names():
-            pdf.addDocument(pisa.CreatePDF(render_to_string(template, context, context_instance=RequestContext(
-                self.request))))  # on construit le pdf
-            #il faut fusionner la suite
 
-        pdf.addFromFile(self.do_pdf(url_doc))
-        etape = context['voeu'].etape
-        if etape.path_template_equivalence and etape.grille_de_equivalence:
-            #on verifie si il y a un template pour le model d'equivalence
-            # template = "duck_inscription/wish/{}".format(etape.path_template_equivalence)
-            template = "duck_inscription/wish/{}".format(etape.path_template_equivalence)
-            pdf.addFromString(PDFTemplateResponse(request=self.request,
-                                                  context=context,
-                                                  template=[template, ]).rendered_content)
-            # pdf.addFromFile(etape.grille_de_equivalence)
-        # pdf.addDocument(pisa.CreatePDF(render_to_string(example_template,
-        #                                                 context,
-        #                                                 context_instance=RequestContext(self.request))))
-
-        #pdf.addFromFile(context['voeu'].etape.grille_evaluation)
-        pdf.join(response)
-        return response
+        return context['voeu'].do_pdf_equi(flux=response,
+                                           templates=self.get_template_names(),
+                                           request=self.request,
+                                           context=context)
 
     def _num_page(self, url_doc):
         return PdfFileReader(url_doc).getNumPages()

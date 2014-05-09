@@ -42,6 +42,9 @@ class SettingsEtape(Etape):
     document_candidature = models.FileField(upload_to='document_candidature',
                                             verbose_name=u"Document de candidature", null=True, blank=True)
     note_maste = models.BooleanField(default=False)
+    path_template_equivalence = models.CharField('Path Template Equivalence', max_length=1000, null=True, blank=True)
+    grille_de_equivalence = models.FileField(upload_to='grilles_evaluations', null=True, blank=True,
+                                             verbose_name="Grille evaluations")
 
     class Meta:
         app_label = 'duck_inscription'
