@@ -15,8 +15,9 @@ class IncriptionDashBoard(views.website.IndexView):
     widgets = [
         [
             {"type": "qbutton", "title": "Inscription", "btns": [
-                {'title': 'Reception', 'url': 'dossier_receptionne'},
-                {'title': 'Dossier inscription', 'model': Individu}
+                {'title': 'Reception', 'url': 'dossier_receptionner'},
+                {'title': 'Dossier inscription', 'model': Individu},
+                {'title': 'Imprimer tous les decisions equivalence', 'url': 'imprimer_decisions_ordre'}
             ]},
         ]
     ]
@@ -97,7 +98,10 @@ class WishInline(object):
 
     def print_dossier_equi(self, obj):
         url = reverse('impression_equivalence', kwargs={'pk': obj.pk})
-        return '<a href="{}" class="btn btn-primary">Impression</a>'.format(url)
+        url2 = reverse('impression_decision_equivalence', kwargs={'pk': obj.pk})
+        reponse = '<a href="{}" class="btn btn-primary">Impression</a>'.format(url)
+        reponse +='<a href="{}" class="btn btn-primary">ImpressionDecision</a>'.format(url2)
+        return reponse
     print_dossier_equi.allow_tags = True
     print_dossier_equi.short_description = 'Impression dossier équivalence'
 
