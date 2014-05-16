@@ -72,9 +72,9 @@ class ImprimerDecisionsEquivalenceEnMasseView(FormView):
         high = form.cleaned_data['high']
         if high > Wish.objects.filter(suivi_dossier='equivalence_reception').count():
             high = Wish.objects.filter(suivi_dossier='equivalence_reception').count()
-
+        name = 'decisions_equivalence_de_' + str(low)+ '_a_'+str(high) +".pdf"
         response = HttpResponse(mimetype='application/pdf')
-        response['Content-Disposition'] = 'attachment; filename=all_deicisions_equivalence.pdf'
+        response['Content-Disposition'] = 'attachment; filename='+name
         all_wishes = self.get_all_viable_wishes(low, high)
         big_pdf = pisapdf.pisaPDF()
         for wish in all_wishes:
