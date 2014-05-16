@@ -165,8 +165,8 @@ class EquivalenceView(TemplateView):
         return self.render_to_response(context)
 
         #        return super(EquivalenceView, self).get(request, *args, **kwargs)
-#
-#
+
+
 class EquivalencePdfView(TemplateView):
     template_name = "duck_inscription/wish/etiquette.html"
     etape = "equivalence"  # à surcharger pour candidature

@@ -361,7 +361,7 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
         pdf.join(flux)
         return flux
 
-    def add_decision_equi_pdf(self,pdf , request, context):
+    def add_decision_equi_pdf(self, pdf, request, context):
         if self.etape.path_template_equivalence and self.etape.grille_de_equivalence:
             #on verifie si il y a un template pour le model d'equivalence
             # template = "duck_inscription/wish/{}".format(etape.path_template_equivalence)

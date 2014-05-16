@@ -321,14 +321,18 @@ h3.titre_pdf{
 </div>
 <div class="bordered_big div_infos_spec pos_div_carte ">
     <div class="bordered_small first_case">N° DE CARTE D'ÉTUDES</div>
-    <div class="second_case">{{ individu.student_code  }}</div>
+    {% if individu.student_code %}
+    <div class="second_case">{{ individu.student_code}}</div>
+    {% else %}
+    <div class="second_case">  </div>
+    {% endif %}
 </div>
 <div class="bordered_big second_div_infos_spec pos_div_date_lieux ">
     <div class="bordered_small first_case">DATE DE NAISSANCE</div>
     <div class="second_case2">{{ individu.birthday  }}</div>
     <div class="bordered_small first_case2">LIEU DE NAISSANCE</div>
-    <div class="second_case3">{{ individu.code_pays_birth  }},
-                              {{ individu.town_birth }}</div>
+    <div class="second_case3">{{ individu.code_pays_birth|upper  }},
+                              {{ individu.town_birth|upper }}</div>
 </div>
 <div class="bordered_adress">
     <div class="special_div">

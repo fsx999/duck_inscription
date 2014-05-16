@@ -8,10 +8,12 @@ from django.shortcuts import redirect
 from django.views.generic import FormView, TemplateView
 from django_xworkflows.xworkflow_log.models import TransitionLog
 from xworkflows import InvalidTransitionError
-from duck_inscription.forms.adminx_forms import DossierReceptionForm
+from duck_inscription.forms.adminx_forms import DossierReceptionForm, ImprimerEnMasseForm
 from duck_inscription.models import Wish
 from django.conf import settings
 from duck_inscription.templatetags.lib_inscription import annee_en_cour
+from xhtml2pdf import pdf as pisapdf
+from xhtml2pdf import pisa
 
 
 class DossierReceptionView(FormView):
@@ -41,6 +43,47 @@ class DossierReceptionView(FormView):
         return self.render_to_response(context)
 
 
+class ImprimerDecisionsEquivalenceEnMasseView(FormView):
+    template_name = "duck_inscription/adminx/imprimer_en_masse.html"
+    form_class = ImprimerEnMasseForm
+    success_url = reverse_lazy('imprimer_decisions_ordre')
+
+    def get_all_viable_wishes(self, low, high):
+        wishes = Wish.objects.filter(suivi_dossier='equivalence_reception').order_by("individu__last_name")
+        return wishes[low:high]
+
+    def get_context_data(self, **kwargs):
+        context = super(ImprimerDecisionsEquivalenceEnMasseView, self).get_context_data(**kwargs)
+        context['dossiers_recus'] = Wish.objects.filter(suivi_dossier='equivalence_reception').count()
+        return context
+
+    def get_wish_context_data(self, wish):
+        context = self.get_context_data()
+        context['voeu'] = wish
+        context['individu'] = wish.individu
+        context['logo_p8'] = "file://" + settings.BASE_DIR + '/duck_theme_ied/static/images/logop8.jpg'
+        context['url_font'] = settings.BASE_DIR + '/duck_theme_ied/static/font/ConnectCode39.ttf'
+        context['url_static'] = settings.BASE_DIR + '/duck_theme_ied/static/images/'
+        context['annee_univ'] = annee_en_cour()
+        return context
+
+    def form_valid(self, form):
+        low = form.cleaned_data['low']
+        high = form.cleaned_data['high']
+        if high > Wish.objects.filter(suivi_dossier='equivalence_reception').count():
+            high = Wish.objects.filter(suivi_dossier='equivalence_reception').count()
+
+        response = HttpResponse(mimetype='application/pdf')
+        response['Content-Disposition'] = 'attachment; filename=all_deicisions_equivalence.pdf'
+        all_wishes = self.get_all_viable_wishes(low, high)
+        big_pdf = pisapdf.pisaPDF()
+        for wish in all_wishes:
+            wish.add_decision_equi_pdf(pdf=big_pdf,
+                                       request=self.request,
+                                       context=self.get_wish_context_data(wish))
+        big_pdf.join(response)
+        return response
+
 class DecisionEquivalencePdfAdminView(TemplateView):
     etape = "equivalence"
 
@@ -67,11 +110,6 @@ class DecisionEquivalencePdfAdminView(TemplateView):
         response = HttpResponse(mimetype='application/pdf')
         response['Content-Disposition'] = 'attachment; filename=%s_%s.pdf' % (self.etape, context['voeu'].etape.cod_etp)
 
-        url_doc = self.get_file().file
-        context['url_doc'] = url_doc
-        url_doc.open('r')
-
-
         return context['voeu'].do_pdf_decision_equi_pdf(flux=response,
                                                         request=self.request,
                                                         context=context)
@@ -80,13 +118,8 @@ class DecisionEquivalencePdfAdminView(TemplateView):
 class ImprimerTousDecisions(TemplateView):
 
     def get_all_viable_wishes(self):
-        t = ContentType.objects.get(model='wish')
-        pks = [t.content_id for t in TransitionLog.objects.filter(content_type=t, transition='equivalence_reception')]
-        wishes = Wish.objects.filter(pk__in=pks, etape__cod_etp__in=['L1NPSY', 'L2NPSY', 'L3NPSY'])
-        print "NOW WATCH THIS"
-        print wishes.all.count()
-        return wishes
-
+        wishes = Wish.objects.filter(suivi_dossier='equivalence_reception').order_by("individu__last_name")
+        return wishes[0:50]
 
     def get_wish_context_data(self, wish):
         context = self.get_context_data()
@@ -98,19 +131,16 @@ class ImprimerTousDecisions(TemplateView):
         context['annee_univ'] = annee_en_cour()
         return context
 
-
     def render_to_response(self, context, **response_kwargs):
         response = HttpResponse(mimetype='application/pdf')
         response['Content-Disposition'] = 'attachment; filename=all_deicisions_equivalence.pdf'
         all_wishes = self.get_all_viable_wishes()
-        url_doc = all_wishes[0].etape.document_equivalence
-        context['url_doc'] = url_doc
-        url_doc.open('r')
+        big_pdf = pisapdf.pisaPDF()
         for wish in all_wishes:
-            wish.do_pdf_decision_equi_pdf(flux=response,
-                                          request=self.request,
-                                          context=self.get_wish_context_data(wish)
-                                          )
+            wish.add_decision_equi_pdf(pdf=big_pdf,
+                                       request=self.request,
+                                       context=self.get_wish_context_data(wish))
+        big_pdf.join(response)
         return response
 
 

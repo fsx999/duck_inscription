@@ -17,7 +17,7 @@ class IncriptionDashBoard(views.website.IndexView):
             {"type": "qbutton", "title": "Inscription", "btns": [
                 {'title': 'Reception', 'url': 'dossier_receptionner'},
                 {'title': 'Dossier inscription', 'model': Individu},
-                {'title': 'Imprimer tous les decisions equivalence', 'url': 'imprimer_decisions_ordre'}
+                {'title': 'Imprimer decisions ', 'url': 'imprimer_decisions_ordre'}
             ]},
         ]
     ]

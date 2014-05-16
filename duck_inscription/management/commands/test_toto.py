@@ -15,7 +15,9 @@ class Command(BaseCommand):
         # on récupére les personnes du jour (soit la date de création, de modif plus grand que la veille
         t = ContentType.objects.get(model='wish')
         pks = [t.content_id for t in TransitionLog.objects.filter(content_type=t, transition='equivalence_reception')]
-        wishes = Wish.objects.filter(pk__in=pks, etape__cod_etp__in=['L1NPSY', 'L2NPSY', 'L3NPSY']).order_by('individu__last_name')
+        print pks
+        wishes = Wish.objects.filter(pk__in=pks, etape__cod_etp__in=['L1NPSY', 'L2NPSY', 'L3NPSY'])
+        print wishes
 
 
 

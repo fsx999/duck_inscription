@@ -1,0 +1,36 @@
+{% extends "xadmin/base_site.html" %}
+
+{% load static floppyforms %}
+{% block title %}
+Gestion de la réception des dossiers
+{% endblock %}
+{% block navbar %}{% endblock %}
+{% block content-nav %}{% endblock %}
+{% block content %}
+
+
+        <div class="well">
+        <h1>Gestion pour l'impression en masse des equivellence</h1>
+        <p class="alert-warning"> En local j'ai teste a partir de
+            50 personnes le proccesus devient trop long.</p>
+        <p class="alert-info"> En total il y a {{ dossiers_recus }} dossiers bippé recus!</p>
+           </div>
+        <form class="form-horizontal" action="" method="post">
+            {% csrf_token %}
+            <div class="well">
+                {% form form %}
+            </div>
+            <div class="form-group">
+                <div class="col-sm-offset-3 col-sm-10">
+            <button type="submit" class="btn btn-success">Imprimer</button>
+                    </div></div>
+        </form>
+        <section class="well">
+
+                {{ message|safe}}
+
+
+        </section>
+
+    <script type="text/javascript" src="{%  static "backoffice/js/dossier_receptionne.js" %}"></script>
+{% endblock %}
