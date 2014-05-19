@@ -329,7 +329,7 @@ h3.titre_pdf{
 </div>
 <div class="bordered_big second_div_infos_spec pos_div_date_lieux ">
     <div class="bordered_small first_case">DATE DE NAISSANCE</div>
-    <div class="second_case2">{{ individu.birthday  }}</div>
+    <div class="second_case2">{{ individu.birthday|date:'d/m/Y' }}</div>
     <div class="bordered_small first_case2">LIEU DE NAISSANCE</div>
     <div class="second_case3">{{ individu.code_pays_birth|upper  }},
                               {{ individu.town_birth|upper }}</div>
