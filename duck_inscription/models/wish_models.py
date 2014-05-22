@@ -211,7 +211,7 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
     annee = models.ForeignKey(SettingAnneeUni, default=2014, db_column='annee')
     centre_gestion = models.ForeignKey(CentreGestion, null=True, blank=True)
     is_reins = models.NullBooleanField(default=None, blank=True)
-
+    date_reception = models.DateTimeField(null=True,blank=True)
     date_validation = models.DateTimeField(null=True, blank=True)
     state = xwf_models.StateField(WishWorkflow)
     suivi_dossier = xwf_models.StateField(SuiviDossierWorkflow)
@@ -265,6 +265,10 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
         if self.etape.date_ouverture_candidature <= now():
             return True
         return False
+
+    def add_date_receptionne(self):
+        self.date_reception = datetime.datetime.now()
+        self.save()
 
     def is_reins_formation(self):
         if self.is_reins is None:
