@@ -218,6 +218,7 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
 
     @on_enter_state('ouverture_equivalence')
     def on_enter_state_ouverture_equivalence(self, res, *args, **kwargs):
+        print "coucou"
         # InsAdmEtp.objects.filter(cod_ind__cod_etu=self.individu.student_code, cod_etp=self.etape.cod_etp, ).count()
         if self.is_reins_formation():
             self.ouverture_inscription()
@@ -226,6 +227,8 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
             self.ouverture_candidature()
         elif self.etape.date_ouverture_equivalence <= now() <= self.etape.date_fermeture_equivalence:  # l'équi est ouverte
             self.liste_diplome()
+        elif self.etape.date_fermeture_equivalence <= now() and not self.etape.required_equivalence:
+            self.ouverture_candidature()
         elif self.etape.date_fermeture_equivalence <= now():  # équi ferme
             self.liste_attente_equivalence()
 
