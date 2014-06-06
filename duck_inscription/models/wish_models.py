@@ -7,6 +7,7 @@ from django.core.urlresolvers import reverse
 from django.db import models
 from django.template import RequestContext
 from django.template.loader import render_to_string
+import django_xworkflows
 from django_xworkflows.xworkflow_log.models import TransitionLog
 from mailrobot.models import Mail
 from wkhtmltopdf.views import PDFTemplateResponse
@@ -218,8 +219,6 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
 
     @on_enter_state('ouverture_equivalence')
     def on_enter_state_ouverture_equivalence(self, res, *args, **kwargs):
-        print "coucou"
-        # InsAdmEtp.objects.filter(cod_ind__cod_etu=self.individu.student_code, cod_etp=self.etape.cod_etp, ).count()
         if self.is_reins_formation():
             self.ouverture_inscription()
             return
@@ -230,13 +229,17 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
         elif self.etape.date_fermeture_equivalence <= now() and not self.etape.required_equivalence:
             self.ouverture_candidature()
         elif self.etape.date_fermeture_equivalence <= now():  # équi ferme
-            self.liste_attente_equivalence()
+            self.liste_diplome()
 
     @on_enter_state('liste_diplome')
     def on_enter_liste_diplome(self, *args, **kwargs):
-        if self.etape.date_ouverture_equivalence:
+
+        if self.etape.date_ouverture_equivalence:  # ouverture equivalence
             if not self.etape.diplome_aces.count():
-                self.demande_equivalence()
+                if now() <= self.etape.date_fermeture_equivalence:  # pas de diplome
+                    self.demande_equivalence()
+                else:
+                    self.liste_attente_equivalence()
 
     @transition_check('liste_diplome')
     def check_liste_diplome(self):
@@ -247,7 +250,14 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
     @on_enter_state('demande_equivalence')
     def on_enter_state_demande_equivalence(self, res, *args, **kwargs):
         if self.etape.required_equivalence and not self.diplome_acces:  # l'équivalence est obligatoire et il n'y pas de diplome
-            self.equivalence()
+            if self.etape.date_ouverture_equivalence <= now() <= self.etape.date_fermeture_equivalence:
+                self.equivalence()
+            else:
+                self.liste_attente_equivalence()
+        elif self.diplome_acces and now() >= self.etape.date_fermeture_equivalence:
+            self.ouverture_candidature()
+
+
 
     @on_enter_state('ouverture_candidature')
     def on_enter_state_ouverture_candidature(self, res, *args, **kwargs):
@@ -256,7 +266,7 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
         elif self.etape.date_ouverture_candidature <= now() <= self.etape.date_fermeture_candidature:  # l'équi est ouverte
             self.note_master()
         elif self.etape.date_fermeture_equivalence <= now():  # équi ferme
-            self.liste_attente_equivalence()
+            self.liste_attente_candidature()
 
     @on_enter_state('note_master')
     def on_enter_state_note_master(self, res, *arg, **kwargs):
@@ -686,6 +696,8 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
 
     # get_pdf.short_description = u'Impression des dossiers'
     # get_pdf.allow_tags = True
+
+
 
 
 class NoteMasterModel(models.Model):

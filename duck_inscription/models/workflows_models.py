@@ -1,6 +1,7 @@
 # coding=utf-8
 from __future__ import unicode_literals
 from django_xworkflows import models as xwf_models
+import django_xworkflows
 
 
 class IndividuWorkflow(xwf_models.Workflow):
@@ -44,7 +45,7 @@ class WishWorkflow(xwf_models.Workflow):
         ('liste_diplome', 'ouverture_equivalence', 'liste_diplome'),
         ('demande_equivalence', ('creation', 'liste_diplome'), 'demande_equivalence'),
         ('equivalence', ('creation', 'liste_diplome', 'demande_equivalence'), 'equivalence'),
-        ('liste_attente_equivalence', 'ouverture_equivalence', 'liste_attente_equivalence'),
+        ('liste_attente_equivalence', ('ouverture_equivalence', 'demande_equivalence'), 'liste_attente_equivalence'),
         ('ouverture_candidature', ('creation', 'ouverture_equivalence', 'equivalence', 'demande_equivalence'),
          'ouverture_candidature'),
         ('note_master', 'ouverture_candidature', 'note_master'),
@@ -80,3 +81,7 @@ class SuiviDossierWorkflow(xwf_models.Workflow):
         ('equivalence_complet', ('equivalence_reception', 'equivalence_incomplet'), 'equivalence_complet'),
         ('equivalence_traite', 'equivalence_complet', 'equivalence_traite'),
     )
+
+
+class WishTransitionLog(django_xworkflows.models.BaseTransitionLog):
+    pass
