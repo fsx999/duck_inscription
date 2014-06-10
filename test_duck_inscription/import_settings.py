@@ -53,6 +53,7 @@ INSTALLED_APPS = (
     'wiki.plugins.notifications',
     'wiki.plugins.images',
     'wiki.plugins.macros',
+    'linaro_django_pagination',
     'djangobb_forum',
     'haystack'
 
@@ -66,6 +67,10 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'linaro_django_pagination.middleware.PaginationMiddleware',
+    # 'djangobb_forum.middleware.LastLoginMiddleware',
+    # 'djangobb_forum.middleware.UsersOnline',
+    # 'djangobb_forum.middleware.TimezoneMiddleware',
 )
 TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.Loader',
@@ -116,6 +121,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     "django.core.context_processors.tz",
     "django.contrib.messages.context_processors.messages",
     "sekizai.context_processors.sekizai",
+    'djangobb_forum.context_processors.forum_settings',
 )
 MEDIA_URL = '/static_tel/'
 HAYSTACK_CONNECTIONS = {
