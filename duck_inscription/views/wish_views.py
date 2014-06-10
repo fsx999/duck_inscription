@@ -47,7 +47,7 @@ class StepView(TemplateView):
         if self.request.GET.get("diplome", "") != "":
             step_wish = []
             for wish in self.request.user.individu.wishes.all():
-                for step in wish.etape.diplome.settingsetape_set.all():
+                for step in wish.etape.diplome.settingsetape_set.exclude(date_ouverture_candidature__isnull=False):
                     step_wish.append(step.pk)
 
             etape = ModelChoiceField(

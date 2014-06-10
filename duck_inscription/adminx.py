@@ -8,6 +8,7 @@ from xadmin import views
 import xadmin
 from duck_inscription.models import Individu, SettingsEtape
 from .models import Wish
+from xadmin.util import User
 from xadmin.views import filter_hook
 
 
@@ -54,6 +55,14 @@ class GlobalSetting(object):
     menu_style = 'accordion'
     global_search_models = [Individu]
     global_add_models = []
+
+    # def get_nav_menu(self):
+    #     return (
+    #         {'title': 'toto', 'menus':(
+    #             {'title': 'trec', 'icon': 'info-sign', 'url': self.get_model_url(User, 'changelist')},
+    #             {'title': 'reaezr', 'icon': 'file', 'url': self.get_model_url(User, 'changelist')},
+    #         )},
+    #     )
 
 xadmin.site.register(views.CommAdminView, GlobalSetting)
 
