@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 from crispy_forms.bootstrap import TabHolder, Tab
 from django.core.urlresolvers import reverse
+from duck_inscription.xadmin_plugins.topnav import IEDPlugin
 from xadmin.layout import Main, Fieldset, Container, Side
 from xadmin.plugins.inline import Inline
 from xadmin import views
@@ -9,7 +10,7 @@ import xadmin
 from duck_inscription.models import Individu, SettingsEtape
 from .models import Wish
 from xadmin.util import User
-from xadmin.views import filter_hook
+from xadmin.views import filter_hook, CommAdminView
 
 
 class IncriptionDashBoard(views.website.IndexView):
@@ -188,3 +189,4 @@ class SettingsEtapeXadmin(object):
 
 xadmin.site.register(Individu, IndividuXadmin)
 xadmin.site.register(SettingsEtape, SettingsEtapeXadmin)
+# xadmin.site.register_plugin(IEDPlugin, CommAdminView)

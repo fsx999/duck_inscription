@@ -14,6 +14,12 @@ urlpatterns = patterns('',
                        url(r'^', include(xadmin.site.urls)),
 
                       )
+from wiki.urls import get_pattern as get_wiki_pattern
+from django_notify.urls import get_pattern as get_nyt_pattern
+urlpatterns += patterns('',
+    (r'^notifications/', get_nyt_pattern()),
+    (r'^wiki/', get_wiki_pattern())
+)
 
 if settings.DEBUG:
     import debug_toolbar

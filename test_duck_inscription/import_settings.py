@@ -40,7 +40,19 @@ INSTALLED_APPS = (
     'autocomplete_light',
     'wkhtmltopdf',
     'xhtml2pdf',
-    'mailrobot'
+    'mailrobot',
+    'django.contrib.sites', # django 1.6.2
+    'django.contrib.humanize',
+    # 'django_nyt',
+    'django_notify',
+    'mptt',
+    'sekizai',
+    'sorl.thumbnail',
+    'wiki',
+    'wiki.plugins.attachments',
+    'wiki.plugins.notifications',
+    'wiki.plugins.images',
+    'wiki.plugins.macros',
 
 )
 
