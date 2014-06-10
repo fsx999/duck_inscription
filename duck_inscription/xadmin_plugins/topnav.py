@@ -11,7 +11,8 @@ from xadmin.views import BaseAdminPlugin, CommAdminView
 
 class IEDPlugin(BaseAdminPlugin):
     urls = [
-        {'name': 'Wiki', 'url': 'wiki'}
+        {'name': 'Wiki', 'url': 'wiki'},
+        {'name': 'Forum', 'url': 'forum'},
     ]
 
 

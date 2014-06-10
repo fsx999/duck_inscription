@@ -75,3 +75,7 @@ USE_TZ = True
 LANGUAGES = (
     ('fr', 'France'),
 )
+## setting djangobb_forum
+DJANGOBB_HEADER = 'Accueil forum'
+DJANGOBB_TAGLINE = 'Forum de l\'IED'
+DJANGOBB_FORUM_BASE_TITLE = 'IED forum'
