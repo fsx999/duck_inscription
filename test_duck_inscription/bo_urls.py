@@ -12,7 +12,7 @@ urlpatterns = patterns('',
                         url(r'^inscription/', include('duck_inscription.urls.adminx_urls')),
                         url(r'admin/', include(admin.site.urls)),
                        url(r'^', include(xadmin.site.urls)),
-
+(r'^forum/', include('djangobb_forum.urls', namespace='djangobb')),
                       )
 from wiki.urls import get_pattern as get_wiki_pattern
 from django_notify.urls import get_pattern as get_nyt_pattern

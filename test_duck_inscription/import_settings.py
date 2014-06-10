@@ -53,6 +53,8 @@ INSTALLED_APPS = (
     'wiki.plugins.notifications',
     'wiki.plugins.images',
     'wiki.plugins.macros',
+    'djangobb_forum',
+    'haystack'
 
 )
 
@@ -106,3 +108,11 @@ TEMPLATE_DIRS = (
 ACCOUNT_ACTIVATION_DAYS = 1
 
 MEDIA_URL = '/static_tel/'
+HAYSTACK_CONNECTIONS = {
+    'default': {
+        'ENGINE': 'haystack.backends.whoosh_backend.WhooshEngine',
+        'PATH': os.path.join(BASE_DIR, 'djangobb_index'),
+        'INCLUDE_SPELLING': True,
+    },
+}
+HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.RealtimeSignalProcessor'
