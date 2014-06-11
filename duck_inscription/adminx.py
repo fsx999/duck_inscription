@@ -77,8 +77,8 @@ class WishInline(object):
     extra = 0
     style = 'table'
     fields = ['email', 'annee']
-    readonly_fields = ['code_dossier', 'etape', 'email', 'diplome_acces', 'centre_gestion', 'reins',
-                       'date_validation', 'valide', 'get_transition_log', 'print_dossier_equi']
+    readonly_fields = ['code_dossier', 'etape', 'diplome_acces', 'centre_gestion', 'reins',
+                       'date_validation', 'valide', 'get_transition_log', 'get_suivi_dossier', 'print_dossier_equi']
     exclude = ('annee', 'is_reins')
     can_delete = True
     hidden_menu = True
@@ -92,12 +92,23 @@ class WishInline(object):
 
     def get_transition_log(self, obj):
         reponse = '<table>'
-        for transition in obj.transitions_logs:
+        for transition in obj.parcours_dossier.all():
             reponse += '<tr><td>{}</td><td>{}</td></tr>'.format(transition.transition, transition.timestamp.strftime('%d/%m/%Y %H:%M:%S'))
         reponse += '</table>'
         return reponse
     get_transition_log.short_description = 'parcours'
     get_transition_log.allow_tags = True
+
+
+    def get_suivi_dossier(self, obj):
+        reponse = '<table>'
+        print obj.etape_dossier.all()
+        for transition in obj.etape_dossier.all():
+            reponse += '<tr><td>{}</td><td>{}</td></tr>'.format(transition.transition, transition.timestamp.strftime('%d/%m/%Y %H:%M:%S'))
+        reponse += '</table>'
+        return reponse
+    get_suivi_dossier.short_description = 'suivi'
+    get_suivi_dossier.allow_tags = True
 
     def print_dossier_equi(self, obj):
         url = reverse('impression_equivalence', kwargs={'pk': obj.pk})

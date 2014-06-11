@@ -23,6 +23,7 @@ __author__ = 'paul'
 
 
 class WishWorkflow(xwf_models.Workflow):
+    log_model = 'duck_inscription.WishParcourTransitionLog'
     states = (
         ('creation', 'Création'),
         ('ouverture_equivalence', 'Ouverture equivalence'),
@@ -84,6 +85,13 @@ class SuiviDossierWorkflow(xwf_models.Workflow):
 
 class WishTransitionLog(django_xworkflows.models.BaseTransitionLog):
     wish = models.ForeignKey('Wish', related_name='etape_dossier')
+    MODIFIED_OBJECT_FIELD = 'wish'
+
+    class Meta:
+        app_label = 'duck_inscription'
+
+class WishParcourTransitionLog(django_xworkflows.models.BaseTransitionLog):
+    wish = models.ForeignKey('Wish', related_name='parcours_dossier')
     MODIFIED_OBJECT_FIELD = 'wish'
 
     class Meta:
