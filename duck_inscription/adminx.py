@@ -57,13 +57,6 @@ class GlobalSetting(object):
     global_search_models = [Individu]
     global_add_models = []
 
-    # def get_nav_menu(self):
-    #     return (
-    #         {'title': 'toto', 'menus':(
-    #             {'title': 'trec', 'icon': 'info-sign', 'url': self.get_model_url(User, 'changelist')},
-    #             {'title': 'reaezr', 'icon': 'file', 'url': self.get_model_url(User, 'changelist')},
-    #         )},
-    #     )
 
 xadmin.site.register(views.CommAdminView, GlobalSetting)
 
@@ -84,7 +77,7 @@ class WishInline(object):
     extra = 0
     style = 'table'
     fields = ['email', 'annee']
-    readonly_fields = ['etape', 'email', 'diplome_acces', 'centre_gestion', 'reins',
+    readonly_fields = ['code_dossier', 'etape', 'email', 'diplome_acces', 'centre_gestion', 'reins',
                        'date_validation', 'valide', 'get_transition_log', 'print_dossier_equi']
     exclude = ('annee', 'is_reins')
     can_delete = True
