@@ -5,12 +5,15 @@ from django.contrib.auth.models import User
 from django.utils.encoding import python_2_unicode_compatible
 from django.db import models
 import unicodedata
+import django_xworkflows
 from django_xworkflows.xworkflow_log.models import TransitionLog
 from django_apogee.models import Departement, Pays, SitFam, SitMil, TypHandicap, TypHebergement, BacOuxEqu, AnneeUni, \
     ComBdi
 from django_xworkflows import models as xwf_models
 
+
 class IndividuWorkflow(xwf_models.Workflow):
+    log_model = 'duck_inscription.IndividuTransitionLog'
     states = (
         ('first_connection', 'Première connexion'),
         ('code_etu_manquant', 'Code etudiant manquant'),
@@ -29,6 +32,15 @@ class IndividuWorkflow(xwf_models.Workflow):
         ('code_etud_manquant', 'individu', 'code_etu_manquant'),
     )
     initial_state = 'first_connection'
+
+
+class IndividuTransitionLog(django_xworkflows.models.BaseTransitionLog):
+    individu = models.ForeignKey('Individu', related_name='etape_dossier')
+    MODIFIED_OBJECT_FIELD = 'individu'
+
+    class Meta:
+        app_label = 'duck_inscription'
+
 
 @python_2_unicode_compatible
 class Individu(xwf_models.WorkflowEnabled, models.Model):

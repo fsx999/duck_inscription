@@ -102,7 +102,6 @@ class WishInline(object):
 
     def get_suivi_dossier(self, obj):
         reponse = '<table>'
-        print obj.etape_dossier.all()
         for transition in obj.etape_dossier.all():
             reponse += '<tr><td>{}</td><td>{}</td></tr>'.format(transition.transition, transition.timestamp.strftime('%d/%m/%Y %H:%M:%S'))
         reponse += '</table>'
