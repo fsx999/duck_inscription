@@ -149,7 +149,7 @@ class IndividuXadmin(object):
 
     def get_transition_log(self, obj):
         reponse = '<table>'
-        for transition in obj.transitions_logs:
+        for transition in obj.etape_dossier.all():
             reponse += '<tr><td>{}</td><td>{}</td></tr>'.format(transition.transition, transition.timestamp.strftime('%d/%m/%Y %H:%M:%S'))
         reponse += '</table>'
         return reponse
