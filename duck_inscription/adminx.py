@@ -2,13 +2,16 @@
 from __future__ import unicode_literals
 from crispy_forms.bootstrap import TabHolder, Tab
 from django.core.urlresolvers import reverse
+from django.http import HttpResponseRedirect
+from xworkflows import InvalidTransitionError
+from duck_inscription.forms.adminx_forms import DossierReceptionForm
 from duck_inscription.xadmin_plugins.topnav import IEDPlugin
 from xadmin.layout import Main, Fieldset, Container, Side
 from xadmin.plugins.inline import Inline
 from xadmin import views
 import xadmin
-from duck_inscription.models import Individu, SettingsEtape
-from .models import Wish
+from duck_inscription.models import Individu, SettingsEtape, WishWorkflow
+from .models import Wish, SuiviDossierWorkflow, IndividuWorkflow
 from xadmin.util import User
 from xadmin.views import filter_hook, CommAdminView
 
@@ -28,13 +31,63 @@ class IncriptionDashBoard(views.website.IndexView):
     widget_customiz = False
 xadmin.site.register_view(r'inscription/$', IncriptionDashBoard,  'inscription')
 
+class StatistiqueDashBoard(views.website.IndexView):
+    widgets = [
+        [
+            {"type": "qbutton", "title": "Inscription", "btns": [
+                {'title': 'Reception', 'url': 'dossier_receptionner'},
+                {'title': 'Dossier inscription', 'model': Individu},
+                {'title': 'Imprimer decisions ', 'url': 'imprimer_decisions_ordre'}
+            ]},
+        ]
+    ]
+    site_title = 'Backoffice'
+    title = 'Accueil'
+    widget_customiz = False
+xadmin.site.register_view(r'statistiques/$', StatistiqueDashBoard,  'statistiques')
+
+
+class DossierReception(views.FormAdminView):
+    form = DossierReceptionForm
+    title = 'Dossier Reception'
+
+    def get_redirect_url(self):
+        return self.get_admin_url('testes')
+
+    def post(self, request, *args, **kwargs):
+        self.instance_forms()
+        self.setup_forms()
+
+        if self.valid_forms():
+            code_dossier = self.form_obj.cleaned_data['code_dossier']
+
+            try:
+                wish = Wish.objects.get(code_dossier=code_dossier)
+                wish.equivalence_receptionner()
+                wish.envoi_email_reception()
+                msg = u'''Le dossier {} avec l\'email {} est bien trairé'''.format(wish.code_dossier, wish.individu.personal_email)
+                self.message_user(msg, 'success')
+            except Wish.DoesNotExist:
+                msg = u'Le dossier numéro {} n\'existe pas'.format(code_dossier)
+                self.message_user(msg, 'error')
+            except InvalidTransitionError as e:
+                msg = u'Dossier déjà traité'
+                self.message_user(msg, 'error')
+            return HttpResponseRedirect(self.get_redirect_url())
+        return self.get_response()
+
+xadmin.site.register_view(r'dossier_receptionner/$', DossierReception,  'dossier_receptionner')
+
+
+
 
 class MainDashboard(object):
     widgets = [
         [
             {"type": "qbutton", "title": "Scolarité", "btns": [
 
-                {'title': "Inscription", 'url': 'inscription'},
+                {'title': "Pré-Inscription", 'url': 'inscription'},
+                {'title': "Statistique", 'url': 'statistiques'},
             ]},
         ]
     ]
@@ -43,6 +96,7 @@ class MainDashboard(object):
     widget_customiz = False
 
 xadmin.site.register(views.website.IndexView, MainDashboard)
+
 
 
 class BaseSetting(object):
@@ -93,7 +147,7 @@ class WishInline(object):
     def get_transition_log(self, obj):
         reponse = '<table>'
         for transition in obj.parcours_dossier.all():
-            reponse += '<tr><td>{}</td><td>{}</td></tr>'.format(transition.transition, transition.timestamp.strftime('%d/%m/%Y %H:%M:%S'))
+            reponse += '<tr><td>{}</td><td>{}</td></tr>'.format(WishWorkflow.states[transition.to_state].title, transition.timestamp.strftime('%d/%m/%Y %H:%M:%S'))
         reponse += '</table>'
         return reponse
     get_transition_log.short_description = 'parcours'
@@ -103,7 +157,7 @@ class WishInline(object):
     def get_suivi_dossier(self, obj):
         reponse = '<table>'
         for transition in obj.etape_dossier.all():
-            reponse += '<tr><td>{}</td><td>{}</td></tr>'.format(transition.transition, transition.timestamp.strftime('%d/%m/%Y %H:%M:%S'))
+            reponse += '<tr><td>{}</td><td>{}</td></tr>'.format(SuiviDossierWorkflow.states[transition.to_state].title, transition.timestamp.strftime('%d/%m/%Y %H:%M:%S'))
         reponse += '</table>'
         return reponse
     get_suivi_dossier.short_description = 'suivi'
@@ -150,7 +204,7 @@ class IndividuXadmin(object):
     def get_transition_log(self, obj):
         reponse = '<table>'
         for transition in obj.etape_dossier.all():
-            reponse += '<tr><td>{}</td><td>{}</td></tr>'.format(transition.transition, transition.timestamp.strftime('%d/%m/%Y %H:%M:%S'))
+            reponse += '<tr><td>{}</td><td>{}</td></tr>'.format(IndividuWorkflow.states[transition.to_state], transition.timestamp.strftime('%d/%m/%Y %H:%M:%S'))
         reponse += '</table>'
         return reponse
     get_transition_log.short_description = 'parcours'
