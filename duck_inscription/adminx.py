@@ -52,7 +52,7 @@ class DossierReception(views.FormAdminView):
     title = 'Dossier Reception'
 
     def get_redirect_url(self):
-        return self.get_admin_url('testes')
+        return self.get_admin_url('dossier_receptionner')
 
     def post(self, request, *args, **kwargs):
         self.instance_forms()
