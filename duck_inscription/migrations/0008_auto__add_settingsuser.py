@@ -11,7 +11,7 @@ class Migration(SchemaMigration):
         # Adding model 'SettingsUser'
         db.create_table(u'duck_inscription_settingsuser', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('user', self.gf('django.db.models.fields.related.ForeignKey')(related_name=u'setting_user', to=orm['auth.User'])),
+            ('user', self.gf('django.db.models.fields.related.OneToOneField')(related_name=u'setting_user', unique=True, to=orm['auth.User'])),
         ))
         db.send_create_signal(u'duck_inscription', ['SettingsUser'])
 
@@ -265,9 +265,9 @@ class Migration(SchemaMigration):
         },
         u'duck_inscription.settingsuser': {
             'Meta': {'object_name': 'SettingsUser'},
-            'etapes': ('django.db.models.fields.related.ManyToManyField', [], {'to': u"orm['duck_inscription.SettingsEtape']", 'symmetrical': 'False'}),
+            'etapes': ('django.db.models.fields.related.ManyToManyField', [], {'related_name': "u'etapes'", 'symmetrical': 'False', 'to': u"orm['duck_inscription.SettingsEtape']"}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'user': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "u'setting_user'", 'to': u"orm['auth.User']"})
+            'user': ('django.db.models.fields.related.OneToOneField', [], {'related_name': "u'setting_user'", 'unique': 'True', 'to': u"orm['auth.User']"})
         },
         'duck_inscription.wish': {
             'Meta': {'object_name': 'Wish'},

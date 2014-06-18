@@ -100,7 +100,11 @@ class EquivalenceView(views.FormAdminView):
 
     def get_form_datas(self, **kwargs):
         data = super(EquivalenceView, self).get_form_datas(**kwargs)
-        data.update({'queryset': self.request.user.setting_user.etape.all()})
+        try:
+            queryset = self.request.user.setting_user.etapes.all()
+        except ValueError:
+            queryset = SettingsEtape.objects.all()
+        data.update({'queryset': queryset})
         return data
 
     def post(self, request, *args, **kwargs):
@@ -185,12 +189,6 @@ class EquivalenceView(views.FormAdminView):
     def get_redirect_url(self):
         return self.get_admin_url('dossier_equivalence')
 
-
-    #
-    # def form_valid(self, form):
-
-    #     try:
-    #         wish = Wish.objects.get(code_dossier=code_dossier)
     #         if wish.etape == "equivalence" or wish.etape == "liste_attente_equivalence":
     #                 if choix == 'accepte':
     #                     if wish.step != etape:
@@ -223,14 +221,11 @@ class EquivalenceView(views.FormAdminView):
     #                 raise Exception(u"Vous n'avez pas le droit de traiter ce dossier")
     #             context['message_success'] = u"Un email a bien été envoyé à %s %s à l'adresse %s" % (
     #                 wish.individu.first_name1, wish.individu.last_name, wish.individu.personal_email)
-    #         else:
-    #             raise Exception(u"Le dossier n'est pas en équivalence")
-    #     except Wish.DoesNotExist:
-    #         context['message_error'] = u"Le dossier n'existe pas"
+
+
     #     except Exception, e:
     #         context['message_error'] = e.message
-    #     context['form'] = self.get_form(self.get_form_class())
-    #     return self.render_to_response(context)
+
     #
     def _envoi_email(self, wish, template):
         context = {'site': Site.objects.get(id=preins_settings.SITE_ID), 'wish': wish, 'motif': self.motif}

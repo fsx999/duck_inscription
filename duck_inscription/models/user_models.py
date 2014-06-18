@@ -6,8 +6,8 @@ from duck_inscription.models import SettingsEtape
 
 
 class SettingsUser(models.Model):
-    user = models.ForeignKey(User, related_name='setting_user')
-    etapes = models.ManyToManyField(SettingsEtape)
+    user = models.OneToOneField(User, related_name='setting_user')
+    etapes = models.ManyToManyField(SettingsEtape, related_name='etapes')
 
     class Meta:
         app_label = 'duck_inscription'
