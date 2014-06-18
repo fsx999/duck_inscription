@@ -9,7 +9,7 @@ from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from django.template import RequestContext
 from django.template.loader import render_to_string
-from mailrobot.models import Mail
+from mailrobot.models import Mail, MailBody, Address, Signature
 from django.conf import settings
 from xadmin.plugins.auth import UserAdmin
 from xworkflows import InvalidTransitionError
@@ -34,6 +34,7 @@ class IncriptionDashBoard(views.website.IndexView):
                 {'title': 'Dossier inscription', 'model': Individu},
                 # {'title': 'Imprimer decisions ', 'url': 'imprimer_decisions_ordre'}
             ]},
+
         ]
     ]
     site_title = 'Backoffice'
@@ -422,3 +423,8 @@ xadmin.site.register(User, CustomUserAdmin)
 xadmin.site.register(Individu, IndividuXadmin)
 xadmin.site.register(SettingsEtape, SettingsEtapeXadmin)
 # xadmin.site.register_plugin(IEDPlugin, CommAdminView)
+xadmin.site.register(MailBody)
+xadmin.site.register(Mail)
+xadmin.site.register(Address)
+xadmin.site.register(Signature)
+
