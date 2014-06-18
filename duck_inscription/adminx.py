@@ -1,28 +1,38 @@
 # coding=utf-8
 from __future__ import unicode_literals
+import test_duck_inscription.settings as preins_settings
 from crispy_forms.bootstrap import TabHolder, Tab
+from django.contrib.sites.models import Site
+from django.core.exceptions import PermissionDenied
+from django.core.mail import send_mail
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
+from django.template import RequestContext
+from django.template.loader import render_to_string
+from mailrobot.models import Mail
+from django.conf import settings
+from xadmin.plugins.auth import UserAdmin
 from xworkflows import InvalidTransitionError
-from duck_inscription.forms.adminx_forms import DossierReceptionForm
+from duck_inscription.forms.adminx_forms import DossierReceptionForm, EquivalenceForm
 from duck_inscription.xadmin_plugins.topnav import IEDPlugin
-from xadmin.layout import Main, Fieldset, Container, Side
+from xadmin.layout import Main, Fieldset, Container, Side, Row
 from xadmin.plugins.inline import Inline
 from xadmin import views
 import xadmin
 from duck_inscription.models import Individu, SettingsEtape, WishWorkflow
-from .models import Wish, SuiviDossierWorkflow, IndividuWorkflow
+from .models import Wish, SuiviDossierWorkflow, IndividuWorkflow, SettingsUser
 from xadmin.util import User
 from xadmin.views import filter_hook, CommAdminView
-
+from django.utils.translation import ugettext as _
 
 class IncriptionDashBoard(views.website.IndexView):
     widgets = [
         [
             {"type": "qbutton", "title": "Inscription", "btns": [
                 {'title': 'Reception', 'url': 'dossier_receptionner'},
+                {'title': 'Dossier Equivalence', 'url': 'dossier_equivalence'},
                 {'title': 'Dossier inscription', 'model': Individu},
-                {'title': 'Imprimer decisions ', 'url': 'imprimer_decisions_ordre'}
+                # {'title': 'Imprimer decisions ', 'url': 'imprimer_decisions_ordre'}
             ]},
         ]
     ]
@@ -65,13 +75,17 @@ class DossierReception(views.FormAdminView):
                 wish = Wish.objects.get(code_dossier=code_dossier)
                 wish.equivalence_receptionner()
                 wish.envoi_email_reception()
-                msg = u'''Le dossier {} avec l\'email {} est bien trairé'''.format(wish.code_dossier, wish.individu.personal_email)
+                msg = u'''Le dossier {} avec l\'email {} est bien traité'''.format(wish.code_dossier,
+                                                                                   wish.individu.personal_email)
                 self.message_user(msg, 'success')
             except Wish.DoesNotExist:
                 msg = u'Le dossier numéro {} n\'existe pas'.format(code_dossier)
                 self.message_user(msg, 'error')
-            except InvalidTransitionError as e:
+            except InvalidTransitionError:
                 msg = u'Dossier déjà traité'
+                self.message_user(msg, 'error')
+            except ValueError:
+                msg = u'Numéro dossier non valide'
                 self.message_user(msg, 'error')
             return HttpResponseRedirect(self.get_redirect_url())
         return self.get_response()
@@ -79,6 +93,153 @@ class DossierReception(views.FormAdminView):
 xadmin.site.register_view(r'dossier_receptionner/$', DossierReception,  'dossier_receptionner')
 
 
+class EquivalenceView(views.FormAdminView):
+    title = 'Dossier équivalence'
+    form = EquivalenceForm
+
+    def get_form_datas(self, **kwargs):
+        data = super(EquivalenceView, self).get_form_datas(**kwargs)
+        data.update({'queryset': self.request.user.setting_user.etape.all()})
+        return data
+
+    def post(self, request, *args, **kwargs):
+        self.instance_forms()
+        self.setup_forms()
+
+        if self.valid_forms():
+            code_dossier = self.form_obj.cleaned_data['code_dossier']
+            choix = self.form_obj.cleaned_data['choix']
+            etape = self.form_obj.cleaned_data['etapes']
+            self.motif = self.form_obj.cleaned_data['motif']
+            try:
+                wish = Wish.objects.get(code_dossier=code_dossier)
+                if wish.etape not in self.request.user.setting_user.etape.all():
+                    raise PermissionDenied
+                if choix == 'complet':
+                    try:
+                        wish.equivalence_complet()
+                        template = Mail.objects.get(name='email_equivalence_complet')
+                        self._envoi_email(wish, template)
+                        self.message_user('Dossier traité', 'success')
+                    except InvalidTransitionError as e:
+                        if wish.suivi_dossier.is_inactif:
+                            wish.equivalence_receptionner()
+                            wish.equivalence_complet()
+                        else:
+                            raise e
+
+                elif choix == 'incomplet':
+                    try:
+
+                        wish.equivalence_incomplet()
+                    except InvalidTransitionError as e:
+                        if wish.suivi_dossier.is_inactif:
+                            wish.equivalence_receptionner()
+                            wish.equivalence_incomplet()
+                        else:
+                            raise e
+                    self._envoi_email(wish, Mail.objects.get(name='email_equivalence_incomplet'))
+
+                elif choix == 'accepte':
+                    mail = 'email_equivalence_accepte' if wish.etape == etape else 'email_equivalence_reoriente'
+
+                    try:
+                        wish.equivalence_traite()
+                    except InvalidTransitionError as e:
+                        if wish.suivi_dossier.is_inactif:
+                            wish.equivalence_receptionner()
+                            wish.equivalence_complet()
+                            wish.equivalence_traite()
+                        elif wish.suivi_dossier.is_equivalence_incomplet():
+                            wish.equivalence_complet()
+                            wish.equivalence_traite()
+                        else:
+                            raise e
+                    wish.etape = etape
+                    wish.save()
+                    self._envoi_email(wish, Mail.objects.get(name=mail))
+                elif choix == 'refuse':
+                    try:
+                        wish.equivalece_refuse()
+                        self._envoi_email(wish, Mail.objects.get(name='email_equivalence_refuse'))
+                    except InvalidTransitionError as e:
+                        raise e
+
+                # on clean le form
+                self.form_obj.data = self.form_obj.data.copy()
+                self.form_obj.data['code_dossier'] = None
+
+            except Wish.DoesNotExist:
+                msg = 'Le dossier n\'existe pas'
+                self.message_user(msg, 'error')
+            except PermissionDenied:
+                msg = 'Vous n\'avez pas la permission de traité ce dossier'
+                self.message_user(msg, 'error')
+            except InvalidTransitionError:
+                msg = 'Le dossier n\'est pas en équivalence'
+                self.message_user(msg, 'error')
+
+        return self.get_response()
+
+    def get_redirect_url(self):
+        return self.get_admin_url('dossier_equivalence')
+
+
+    #
+    # def form_valid(self, form):
+
+    #     try:
+    #         wish = Wish.objects.get(code_dossier=code_dossier)
+    #         if wish.etape == "equivalence" or wish.etape == "liste_attente_equivalence":
+    #                 if choix == 'accepte':
+    #                     if wish.step != etape:
+    #                         wish.step = etape
+    #                         sujet = u"[ IED Paris 8 ] Décision d'équivalence - Réorientation à la formation %s"
+    #                         self._envoi_email(wish, sujet % (wish.step.label,),
+    #                                           "backoffice/emails/email_reoriente.html",
+    #                                           Etape.objects.get(name="equivalence_traite"))
+    #                     else:
+    #                         self._envoi_email(wish,
+    #                                           u"[ IED Paris 8 ] Décision d'équivalence - Accès à la formation %s" % (
+    #                                               wish.step.label,), 'backoffice/emails/email_accepte.html',
+    #                                           Etape.objects.get(name="equivalence_traite"))
+    #
+    #                     wish.dispatch()
+    #
+    #                 elif choix == 'complet':
+    #                     self._envoi_email(wish, u"[ IED Paris 8 ] Dossier de demance d'équivalence complet",
+    #                                       "backoffice/emails/email_complet.html",
+    #                                       Etape.objects.get(name="equivalence_complet"))
+    #                 elif choix == "incomplet":
+    #                     self._envoi_email(wish, u"[ IED Paris 8 ] Dossier de demance d'équivalence incomplet",
+    #                                       "backoffice/emails/email_incomplet.html",
+    #                                       Etape.objects.get(name="equivalence_incomplet"))
+    #                 elif choix == "refuse":
+    #                     self._envoi_email(wish, u"[ IED Paris 8 ] Dossier de demance d'équivalence refusé",
+    #                                       "backoffice/emails/email_refuse.html",
+    #                                       Etape.objects.get(name="equivalence_refuse"))
+    #             else:
+    #                 raise Exception(u"Vous n'avez pas le droit de traiter ce dossier")
+    #             context['message_success'] = u"Un email a bien été envoyé à %s %s à l'adresse %s" % (
+    #                 wish.individu.first_name1, wish.individu.last_name, wish.individu.personal_email)
+    #         else:
+    #             raise Exception(u"Le dossier n'est pas en équivalence")
+    #     except Wish.DoesNotExist:
+    #         context['message_error'] = u"Le dossier n'existe pas"
+    #     except Exception, e:
+    #         context['message_error'] = e.message
+    #     context['form'] = self.get_form(self.get_form_class())
+    #     return self.render_to_response(context)
+    #
+    def _envoi_email(self, wish, template):
+        context = {'site': Site.objects.get(id=preins_settings.SITE_ID), 'wish': wish, 'motif': self.motif}
+        email = wish.individu.user.email if not settings.DEBUG else 'paul.guichon@iedparis8.net'
+        mail = template.make_message(context=context, recipients=[email])
+        mail.send()
+
+
+
+xadmin.site.register_view(r'dossier_equivalence/$', EquivalenceView,  'dossier_equivalence')
 
 
 class MainDashboard(object):
@@ -245,6 +406,19 @@ class SettingsEtapeXadmin(object):
     )
 
 
+class UserSettingsInline(object):
+    model = SettingsUser
+    style_fields = {'etape': 'm2m_transfer'}
+    can_delete = False
+    max = 1
+
+
+class CustomUserAdmin(UserAdmin):
+    inlines = [UserSettingsInline]
+
+
+xadmin.site.unregister(User)
+xadmin.site.register(User, CustomUserAdmin)
 xadmin.site.register(Individu, IndividuXadmin)
 xadmin.site.register(SettingsEtape, SettingsEtapeXadmin)
 # xadmin.site.register_plugin(IEDPlugin, CommAdminView)
