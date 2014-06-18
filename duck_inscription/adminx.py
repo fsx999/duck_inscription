@@ -409,7 +409,7 @@ class SettingsEtapeXadmin(object):
 
 class UserSettingsInline(object):
     model = SettingsUser
-    style_fields = {'etape': 'm2m_transfer'}
+    style_fields = {'etapes': 'm2m_transfer'}
     can_delete = False
     extra = 1
     max_num = 1
