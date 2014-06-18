@@ -11,3 +11,4 @@ class SettingsUser(models.Model):
 
     class Meta:
         app_label = 'duck_inscription'
+
