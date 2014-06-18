@@ -1,10 +1,12 @@
 # coding=utf-8
 from __future__ import unicode_literals
+from django.db.models import Count
 from django.utils.encoding import python_2_unicode_compatible
 from django_apogee.models import AnneeUni, Etape
 
 from django.db import models
 from duck_inscription.managers import SettingAnneeUniManager
+
 
 
 @python_2_unicode_compatible
@@ -55,6 +57,18 @@ class SettingsEtape(Etape):
         result = self.label or ""
         return result
 
+    def stat_parcours_dossier(self):
+        from duck_inscription.models import WishParcourTransitionLog
+        return dict(WishParcourTransitionLog.objects.filter(wish__etape=self, to_state__in=[
+            'ouverture_equivalence',
+            'equivalence',
+            'candidature'
+        ]).values_list('to_state').annotate(Count('to_state')))
+
+    def stat_suivi_dossier(self):
+        from duck_inscription.models import WishTransitionLog
+        return dict(WishTransitionLog.objects.filter(
+            wish__etape=self).values_list('to_state').annotate(Count('to_state')))
 
 @python_2_unicode_compatible
 class DiplomeEtape(models.Model):
