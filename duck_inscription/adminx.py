@@ -100,10 +100,8 @@ class EquivalenceView(views.FormAdminView):
 
     def get_form_datas(self, **kwargs):
         data = super(EquivalenceView, self).get_form_datas(**kwargs)
-        try:
-            queryset = self.request.user.setting_user.etapes.all()
-        except ValueError:
-            queryset = SettingsEtape.objects.all()
+        queryset = getattr(self.request.user.setting_user, 'etapes', SettingsEtape.objects).all()
+
         data.update({'queryset': queryset})
         return data
 
@@ -116,18 +114,28 @@ class EquivalenceView(views.FormAdminView):
             choix = self.form_obj.cleaned_data['choix']
             etape = self.form_obj.cleaned_data['etapes']
             self.motif = self.form_obj.cleaned_data['motif']
+
             try:
                 wish = Wish.objects.get(code_dossier=code_dossier)
-                if wish.etape not in self.request.user.setting_user.etape.all():
+                if wish.etape not in self.request.user.setting_user.etapes.all():
                     raise PermissionDenied
-                if choix == 'complet':
+                if wish.suivi_dossier.is_equivalence_traite:
+                    msg = 'Dossier déjà traité'
+                    self.message_user(msg, 'warning')
+                elif not wish.state.is_equivalence:
+                    msg = 'Dossier n\'est pas '
+                    self.message_user(msg, 'warning')
+                elif choix == 'complet':
                     try:
                         wish.equivalence_complet()
                         template = Mail.objects.get(name='email_equivalence_complet')
                         self._envoi_email(wish, template)
                         self.message_user('Dossier traité', 'success')
                     except InvalidTransitionError as e:
-                        if wish.suivi_dossier.is_inactif:
+                        if wish.suivi_dossier.is_equivalence_complet:
+                            msg = 'Dossier déjà traité'
+                            self.message_user(msg, 'warning')
+                        elif wish.suivi_dossier.is_inactif:
                             wish.equivalence_receptionner()
                             wish.equivalence_complet()
                         else:
@@ -141,8 +149,10 @@ class EquivalenceView(views.FormAdminView):
                         if wish.suivi_dossier.is_inactif:
                             wish.equivalence_receptionner()
                             wish.equivalence_incomplet()
+
                         else:
                             raise e
+                    self.message_user('Dossier traité', 'success')
                     self._envoi_email(wish, Mail.objects.get(name='email_equivalence_incomplet'))
 
                 elif choix == 'accepte':
@@ -155,13 +165,14 @@ class EquivalenceView(views.FormAdminView):
                             wish.equivalence_receptionner()
                             wish.equivalence_complet()
                             wish.equivalence_traite()
-                        elif wish.suivi_dossier.is_equivalence_incomplet():
+                        elif wish.suivi_dossier.is_equivalence_incomplet:
                             wish.equivalence_complet()
                             wish.equivalence_traite()
                         else:
                             raise e
                     wish.etape = etape
                     wish.save()
+                    wish.ouverture_inscription()
                     self._envoi_email(wish, Mail.objects.get(name=mail))
                 elif choix == 'refuse':
                     try:

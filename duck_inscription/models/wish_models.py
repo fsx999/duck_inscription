@@ -48,8 +48,8 @@ class WishWorkflow(xwf_models.Workflow):
          'ouverture_candidature'),
         ('note_master', 'ouverture_candidature', 'note_master'),
         ('candidature', ('note_master', 'ouverture_candidature'), 'candidature'),
-        ('ouverture_inscription', ('creation', 'ouverture_equivalence', 'ouverture_candidature'),
-         'ouverture_inscription'),
+        ('ouverture_inscription', ('creation', 'ouverture_equivalence', 'ouverture_candidature', 'equivalence',
+         'candidature'), 'ouverture_inscription'),
     )
 
     initial_state = 'creation'
