@@ -62,7 +62,6 @@ try:
 
 except NameError:
     print "erreur"
-
 if DEBUG:
     COMPRESS_ENABLED = False
 else:

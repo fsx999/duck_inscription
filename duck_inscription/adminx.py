@@ -123,7 +123,7 @@ class EquivalenceView(views.FormAdminView):
                     msg = 'Dossier déjà traité'
                     self.message_user(msg, 'warning')
                 elif not wish.state.is_equivalence:
-                    msg = 'Dossier n\'est pas '
+                    msg = 'Dossier n\'est pas en equivalence'
                     self.message_user(msg, 'warning')
                 elif choix == 'complet':
                     try:
@@ -191,9 +191,8 @@ class EquivalenceView(views.FormAdminView):
             except PermissionDenied:
                 msg = 'Vous n\'avez pas la permission de traité ce dossier'
                 self.message_user(msg, 'error')
-            except InvalidTransitionError:
-                msg = 'Le dossier n\'est pas en équivalence'
-                self.message_user(msg, 'error')
+            except InvalidTransitionError as e:
+                self.message_user(e, 'error')
 
         return self.get_response()
 
