@@ -12,7 +12,7 @@ from django.template.loader import render_to_string
 from mailrobot.models import Mail, MailBody, Address, Signature
 from django.conf import settings
 from xadmin.plugins.auth import UserAdmin
-from xworkflows import InvalidTransitionError
+from xworkflows import InvalidTransitionError, ForbiddenTransition
 from duck_inscription.forms.adminx_forms import DossierReceptionForm, EquivalenceForm
 from duck_inscription.xadmin_plugins.topnav import IEDPlugin
 from xadmin.layout import Main, Fieldset, Container, Side, Row
@@ -138,6 +138,7 @@ class EquivalenceView(views.FormAdminView):
                         elif wish.suivi_dossier.is_inactif:
                             wish.equivalence_receptionner()
                             wish.equivalence_complet()
+                            self.message_user('Dossier traité', 'success')
                         else:
                             raise e
 
@@ -160,9 +161,12 @@ class EquivalenceView(views.FormAdminView):
 
                     try:
                         wish.equivalence_traite()
-                    except InvalidTransitionError as e:
+                    except (InvalidTransitionError, ForbiddenTransition) as e:
                         if wish.suivi_dossier.is_inactif:
                             wish.equivalence_receptionner()
+                            wish.equivalence_complet()
+                            wish.equivalence_traite()
+                        elif wish.suivi_dossier.is_equivalence_reception:
                             wish.equivalence_complet()
                             wish.equivalence_traite()
                         elif wish.suivi_dossier.is_equivalence_incomplet:
@@ -174,6 +178,7 @@ class EquivalenceView(views.FormAdminView):
                     wish.save()
                     wish.ouverture_inscription()
                     self._envoi_email(wish, Mail.objects.get(name=mail))
+                    self.message_user('Dossier traité', 'success')
                 elif choix == 'refuse':
                     try:
                         wish.equivalece_refuse()
