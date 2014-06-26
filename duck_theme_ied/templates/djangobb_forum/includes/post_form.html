@@ -5,26 +5,7 @@
         <form id="post" action="{{ form_url|default_if_none:"." }}" method="post" enctype="multipart/form-data">
             {% csrf_token %}
             
-            {% if create_poll_form %}
-            <script>{# TODO: move to html head! #}
-                $(document).ready(function() {
-                    $('.poll .infldset').hide();
-                    $(".poll").click(function() {
-                        $('.poll .infldset').slideDown();
-                    });
-                });
-            </script>
-            <div class="inform poll">
-                <fieldset>
-                    <legend>{% trans "Create a poll" %}</legend>
-                    <div class="infldset">
-                        <div class="rbox">
-                            {{ create_poll_form }}
-                        </div>
-                    </div>
-                </fieldset>
-            </div>
-            {% endif %}
+
             
             <div class="inform">
                 <fieldset>
@@ -35,9 +16,6 @@
                             <label><strong>{% trans "Subject" %}</strong><br />{{ form.name.errors }}{{ form.name }}<br /></label>
                         {% endif %}
                         <label><strong>{% trans "Message" %}</strong><br />{{ form.body.errors }}{{ form.body }}</label>
-                        <p>
-                            Note: A list of all supported source code highlighter for [code <strong>XXX</strong>]...[/code] can be found here: <a href="http://pygments.org/docs/lexers/">pygments.org</a> (Use 'Short name')
-                        </p>
                         <label>{{ form.subscribe }}<strong>{% trans "Subscribe this topic" %}</strong>{{ form.subscribe.errors }}<br /></label>
                     </div>
                 </fieldset>
