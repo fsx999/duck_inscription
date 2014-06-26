@@ -25,6 +25,7 @@ from xadmin.util import User
 from xadmin.views import filter_hook, CommAdminView
 from django.utils.translation import ugettext as _
 
+
 class IncriptionDashBoard(views.website.IndexView):
     widgets = [
         [
@@ -32,7 +33,6 @@ class IncriptionDashBoard(views.website.IndexView):
                 {'title': 'Reception', 'url': 'dossier_receptionner'},
                 {'title': 'Dossier Equivalence', 'url': 'dossier_equivalence'},
                 {'title': 'Dossier inscription', 'model': Individu},
-                # {'title': 'Imprimer decisions ', 'url': 'imprimer_decisions_ordre'}
             ]},
 
         ]
@@ -41,6 +41,7 @@ class IncriptionDashBoard(views.website.IndexView):
     title = 'Accueil'
     widget_customiz = False
 xadmin.site.register_view(r'inscription/$', IncriptionDashBoard,  'inscription')
+
 
 class StatistiqueDashBoard(views.website.IndexView):
     widgets = [
@@ -204,51 +205,11 @@ class EquivalenceView(views.FormAdminView):
     def get_redirect_url(self):
         return self.get_admin_url('dossier_equivalence')
 
-    #         if wish.etape == "equivalence" or wish.etape == "liste_attente_equivalence":
-    #                 if choix == 'accepte':
-    #                     if wish.step != etape:
-    #                         wish.step = etape
-    #                         sujet = u"[ IED Paris 8 ] Décision d'équivalence - Réorientation à la formation %s"
-    #                         self._envoi_email(wish, sujet % (wish.step.label,),
-    #                                           "backoffice/emails/email_reoriente.html",
-    #                                           Etape.objects.get(name="equivalence_traite"))
-    #                     else:
-    #                         self._envoi_email(wish,
-    #                                           u"[ IED Paris 8 ] Décision d'équivalence - Accès à la formation %s" % (
-    #                                               wish.step.label,), 'backoffice/emails/email_accepte.html',
-    #                                           Etape.objects.get(name="equivalence_traite"))
-    #
-    #                     wish.dispatch()
-    #
-    #                 elif choix == 'complet':
-    #                     self._envoi_email(wish, u"[ IED Paris 8 ] Dossier de demance d'équivalence complet",
-    #                                       "backoffice/emails/email_complet.html",
-    #                                       Etape.objects.get(name="equivalence_complet"))
-    #                 elif choix == "incomplet":
-    #                     self._envoi_email(wish, u"[ IED Paris 8 ] Dossier de demance d'équivalence incomplet",
-    #                                       "backoffice/emails/email_incomplet.html",
-    #                                       Etape.objects.get(name="equivalence_incomplet"))
-    #                 elif choix == "refuse":
-    #                     self._envoi_email(wish, u"[ IED Paris 8 ] Dossier de demance d'équivalence refusé",
-    #                                       "backoffice/emails/email_refuse.html",
-    #                                       Etape.objects.get(name="equivalence_refuse"))
-    #             else:
-    #                 raise Exception(u"Vous n'avez pas le droit de traiter ce dossier")
-    #             context['message_success'] = u"Un email a bien été envoyé à %s %s à l'adresse %s" % (
-    #                 wish.individu.first_name1, wish.individu.last_name, wish.individu.personal_email)
-
-
-    #     except Exception, e:
-    #         context['message_error'] = e.message
-
-    #
     def _envoi_email(self, wish, template):
         context = {'site': Site.objects.get(id=preins_settings.SITE_ID), 'wish': wish, 'motif': self.motif}
         email = wish.individu.user.email if not settings.DEBUG else 'paul.guichon@iedparis8.net'
         mail = template.make_message(context=context, recipients=[email])
         mail.send()
-
-
 
 xadmin.site.register_view(r'dossier_equivalence/$', EquivalenceView,  'dossier_equivalence')
 
@@ -268,7 +229,6 @@ class MainDashboard(object):
     widget_customiz = False
 
 xadmin.site.register(views.website.IndexView, MainDashboard)
-
 
 
 class BaseSetting(object):
@@ -319,18 +279,19 @@ class WishInline(object):
     def get_transition_log(self, obj):
         reponse = '<table>'
         for transition in obj.parcours_dossier.all():
-            reponse += '<tr><td>{}</td><td>{}</td></tr>'.format(WishWorkflow.states[transition.to_state].title, transition.timestamp.strftime('%d/%m/%Y %H:%M:%S'))
+            reponse += '<tr><td>{}</td><td>{}</td></tr>'.format(WishWorkflow.states[transition.to_state].title,
+                                                                transition.timestamp.strftime('%d/%m/%Y %H:%M:%S'))
         reponse += '</table>'
         return reponse
     get_transition_log.short_description = 'parcours'
     get_transition_log.allow_tags = True
 
-
     def get_suivi_dossier(self, obj):
         reponse = '<table>'
         print obj.etape_dossier.all()
         for transition in obj.etape_dossier.all():
-            reponse += '<tr><td>{}</td><td>{}</td></tr>'.format(SuiviDossierWorkflow.states[transition.to_state].title, transition.timestamp.strftime('%d/%m/%Y %H:%M:%S'))
+            reponse += '<tr><td>{}</td><td>{}</td></tr>'.format(SuiviDossierWorkflow.states[transition.to_state].title,
+                                                                transition.timestamp.strftime('%d/%m/%Y %H:%M:%S'))
         reponse += '</table>'
         return reponse
     get_suivi_dossier.short_description = 'suivi'
@@ -340,7 +301,7 @@ class WishInline(object):
         url = reverse('impression_equivalence', kwargs={'pk': obj.pk})
         url2 = reverse('impression_decision_equivalence', kwargs={'pk': obj.pk})
         reponse = '<a href="{}" class="btn btn-primary">Impression</a>'.format(url)
-        reponse +='<a href="{}" class="btn btn-primary">ImpressionDecision</a>'.format(url2)
+        reponse += '<a href="{}" class="btn btn-primary">ImpressionDecision</a>'.format(url2)
         return reponse
     print_dossier_equi.allow_tags = True
     print_dossier_equi.short_description = 'Impression dossier équivalence'
@@ -377,7 +338,8 @@ class IndividuXadmin(object):
     def get_transition_log(self, obj):
         reponse = '<table>'
         for transition in obj.etape_dossier.all():
-            reponse += '<tr><td>{}</td><td>{}</td></tr>'.format(IndividuWorkflow.states[transition.to_state], transition.timestamp.strftime('%d/%m/%Y %H:%M:%S'))
+            reponse += '<tr><td>{}</td><td>{}</td></tr>'.format(IndividuWorkflow.states[transition.to_state],
+                                                                transition.timestamp.strftime('%d/%m/%Y %H:%M:%S'))
         reponse += '</table>'
         return reponse
     get_transition_log.short_description = 'parcours'
@@ -438,4 +400,3 @@ xadmin.site.register(MailBody)
 xadmin.site.register(Mail)
 xadmin.site.register(Address)
 xadmin.site.register(Signature)
-
