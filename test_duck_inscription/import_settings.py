@@ -40,7 +40,22 @@ INSTALLED_APPS = (
     'autocomplete_light',
     'wkhtmltopdf',
     'xhtml2pdf',
-    'mailrobot'
+    'mailrobot',
+    'django.contrib.sites', # django 1.6.2
+    'django.contrib.humanize',
+    # 'django_nyt',
+    'django_notify',
+    'mptt',
+    'sekizai',
+    'sorl.thumbnail',
+    'wiki',
+    'wiki.plugins.attachments',
+    'wiki.plugins.notifications',
+    'wiki.plugins.images',
+    'wiki.plugins.macros',
+    'linaro_django_pagination',
+    'djangobb_forum',
+    'haystack'
 
 )
 
@@ -52,6 +67,10 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'linaro_django_pagination.middleware.PaginationMiddleware',
+    # 'djangobb_forum.middleware.LastLoginMiddleware',
+    # 'djangobb_forum.middleware.UsersOnline',
+    # 'djangobb_forum.middleware.TimezoneMiddleware',
 )
 TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.Loader',
@@ -92,5 +111,24 @@ TEMPLATE_DIRS = (
 )
 
 ACCOUNT_ACTIVATION_DAYS = 1
-
+TEMPLATE_CONTEXT_PROCESSORS = (
+    "django.contrib.auth.context_processors.auth",
+    "django.core.context_processors.debug",
+    "django.core.context_processors.i18n",
+    "django.core.context_processors.media",
+    "django.core.context_processors.request",
+    "django.core.context_processors.static",
+    "django.core.context_processors.tz",
+    "django.contrib.messages.context_processors.messages",
+    "sekizai.context_processors.sekizai",
+    'djangobb_forum.context_processors.forum_settings',
+)
 MEDIA_URL = '/static_tel/'
+HAYSTACK_CONNECTIONS = {
+    'default': {
+        'ENGINE': 'haystack.backends.whoosh_backend.WhooshEngine',
+        'PATH': os.path.join(BASE_DIR, 'djangobb_index'),
+        'INCLUDE_SPELLING': True,
+    },
+}
+HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.RealtimeSignalProcessor'

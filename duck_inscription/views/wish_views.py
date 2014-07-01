@@ -47,13 +47,14 @@ class StepView(TemplateView):
         if self.request.GET.get("diplome", "") != "":
             step_wish = []
             for wish in self.request.user.individu.wishes.all():
-                for step in wish.etape.diplome.settingsetape_set.all():
+                for step in wish.etape.diplome.settingsetape_set.exclude(date_ouverture_candidature__isnull=False):
                     step_wish.append(step.pk)
 
-            etape = ModelChoiceField(queryset=SettingsEtape.objects.filter(
-                diplome=self.request.GET.get("diplome")).exclude(pk__in=step_wish).exclude(is_inscription_ouverte=False).order_by('label'),
-            )
-            return HttpResponse(etape.widget.render(name='etape', value='', attrs={'id': 'id_etape', 'class': "required"}))
+            etape = ModelChoiceField(
+                queryset=SettingsEtape.objects.filter(diplome=self.request.GET.get("diplome")).exclude(
+                    pk__in=step_wish).exclude(is_inscription_ouverte=False).order_by('label'), )
+            return HttpResponse(
+                etape.widget.render(name='etape', value='', attrs={'id': 'id_etape', 'class': "required"}))
 
         return HttpResponse('echec')
 
@@ -145,7 +146,6 @@ class DemandeEquivalenceView(FormView):
 class ListeAttenteEquivalenceView(TemplateView):
     template_name = 'duck_inscription/wish/liste_attente_equivalence.html'
 
-
     def get_context_data(self, **kwargs):
         context = super(ListeAttenteEquivalenceView, self).get_context_data(**kwargs)
         context['wish'] = self.request.user.individu.wishes.get(pk=self.kwargs['pk'])
@@ -164,8 +164,6 @@ class EquivalenceView(TemplateView):
         context['wish'] = wish
         return self.render_to_response(context)
 
-        #        return super(EquivalenceView, self).get(request, *args, **kwargs)
-
 
 class EquivalencePdfView(TemplateView):
     template_name = "duck_inscription/wish/etiquette.html"
@@ -180,12 +178,12 @@ class EquivalencePdfView(TemplateView):
         context['url_static'] = settings.BASE_DIR + '/duck_theme_ied/static/images/'
         context['annee_univ'] = annee_en_cour()
 
-
         return context
 
     def get_template_names(self):
         tempate_names = super(EquivalencePdfView, self).get_template_names()
-        tempate_names.append('duck_inscription/wish/%s_pdf.html' % self.etape)  # permet d'avoir la meme classe pour candidature
+        tempate_names.append(
+            'duck_inscription/wish/%s_pdf.html' % self.etape)  # permet d'avoir la meme classe pour candidature
         return tempate_names
 
     def get_file(self):
@@ -209,10 +207,7 @@ class EquivalencePdfView(TemplateView):
 
         context['num_page'] = self._num_page(url_doc)  # on indique le nombre de page pour la page 1
 
-
-        return context['voeu'].do_pdf_equi(flux=response,
-                                           templates=self.get_template_names(),
-                                           request=self.request,
+        return context['voeu'].do_pdf_equi(flux=response, templates=self.get_template_names(), request=self.request,
                                            context=context)
 
     def _num_page(self, url_doc):
@@ -301,11 +296,9 @@ class CandidaturePdfView(EquivalencePdfView):
 
         context['num_page'] = self._num_page(url_doc)  # on indique le nombre de page pour la page 1
 
+        return context['voeu'].do_pdf_candi(flux=response, templates=self.get_template_names(), request=self.request,
+                                            context=context)
 
-        return context['voeu'].do_pdf_candi(flux=response,
-                                           templates=self.get_template_names(),
-                                           request=self.request,
-                                           context=context)
 
 class ListeAttenteCandidatureView(ListeAttenteEquivalenceView):
     template_name = 'wish/liste_attente_candidature.html'
@@ -327,16 +320,17 @@ class OuverturePaiementView(TemplateView):
         context = self.get_context_data(**kwargs)
         wish = context['wish']
         # if wish.etape == 'ouverture_paiement' or wish.dispatch_etape == 'ouverture_paiement' and wish.etape != wish.dispatch_etape:
-        #     wish.etape = wish.dispatch_etape = 'ouverture_paiement'
+        # wish.etape = wish.dispatch_etape = 'ouverture_paiement'
         #     wish.save()
         # if wish.dispatch():
         #
         #     return redirect(wish.get_absolute_url())
         return self.render_to_response(context)
+
 #
 #
 # class ChoixIedFpView(TemplateView):
-#     template_name = "wish/choix_ied_fp.html"
+# template_name = "wish/choix_ied_fp.html"
 #
 #     def get(self, request, *args, **kwargs):
 #         centre = self.request.GET.get('centre', None)

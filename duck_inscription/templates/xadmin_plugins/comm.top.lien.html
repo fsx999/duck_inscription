@@ -1,0 +1,11 @@
+{% load i18n xadmin_tags %}
+{% load url from future %}
+<ul class="nav navbar-nav">
+{% for url in urls %}
+
+        <li><a href="{{ url.url }}">{{ url.name }}</a></li>
+
+{% endfor %}
+
+</ul>
+

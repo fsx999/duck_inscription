@@ -7,13 +7,13 @@ from django.core.urlresolvers import reverse
 from django.db import models
 from django.template import RequestContext
 from django.template.loader import render_to_string
+import django_xworkflows
 from django_xworkflows.xworkflow_log.models import TransitionLog
 from mailrobot.models import Mail
 from wkhtmltopdf.views import PDFTemplateResponse
 from xworkflows import transition, after_transition, before_transition, on_enter_state, transition_check
 from django_apogee.models import CentreGestion, Diplome, InsAdmEtp
 from duck_inscription.models import SettingAnneeUni, Individu, SettingsEtape
-from duck_inscription.models.workflows_models import WishWorkflow, SuiviDossierWorkflow
 from django_xworkflows import models as xwf_models
 from django.utils.timezone import now
 from django.conf import settings
@@ -22,6 +22,80 @@ from xhtml2pdf import pisa
 __author__ = 'paul'
 
 
+class WishWorkflow(xwf_models.Workflow):
+    log_model = 'duck_inscription.WishParcourTransitionLog'
+    states = (
+        ('creation', 'Création'),
+        ('ouverture_equivalence', 'Ouverture equivalence'),
+        ('liste_diplome', 'Liste Diplome équivalent'),
+        ('demande_equivalence', 'Demande desir équivalence'),
+        ('equivalence', 'Dossier équivalence'),
+        ('liste_attente_equivalence', 'Dossier en liste attente équivalence'),
+        ('ouverture_candidature', 'Ouverture candidature'),
+        ('note_master', 'Note master'),
+        ('candidature', 'Candidature'),
+        ('liste_attente_candidature', 'Dossier en liste attente candidature'),
+        ('ouverture_inscription', 'Ouverture inscription')
+    )
+
+    transitions = (
+        ('ouverture_equivalence', 'creation', 'ouverture_equivalence'),
+        ('liste_diplome', 'ouverture_equivalence', 'liste_diplome'),
+        ('demande_equivalence', ('creation', 'liste_diplome'), 'demande_equivalence'),
+        ('equivalence', ('creation', 'liste_diplome', 'demande_equivalence'), 'equivalence'),
+        ('liste_attente_equivalence', ('ouverture_equivalence', 'demande_equivalence'), 'liste_attente_equivalence'),
+        ('ouverture_candidature', ('creation', 'ouverture_equivalence', 'equivalence', 'demande_equivalence'),
+         'ouverture_candidature'),
+        ('note_master', 'ouverture_candidature', 'note_master'),
+        ('candidature', ('note_master', 'ouverture_candidature'), 'candidature'),
+        ('ouverture_inscription', ('creation', 'ouverture_equivalence', 'ouverture_candidature', 'equivalence',
+         'candidature'), 'ouverture_inscription'),
+    )
+
+    initial_state = 'creation'
+
+
+class SuiviDossierWorkflow(xwf_models.Workflow):
+    log_model = 'duck_inscription.WishTransitionLog'
+
+    states = (
+        ('inactif', 'Inactif'),
+        ('equivalence_reception', 'Dossier Equivalence receptionné'),
+        ('equivalence_complet', 'Dossier Equivalence complet'),
+        ('equivalence_incomplet', 'Dossier Equivalence incomplet'),
+        ('equivalence_traite', 'Dossier Equivalence traite'),
+        ('candidature_reception', 'Dossier Candidature receptionné'),
+        ('candidature_complet', 'Dossier Candidature complet'),
+        ('candidature_incomplet', 'Dossier Candidature incomplet'),
+        ('candidature_traite', 'Dossier Candidature traite'),
+        ('inscription_reception', 'Dossier inscription receptionné'),
+        ('inscription_complet', 'Dossier inscription complet'),
+        ('inscription_incomplet', 'Dossier inscription incomplet'),
+        ('inscription_traite', 'Dossier inscription traite'),
+    )
+
+    initial_state = 'inactif'
+    transitions = (
+        ('equivalence_receptionner', ('inactif', 'equivalence_incomplet'), 'equivalence_reception'),
+        ('equivalence_incomplet', 'equivalence_reception', 'equivalence_incomplet'),
+        ('equivalence_complet', ('equivalence_reception', 'equivalence_incomplet'), 'equivalence_complet'),
+        ('equivalence_traite', 'equivalence_complet', 'equivalence_traite'),
+    )
+
+
+class WishTransitionLog(django_xworkflows.models.BaseTransitionLog):
+    wish = models.ForeignKey('Wish', related_name='etape_dossier')
+    MODIFIED_OBJECT_FIELD = 'wish'
+
+    class Meta:
+        app_label = 'duck_inscription'
+
+class WishParcourTransitionLog(django_xworkflows.models.BaseTransitionLog):
+    wish = models.ForeignKey('Wish', related_name='parcours_dossier')
+    MODIFIED_OBJECT_FIELD = 'wish'
+
+    class Meta:
+        app_label = 'duck_inscription'
 
 # class Step(models.Model):
 #     """
@@ -218,7 +292,6 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
 
     @on_enter_state('ouverture_equivalence')
     def on_enter_state_ouverture_equivalence(self, res, *args, **kwargs):
-        # InsAdmEtp.objects.filter(cod_ind__cod_etu=self.individu.student_code, cod_etp=self.etape.cod_etp, ).count()
         if self.is_reins_formation():
             self.ouverture_inscription()
             return
@@ -226,14 +299,20 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
             self.ouverture_candidature()
         elif self.etape.date_ouverture_equivalence <= now() <= self.etape.date_fermeture_equivalence:  # l'équi est ouverte
             self.liste_diplome()
+        elif self.etape.date_fermeture_equivalence <= now() and not self.etape.required_equivalence:
+            self.ouverture_candidature()
         elif self.etape.date_fermeture_equivalence <= now():  # équi ferme
-            self.liste_attente_equivalence()
+            self.liste_diplome()
 
     @on_enter_state('liste_diplome')
     def on_enter_liste_diplome(self, *args, **kwargs):
-        if self.etape.date_ouverture_equivalence:
+
+        if self.etape.date_ouverture_equivalence:  # ouverture equivalence
             if not self.etape.diplome_aces.count():
-                self.demande_equivalence()
+                if now() <= self.etape.date_fermeture_equivalence:  # pas de diplome
+                    self.demande_equivalence()
+                else:
+                    self.liste_attente_equivalence()
 
     @transition_check('liste_diplome')
     def check_liste_diplome(self):
@@ -244,7 +323,14 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
     @on_enter_state('demande_equivalence')
     def on_enter_state_demande_equivalence(self, res, *args, **kwargs):
         if self.etape.required_equivalence and not self.diplome_acces:  # l'équivalence est obligatoire et il n'y pas de diplome
-            self.equivalence()
+            if self.etape.date_ouverture_equivalence <= now() <= self.etape.date_fermeture_equivalence:
+                self.equivalence()
+            else:
+                self.liste_attente_equivalence()
+        elif self.diplome_acces and now() >= self.etape.date_fermeture_equivalence:
+            self.ouverture_candidature()
+
+
 
     @on_enter_state('ouverture_candidature')
     def on_enter_state_ouverture_candidature(self, res, *args, **kwargs):
@@ -253,7 +339,7 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
         elif self.etape.date_ouverture_candidature <= now() <= self.etape.date_fermeture_candidature:  # l'équi est ouverte
             self.note_master()
         elif self.etape.date_fermeture_equivalence <= now():  # équi ferme
-            self.liste_attente_equivalence()
+            self.liste_attente_candidature()
 
     @on_enter_state('note_master')
     def on_enter_state_note_master(self, res, *arg, **kwargs):
@@ -687,6 +773,8 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
 
     # get_pdf.short_description = u'Impression des dossiers'
     # get_pdf.allow_tags = True
+
+
 
 
 class NoteMasterModel(models.Model):

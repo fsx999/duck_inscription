@@ -27,6 +27,9 @@ urlpatterns += patterns('',
     url(r'^captcha/', include('captcha.urls')),
 )
 
+
+
+
 if settings.DEBUG:
     import debug_toolbar
     urlpatterns += patterns('',

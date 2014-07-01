@@ -9,8 +9,26 @@ from django_xworkflows.xworkflow_log.models import TransitionLog
 from django_apogee.models import Departement, Pays, SitFam, SitMil, TypHandicap, TypHebergement, BacOuxEqu, AnneeUni, \
     ComBdi
 from django_xworkflows import models as xwf_models
-from duck_inscription.models.workflows_models import IndividuWorkflow
 
+class IndividuWorkflow(xwf_models.Workflow):
+    states = (
+        ('first_connection', 'Première connexion'),
+        ('code_etu_manquant', 'Code etudiant manquant'),
+        ('individu', 'Individu'),
+        ('adresse', 'Adresse'),
+        ('recap', 'Recapitulatif'),
+        ('accueil', 'Accueil'),
+    )
+
+    transitions = (
+        ('modif_individu', ('first_connection', 'code_etu_manquant', 'recap'), 'individu'),
+        ('first_connection', 'individu', 'first_connection'),
+        ('modif_adresse', ('individu', 'recap'), 'adresse'),
+        ('recap', 'adresse', 'recap'),
+        ('accueil', 'recap', 'accueil'),
+        ('code_etud_manquant', 'individu', 'code_etu_manquant'),
+    )
+    initial_state = 'first_connection'
 
 @python_2_unicode_compatible
 class Individu(xwf_models.WorkflowEnabled, models.Model):
