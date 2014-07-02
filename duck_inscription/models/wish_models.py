@@ -354,13 +354,13 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
         return False
 
     def is_reins_formation(self):
-        # if self.is_reins is None:
-        diplomes = self.etape.cursus.settingsetape_set.all().values_list('pk', flat=True)
-        if self.individu.student_code:
-            self.is_reins = InsAdmEtp.objects.filter(cod_ind__cod_etu=self.individu.student_code, cod_etp__in=diplomes).count() != 0
-        else:
-            self.is_reins = False
-        self.save()
+        if self.is_reins is None:
+            diplomes = self.etape.cursus.settingsetape_set.all().values_list('pk', flat=True)
+            if self.individu.student_code:
+                self.is_reins = InsAdmEtp.objects.filter(cod_ind__cod_etu=self.individu.student_code, cod_etp__in=diplomes).count() != 0
+            else:
+                self.is_reins = False
+            self.save()
         return self.is_reins
 
     def envoi_email_reception(self):
