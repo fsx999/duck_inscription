@@ -294,6 +294,7 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
     def on_enter_state_ouverture_equivalence(self, res, *args, **kwargs):
         if self.is_reins_formation():
             self.ouverture_inscription()
+            print "cocouou"
             return
         if not self.etape.date_ouverture_equivalence:  # il n'y a pas d'équivalence on va en candidature
             self.ouverture_candidature()

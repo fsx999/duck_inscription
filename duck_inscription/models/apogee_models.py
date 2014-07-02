@@ -31,6 +31,7 @@ class SettingAnneeUni(AnneeUni):
 class SettingsEtape(Etape):
     label = models.CharField('Label', max_length=120, null=True)
     diplome = models.ForeignKey('DiplomeEtape', null=True, blank=True)
+    cursus = models.ForeignKey('CursusEtape', null=True, blank=True)
     required_equivalence = models.BooleanField('Equivalence obligatoire', default=True)
     is_inscription_ouverte = models.BooleanField('ouverture campagne inscription', default=True)
     date_ouverture_equivalence = models.DateTimeField(null=True, blank=True)
@@ -70,6 +71,7 @@ class SettingsEtape(Etape):
         return dict(WishTransitionLog.objects.filter(
             wish__etape=self).values_list('to_state').annotate(Count('to_state')))
 
+
 @python_2_unicode_compatible
 class DiplomeEtape(models.Model):
     label = models.CharField('Label web', max_length=120, null=True)
@@ -79,6 +81,19 @@ class DiplomeEtape(models.Model):
         app_label = 'duck_inscription'
         verbose_name_plural = 'Diplomes'
         verbose_name = 'Diplômes'
+
+    def __str__(self):
+        return self.label or ''
+
+
+@python_2_unicode_compatible
+class CursusEtape(models.Model):
+    label = models.CharField('Label web', max_length=200, null=True)
+
+    class Meta:
+        app_label = 'duck_inscription'
+        verbose_name_plural = 'Cursus'
+        verbose_name = 'Cursus'
 
     def __str__(self):
         return self.label or ''

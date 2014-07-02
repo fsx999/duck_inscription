@@ -20,7 +20,7 @@ from xadmin.plugins.inline import Inline
 from xadmin import views
 import xadmin
 from duck_inscription.models import Individu, SettingsEtape, WishWorkflow
-from .models import Wish, SuiviDossierWorkflow, IndividuWorkflow, SettingsUser
+from .models import Wish, SuiviDossierWorkflow, IndividuWorkflow, SettingsUser, CursusEtape
 from xadmin.util import User
 from xadmin.views import filter_hook, CommAdminView
 from django.utils.translation import ugettext as _
@@ -353,6 +353,7 @@ class SettingsEtapeXadmin(object):
             Fieldset('Etape',
                      'cod_etp',
                      'diplome',
+                     'cursus',
                      'label',
                      'label_formation'),
             TabHolder(
@@ -400,3 +401,4 @@ xadmin.site.register(MailBody)
 xadmin.site.register(Mail)
 xadmin.site.register(Address)
 xadmin.site.register(Signature)
+xadmin.site.register(CursusEtape)
