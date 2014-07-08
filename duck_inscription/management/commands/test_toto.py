@@ -31,6 +31,6 @@ class Command(BaseCommand):
         """
         for user in User.objects.filter(is_staff=False):
             send_mail(u"[IED]Inscription retardée", text, 'nepasrepondre@iedparis8.net', [user.email])
-            break
+
 
 
