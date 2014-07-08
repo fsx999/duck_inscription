@@ -310,8 +310,8 @@ class WishInline(object):
 class IndividuXadmin(object):
     site_title = 'Consultation des dossiers étudiants'
     show_bookmarks = False
-    fields = ('code_opi', 'last_name', 'first_name1', 'birthday', 'personal_email', 'state')
-    readonly_fields = ('code_opi', 'last_name', 'first_name1', 'birthday', 'personal_email', 'get_transition_log')
+    fields = ('code_opi', 'last_name', 'first_name1', 'birthday', 'personal_email', 'state', 'user')
+    readonly_fields = ('user', 'code_opi', 'last_name', 'first_name1', 'birthday', 'personal_email', 'get_transition_log')
     list_display = ('__unicode__', 'last_name')
     list_export = []
     list_per_page = 10
@@ -348,6 +348,8 @@ class IndividuXadmin(object):
 
 class SettingsEtapeXadmin(object):
     exclude = ('lib_etp', 'cod_cyc', 'cod_cur', 'annee')
+    list_filter = ['cursus']
+    quickfilter = ['cursus']
     form_layout = (
         Main(
             Fieldset('Etape',
