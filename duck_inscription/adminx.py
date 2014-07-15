@@ -184,6 +184,7 @@ class EquivalenceView(views.FormAdminView):
                     try:
                         wish.equivalece_refuse()
                         self._envoi_email(wish, Mail.objects.get(name='email_equivalence_refuse'))
+                        self.message_user('Dossier traité', 'success')
                     except InvalidTransitionError as e:
                         raise e
 
