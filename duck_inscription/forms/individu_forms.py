@@ -7,18 +7,13 @@ from django.conf import settings
 from django.utils import formats, six
 import re
 from django_apogee.models import Individu, Departement, Pays, SitFam, SitMil, TypHandicap, BacOuxEqu, TypHebergement, \
-    ComBdi
-from duck_inscription.models import AdresseIndividu
-
+    ComBdi, MentionBac, CatSocPfl, DomaineActPfl, QuotiteTra, SituationSise, MtfNonAflSso, RegimeParent, TypeDiplomeExt,\
+    SitSociale
+from duck_inscription.models import AdresseIndividu, DossierInscription
+from django_apogee.models import Etablissement, TypEtb, BacOuxEqu
 RE_DATE = re.compile(r'(\d{4})-(\d\d?)-(\d\d?)$')
 import floppyforms as forms
-# from apogee.models import (ApogeePays, FamilyStatus, BacOuxEqui, ApogeeEtablissement, ApogeeMentionBac,
-#                            ApogeeTypeEtablissement, ApogeeSituationSise, ApogeeTypeDiplomeExt, ApogeeQuotiteTra,
-#                            ApogeeCatSocPfl, ApogeeSitSociale, ApogeeRegimeSecuNonSecu, INDIVIDU, Pays, Departement, SituationMilitaire, TypeHandicap,  ApogeeComBdi, TypeHebergement, DomaineActPfl)
-# from pal2 import import_settting as settings
-# from inscription.models import Individu, AdresseIndividu, DossierInscription
-# from inscription.utils import make_ied_password
-# from inscription.forms.lib_forms import (NationalityModelChoiceField, LabelModelChoiceField, )
+
 from django.forms.models import modelformset_factory, BaseInlineFormSet
 from django.template import loader
 
@@ -423,363 +418,363 @@ class AdresseBaseFormSet(BaseInlineFormSet):
 
 class RecapitulatifIndividuForm(forms.Form):
     pass
-#
-#
-#
-#
-# ETABLISSEMENT = forms.ModelChoiceField(ApogeeEtablissement.objects.all(),
-#                                      label= u"Code département ou code postal",
-#                                      required=True,
-#                                      widget=autocomplete_light.ChoiceWidget('ApogeeEtablissementAutocomplete'))
-#
-#
-# class GenericEtablissement(forms.ModelForm):
-#     type_etablissement = forms.ModelChoiceField(
-#         label=u"Type d'établissement :",
-#         help_text=u"Selectionnez un type d'établissement",
-#         queryset=ApogeeTypeEtablissement.objects.filter(tem_en_sve_tpe='O').exclude(
-#             apogeeetablissement__isnull=True).order_by('-lib_tpe'),
-#         required=False
-#     )
-#
-#
-# class PremiereInscriptionForm(forms.ModelForm):
-#     premier_universite_fr = forms.ModelChoiceField(
-#         label=u"Première université française ou établissement supérieur:",
-#         queryset=ApogeeEtablissement.objects.filter(cod_tpe='00'),
-#         required=False,
-#         widget=forms.Select(attrs={"value_toggle": '!', 'toggle_field': 'annee_premiere_inscription_universite_fr'}),
-#         help_text=u"Choisir l'université Paris 8 s'il s'agit de votre première inscription dans l'enseignement supérieur français",
-#     )
-#     annee_premiere_inscription_p8 = forms.ChoiceField(
-#         label=u"Année de la première inscription à l'université Paris 8 :",
-#         choices=ANNEE_P8,
-#         required=False,
-#         help_text=u"Depuis 2000. Choisir 2013/2014  s'il s'agit de votre première inscription à l'université Paris 8"
-#     )
-#     annee_premiere_inscription_universite_fr = forms.ChoiceField(
-#         label=u"Année de votre première inscription dans une université française :",
-#         choices=ANNEE_INSCRIPTION,
-#         help_text=u"Choisir 2013/2014 s'il s'agit de votre première inscription dans une université française.",
-#         required=False
-#     )
-#     annee_premiere_inscription_enseignement_sup_fr = forms.ChoiceField(
-#         label=u"Année de votre première inscription dans l'enseignement supérieur français :",
-#         help_text=u"Choisir 2013/2014 s'il s'agit de votre première inscription dans l'enseignement supérieur français",
-#         choices=ANNEE_INSCRIPTION,
-#         required=False
-#     )
-#
-#     annee_derniere_inscription_universite_hors_p8 = forms.ChoiceField(
-#         label=u"Année de votre dernière inscription dans une université française hors Paris 8 :",
-#         help_text=u"Si votre dernière université n'est pas Paris 8",
-#         choices=ANNEE_INSCRIPTION,
-#         required=False
-#     )
-#     def clean_annee_premiere_inscription_enseignement_sup_fr(self):
-#         data = self.cleaned_data['annee_premiere_inscription_enseignement_sup_fr']
-#         if data != u'' and self.instance.individu.annee_obtention > data:
-#             raise forms.ValidationError(u"Vous avez choisi une date inférieure à celle de votre bac")
-#         if data == u'':
-#             data = 2013
-#         return data
-#
-#     def clean_annee_premiere_inscription_p8(self):
-#         data = self.cleaned_data['annee_premiere_inscription_p8']
-#         if data != u'' and self.instance.individu.annee_obtention > data:
-#             raise forms.ValidationError(u"Vous avez choisi une date inférieure à celle de votre bac")
-#         if data == u'':
-#             data = 2013
-#         return data
-#
-#     def clean_annee_premiere_inscription_universite_fr(self):
-#         data = self.cleaned_data['annee_premiere_inscription_universite_fr']
-#         if data != u'' and self.instance.individu.annee_obtention > data:
-#             raise forms.ValidationError(u"Vous avez choisi une date inférieure à celle de votre bac")
-#         if data == u'':
-#             data = 2013
-#         return data
-#
-#     def clean_premier_universite_fr(self):
-#         data = self.cleaned_data['premier_universite_fr']
-#         if data is None:
-#             data = ApogeeEtablissement.objects.get(cod_etb='0931827F')
-#         return data
-#
-#     class Meta:
-#         model = DossierInscription
-#         fields= ("premier_universite_fr",
-#                  "annee_premiere_inscription_p8",
-#                  "annee_premiere_inscription_universite_fr",
-#                  "annee_premiere_inscription_enseignement_sup_fr",
-#                  'id',
-#         )
-#
-#
-# class ComplementBacForm(GenericEtablissement):
-#     bac = forms.ModelChoiceField(queryset=
-#         BacOuxEqui.objects.all(),
-#         label=u"Bac ou équivalent",
-#     )
-#
-#     annee_bac = forms.ChoiceField(
-#         choices=[(u'', u'-------')] + [(unicode(i), unicode(i)) for i in range(datetime.today().year - 70,
-#                                                                     datetime.today().year + 1)],
-#         label=u"Année d'obtention",
-#         help_text=u"(Année d'obtention du baccalauréat ou équivalent)",
-#         required=True
-#     )
-#     etablissement_bac = ETABLISSEMENT
-#
-#     mention_bac = forms.ModelChoiceField(
-#         label=u"Renseignez la mention qui vous a été attribuée lors de l'obtention de votre baccalauréat :",
-#         help_text=u"Seulement si vous avez un baccalauréat",
-#         queryset=ApogeeMentionBac.objects.filter(tem_en_sve_mnb='O'),
-#         required=False
-#     )
-#     def clean_annee_bac(self):
-#         data = self.cleaned_data['annee_bac']
-#         if (self.instance.individu.birthday.year + 15) >  int(data):
-#             raise forms.ValidationError(
-#                     u"Vous avez saisi une date d'obtention du bac incorect vis à vis de votre date de naissance"
-#             )
-#         return data
-#
-#     class Meta:
-#         model = DossierInscription
-#         fields = ('bac', 'annee_bac', 'etablissement_bac', 'mention_bac')
-#
-#
-# class CatSocForm(forms.ModelForm):
-#     cat_soc_etu = forms.ModelChoiceField(
-#         label=u"Votre activité professionnelle :",
-#         queryset=ApogeeCatSocPfl.objects.filter(tem_en_sve_pcs='O').order_by
-#             ('-lib_web_pcs'),
-#     )
-#     cat_soc_chef_famille = forms.ModelChoiceField(
-#         label=u"L'activité professionnelle du père:",
-#         queryset=ApogeeCatSocPfl.objects.filter(tem_en_sve_pcs='O').order_by
-#             ('lib_web_pcs'),
-#         empty_label=u"Aucune",
-#         required=False,
-#     )
-#     cat_soc_autre_parent = forms.ModelChoiceField(
-#         label=u"L'activité professionnelle de la mère :",
-#         queryset=ApogeeCatSocPfl.objects.filter(tem_en_sve_pcs='O').order_by
-#             ('lib_web_pcs'),
-#         empty_label=u"Aucune",
-#         required=False,
-#     )
-#     sportif_haut_niveau = forms.NullBooleanField(
-#         label=u"Etes vous sportif de haut niveau :",
-#         help_text=u"Vous devrez joindre les justificatifs le cas échéant.",
-#
-#         widget=forms.Select(
-#             choices=(("", "-----"), ("True", "Oui"), ("False", "Non")),
-#             attrs={'class': 'required auto'}
-#         )
-#     )
-#     cat_travail = forms.ModelChoiceField(
-#         queryset=DomaineActPfl.objects.filter(lib_web_dap__isnull=False),
-#         label=u"Domaine d'activité",
-#         required=False,
-#         help_text=u"Uniquement si vous travaillez"
-#     )
-#     quotite_travail = forms.ModelChoiceField(
-#         label=u"Votre quotité de travail :",
-#         queryset=ApogeeQuotiteTra.objects.filter(tem_en_sve_qtr='O'),
-#         widget=forms.Select(attrs={'class': 'auto'}),
-#         empty_label=u"Ne travaille pas",
-#         required=False
-#     )
-#
-#     class Meta:
-#         model = DossierInscription
-#         fields = (
-#            'cat_soc_etu',
-#             'cat_soc_chef_famille',
-#             'cat_soc_autre_parent',
-#
-#             'sportif_haut_niveau',
-#             'quotite_travail',
-#            'cat_travail'
-#         )
-#
-#
-# class DernierEtablissementForm(GenericEtablissement):
-#     annee_dernier_etablissement = forms.ChoiceField(
-#         label=u"Année :",
-#         choices=ANNEE,
-#     )
-#
-#     dernier_etablissement = ETABLISSEMENT
-#
-#
-#
-#     class Meta:
-#         model = DossierInscription
-#         fields = ('annee_dernier_etablissement', 'type_etablissement', 'dernier_etablissement')
-#
-#
-# class SituationAnneePrecedenteForm(forms.ModelForm):
-#     sise_annee_precedente = forms.ModelChoiceField(
-#         queryset=ApogeeSituationSise.objects.filter(tem_en_sve_sis='O').order_by('-lib_sis'),
-#         label=u"Indiquez votre situation l’année précédente :",
-#     )
-#
-#     class Meta:
-#         model = DossierInscription
-#         fields = ('sise_annee_precedente',)
-#
-#
-# class EtablissementSituationAnneePrecedenteForm(GenericEtablissement):
-#     etablissement_annee_precedente = ETABLISSEMENT
-#
-#     class Meta:
-#         model = DossierInscription
-#         fields = ('type_etablissement', 'etablissement_annee_precedente',)
-#
-# class EtablissementDernierDiplomeForm(GenericEtablissement):
-#     type_dernier_diplome = forms.ModelChoiceField(
-#         queryset=ApogeeTypeDiplomeExt.objects.filter(tem_en_sve_tde='O').order_by('lib_tde'),
-#         label=u"Dernier diplome obtenu :",
-#         help_text=u"Quel est le dernier diplôme que vous avez obtenu ?"
-#     )
-#     annee_dernier_diplome = forms.ChoiceField(
-#         label=u"Année d'obtention :",
-#         choices=ANNEE,
-#         help_text=u"Exemple :  si diplôme obtenu en juin 2012, indiquer 2011/2012.",
-#         widget=forms.Select(attrs={'class': 'required auto'}),
-#     )
-#     etablissement_dernier_diplome = ETABLISSEMENT
-#
-#     class Meta:
-#         model = DossierInscription
-#         fields = (
-#             'type_dernier_diplome',
-#             'annee_dernier_diplome',
-#             'type_etablissement',
-#             'etablissement_dernier_diplome',
-#         )
-#
-#
-# class TestAutreEtablissementForm(forms.ModelForm ):
-#     autre_eta = forms.NullBooleanField(
-#         label=u"Indiquez si vous êtes inscrit dans un autre établissement d'enseignement pour l'année en cours :",
-#         help_text=u"Fréquentez-vous un autre établissement pour l’année en cours ?",
-#         widget=forms.Select(
-#             choices=(("", "-----"), ("True", "Oui"), ("False", "Non")),
-#         )
-#     )
-#
-#     class Meta:
-#         model = DossierInscription
-#         fields = (
-#             'autre_eta',
-#         )
-#
-#
-# class AutreEtablissementForm(GenericEtablissement):
-#     autre_etablissement = ETABLISSEMENT
-#
-#     class Meta:
-#         model = DossierInscription
-#         fields = (
-#             'type_etablissement',
-#             'autre_etablissement',
-#         )
-#
-#
-#
-# class ValidationForm(forms.ModelForm):
-#     valider = forms.CharField()
-#
-#     class Meta:
-#         model = DossierInscription
-#         fields = ('id',)
-#
-#
-# class SituationSocialeForm(forms.ModelForm):
-#     situation_sociale = forms.ModelChoiceField(
-#         label=u"Votre situation sociale :",
-#         queryset=ApogeeSitSociale.objects.all(),
-#         help_text=u'(sur présentation des justificatifs)',
-#         required=True,
-#     )
-#     echelon = forms.CharField(
-#         label=u"Echelon :",
-#         max_length=2,
-#         required=False,
-#         widget=forms.TextInput(attrs={"value_toggle": 'BO', 'toggle_field': 'situation_sociale'}),
-#     )
-#     num_boursier = forms.CharField(
-#         label=u"N° de boursier :",
-#         max_length=13,
-#         required=False,
-#         widget=forms.TextInput(attrs={"value_toggle": 'BO', 'toggle_field': 'situation_sociale'}),
-#     )
-#     boursier_crous = forms.NullBooleanField(
-#         label=u"Bousier du Crous de l'année précédente :",
-#         required=False,
-#         widget=forms.Select(
-#             choices=(("", "-----"), ("True", u"Oui"), ("False", u"Non")),
-#             attrs={"value_toggle": 'BO', 'toggle_field': 'situation_sociale'}
-#         )
-#     )
-#     class Meta:
-#         model = DossierInscription
-#         fields =(
-#             'situation_sociale',
-#             'echelon',
-#             'num_boursier',
-#             'boursier_crous',
-#         )
-#
-# class SecuriteSocialeForm(forms.ModelForm):
-#     affiliation_parent = forms.ModelChoiceField(
-#         label=u"Affiliation au régime de sécurité sociale des parents :",
-#         help_text=u"Vous devrez fournir des justificatifs.",
-#         queryset=ApogeeRegimeSecuNonSecu.objects.filter(tem_affiliation_parent='O'),
-#         empty_label=u"Aucune",
-#         required=False
-#     )
-#
-#     non_affiliation = forms.ModelChoiceField(
-#         label=u"Cas de non affiliation au régime de sécurité sociale des étudiants (salarié, +28 ans ...)",
-#         help_text=u"Vous devrez fournir des justificatifs.",
-#         queryset=ApogeeRegimeSecuNonSecu.objects.filter(tem_affiliation_parent='N'),
-#         empty_label=u"Aucun",
-#         required=False
-#     )
-#
-#     centre_payeur = forms.ChoiceField(
-#         label=u"Indiquez votre centre payeur :",
-#         choices=(('', '------'), ('SMEREP', 'SMEREP'), ('LMDE', 'LMDE')),
-#         required=False,
-#         widget=forms.Select(attrs={"value_toggle": '', 'toggle_field': 'non_affiliation'})
-#     )
-#
-#     class Meta:
-#         model = DossierInscription
-#         fields = (
-#            'affiliation_parent',
-#             'non_affiliation',
-#             'num_secu',
-#             'centre_payeur',
-#         )
-#
-#
-# class NumSecuForm(forms.ModelForm):
-#     num_secu = forms.CharField(
-#         label=u"Votre numéro de sécurité sociale :",
-#         max_length=15,
-#         min_length=5,
-#     )
-#
-#     class Meta:
-#         model = DossierInscription
-#         fields = (
-#              'num_secu',
-#         )
-#
-#
+
+
+
+
+ETABLISSEMENT = forms.ModelChoiceField(Etablissement.objects.all(),
+                                     label= u"Code département ou code postal",
+                                     required=True,
+                                     widget=autocomplete_light.ChoiceWidget('ApogeeEtablissementAutocomplete'))
+
+
+class GenericEtablissement(forms.ModelForm):
+    type_etablissement = forms.ModelChoiceField(
+        label=u"Type d'établissement :",
+        help_text=u"Selectionnez un type d'établissement",
+        queryset=TypEtb.objects.filter(tem_en_sve_tpe='O').exclude(
+            etablissement__isnull=True).order_by('-lib_tpe'),
+        required=False
+    )
+
+
+class PremiereInscriptionForm(forms.ModelForm):
+    premier_universite_fr = forms.ModelChoiceField(
+        label=u"Première université française ou établissement supérieur:",
+        queryset=Etablissement.objects.filter(cod_tpe='00'),
+        required=False,
+        widget=forms.Select(attrs={"value_toggle": '!', 'toggle_field': 'annee_premiere_inscription_universite_fr'}),
+        help_text=u"Choisir l'université Paris 8 s'il s'agit de votre première inscription dans l'enseignement supérieur français",
+    )
+    annee_premiere_inscription_p8 = forms.ChoiceField(
+        label=u"Année de la première inscription à l'université Paris 8 :",
+        choices=ANNEE_P8,
+        required=False,
+        help_text=u"Depuis 2000. Choisir 2013/2014  s'il s'agit de votre première inscription à l'université Paris 8"
+    )
+    annee_premiere_inscription_universite_fr = forms.ChoiceField(
+        label=u"Année de votre première inscription dans une université française :",
+        choices=ANNEE_INSCRIPTION,
+        help_text=u"Choisir 2013/2014 s'il s'agit de votre première inscription dans une université française.",
+        required=False
+    )
+    annee_premiere_inscription_enseignement_sup_fr = forms.ChoiceField(
+        label=u"Année de votre première inscription dans l'enseignement supérieur français :",
+        help_text=u"Choisir 2013/2014 s'il s'agit de votre première inscription dans l'enseignement supérieur français",
+        choices=ANNEE_INSCRIPTION,
+        required=False
+    )
+
+    annee_derniere_inscription_universite_hors_p8 = forms.ChoiceField(
+        label=u"Année de votre dernière inscription dans une université française hors Paris 8 :",
+        help_text=u"Si votre dernière université n'est pas Paris 8",
+        choices=ANNEE_INSCRIPTION,
+        required=False
+    )
+    def clean_annee_premiere_inscription_enseignement_sup_fr(self):
+        data = self.cleaned_data['annee_premiere_inscription_enseignement_sup_fr']
+        if data != u'' and self.instance.individu.annee_obtention > data:
+            raise forms.ValidationError(u"Vous avez choisi une date inférieure à celle de votre bac")
+        if data == u'':
+            data = 2013
+        return data
+
+    def clean_annee_premiere_inscription_p8(self):
+        data = self.cleaned_data['annee_premiere_inscription_p8']
+        if data != u'' and self.instance.individu.annee_obtention > data:
+            raise forms.ValidationError(u"Vous avez choisi une date inférieure à celle de votre bac")
+        if data == u'':
+            data = 2013
+        return data
+
+    def clean_annee_premiere_inscription_universite_fr(self):
+        data = self.cleaned_data['annee_premiere_inscription_universite_fr']
+        if data != u'' and self.instance.individu.annee_obtention > data:
+            raise forms.ValidationError(u"Vous avez choisi une date inférieure à celle de votre bac")
+        if data == u'':
+            data = 2013
+        return data
+
+    def clean_premier_universite_fr(self):
+        data = self.cleaned_data['premier_universite_fr']
+        if data is None:
+            data = Etablissement.objects.get(cod_etb='0931827F')
+        return data
+
+    class Meta:
+        model = DossierInscription
+        fields= ("premier_universite_fr",
+                 "annee_premiere_inscription_p8",
+                 "annee_premiere_inscription_universite_fr",
+                 "annee_premiere_inscription_enseignement_sup_fr",
+                 'id',
+        )
+
+
+class ComplementBacForm(GenericEtablissement):
+    bac = forms.ModelChoiceField(queryset=
+        BacOuxEqu.objects.all(),
+        label=u"Bac ou équivalent",
+    )
+
+    annee_bac = forms.ChoiceField(
+        choices=[(u'', u'-------')] + [(unicode(i), unicode(i)) for i in range(datetime.today().year - 70,
+                                                                    datetime.today().year + 1)],
+        label=u"Année d'obtention",
+        help_text=u"(Année d'obtention du baccalauréat ou équivalent)",
+        required=True
+    )
+    etablissement_bac = ETABLISSEMENT
+
+    mention_bac = forms.ModelChoiceField(
+        label=u"Renseignez la mention qui vous a été attribuée lors de l'obtention de votre baccalauréat :",
+        help_text=u"Seulement si vous avez un baccalauréat",
+        queryset=MentionBac.objects.filter(tem_en_sve_mnb='O'),
+        required=False
+    )
+    def clean_annee_bac(self):
+        data = self.cleaned_data['annee_bac']
+        if (self.instance.individu.birthday.year + 15) >  int(data):
+            raise forms.ValidationError(
+                    u"Vous avez saisi une date d'obtention du bac incorect vis à vis de votre date de naissance"
+            )
+        return data
+
+    class Meta:
+        model = DossierInscription
+        fields = ('bac', 'annee_bac', 'etablissement_bac', 'mention_bac')
+
+
+class CatSocForm(forms.ModelForm):
+    cat_soc_etu = forms.ModelChoiceField(
+        label=u"Votre activité professionnelle :",
+        queryset=CatSocPfl.objects.filter(tem_en_sve_pcs='O').order_by
+            ('-lib_web_pcs'),
+    )
+    cat_soc_chef_famille = forms.ModelChoiceField(
+        label=u"L'activité professionnelle du père:",
+        queryset=CatSocPfl.objects.filter(tem_en_sve_pcs='O').order_by
+            ('lib_web_pcs'),
+        empty_label=u"Aucune",
+        required=False,
+    )
+    cat_soc_autre_parent = forms.ModelChoiceField(
+        label=u"L'activité professionnelle de la mère :",
+        queryset=CatSocPfl.objects.filter(tem_en_sve_pcs='O').order_by
+            ('lib_web_pcs'),
+        empty_label=u"Aucune",
+        required=False,
+    )
+    sportif_haut_niveau = forms.NullBooleanField(
+        label=u"Etes vous sportif de haut niveau :",
+        help_text=u"Vous devrez joindre les justificatifs le cas échéant.",
+
+        widget=forms.Select(
+            choices=(("", "-----"), ("True", "Oui"), ("False", "Non")),
+            attrs={'class': 'required auto'}
+        )
+    )
+    cat_travail = forms.ModelChoiceField(
+        queryset=DomaineActPfl.objects.filter(lib_web_dap__isnull=False),
+        label=u"Domaine d'activité",
+        required=False,
+        help_text=u"Uniquement si vous travaillez"
+    )
+    quotite_travail = forms.ModelChoiceField(
+        label=u"Votre quotité de travail :",
+        queryset=QuotiteTra.objects.filter(tem_en_sve_qtr='O'),
+        widget=forms.Select(attrs={'class': 'auto'}),
+        empty_label=u"Ne travaille pas",
+        required=False
+    )
+
+    class Meta:
+        model = DossierInscription
+        fields = (
+           'cat_soc_etu',
+            'cat_soc_chef_famille',
+            'cat_soc_autre_parent',
+
+            'sportif_haut_niveau',
+            'quotite_travail',
+           'cat_travail'
+        )
+
+
+class DernierEtablissementForm(GenericEtablissement):
+    annee_dernier_etablissement = forms.ChoiceField(
+        label=u"Année :",
+        choices=ANNEE,
+    )
+
+    dernier_etablissement = ETABLISSEMENT
+
+
+
+    class Meta:
+        model = DossierInscription
+        fields = ('annee_dernier_etablissement', 'type_etablissement', 'dernier_etablissement')
+
+
+class SituationAnneePrecedenteForm(forms.ModelForm):
+    sise_annee_precedente = forms.ModelChoiceField(
+        queryset=SituationSise.objects.filter(tem_en_sve_sis='O').order_by('-lib_sis'),
+        label=u"Indiquez votre situation l’année précédente :",
+    )
+
+    class Meta:
+        model = DossierInscription
+        fields = ('sise_annee_precedente',)
+
+
+class EtablissementSituationAnneePrecedenteForm(GenericEtablissement):
+    etablissement_annee_precedente = ETABLISSEMENT
+
+    class Meta:
+        model = DossierInscription
+        fields = ('type_etablissement', 'etablissement_annee_precedente',)
+
+class EtablissementDernierDiplomeForm(GenericEtablissement):
+    type_dernier_diplome = forms.ModelChoiceField(
+        queryset=TypeDiplomeExt.objects.filter(tem_en_sve_tde='O').order_by('lib_tde'),
+        label=u"Dernier diplome obtenu :",
+        help_text=u"Quel est le dernier diplôme que vous avez obtenu ?"
+    )
+    annee_dernier_diplome = forms.ChoiceField(
+        label=u"Année d'obtention :",
+        choices=ANNEE,
+        help_text=u"Exemple :  si diplôme obtenu en juin 2012, indiquer 2011/2012.",
+        widget=forms.Select(attrs={'class': 'required auto'}),
+    )
+    etablissement_dernier_diplome = ETABLISSEMENT
+
+    class Meta:
+        model = DossierInscription
+        fields = (
+            'type_dernier_diplome',
+            'annee_dernier_diplome',
+            'type_etablissement',
+            'etablissement_dernier_diplome',
+        )
+
+
+class TestAutreEtablissementForm(forms.ModelForm ):
+    autre_eta = forms.NullBooleanField(
+        label=u"Indiquez si vous êtes inscrit dans un autre établissement d'enseignement pour l'année en cours :",
+        help_text=u"Fréquentez-vous un autre établissement pour l’année en cours ?",
+        widget=forms.Select(
+            choices=(("", "-----"), ("True", "Oui"), ("False", "Non")),
+        )
+    )
+
+    class Meta:
+        model = DossierInscription
+        fields = (
+            'autre_eta',
+        )
+
+
+class AutreEtablissementForm(GenericEtablissement):
+    autre_etablissement = ETABLISSEMENT
+
+    class Meta:
+        model = DossierInscription
+        fields = (
+            'type_etablissement',
+            'autre_etablissement',
+        )
+
+
+
+class ValidationForm(forms.ModelForm):
+    valider = forms.CharField()
+
+    class Meta:
+        model = DossierInscription
+        fields = ('id',)
+
+
+class SituationSocialeForm(forms.ModelForm):
+    situation_sociale = forms.ModelChoiceField(
+        label=u"Votre situation sociale :",
+        queryset=SitSociale.objects.all(),
+        help_text=u'(sur présentation des justificatifs)',
+        required=True,
+    )
+    echelon = forms.CharField(
+        label=u"Echelon :",
+        max_length=2,
+        required=False,
+        widget=forms.TextInput(attrs={"value_toggle": 'BO', 'toggle_field': 'situation_sociale'}),
+    )
+    num_boursier = forms.CharField(
+        label=u"N° de boursier :",
+        max_length=13,
+        required=False,
+        widget=forms.TextInput(attrs={"value_toggle": 'BO', 'toggle_field': 'situation_sociale'}),
+    )
+    boursier_crous = forms.NullBooleanField(
+        label=u"Bousier du Crous de l'année précédente :",
+        required=False,
+        widget=forms.Select(
+            choices=(("", "-----"), ("True", u"Oui"), ("False", u"Non")),
+            attrs={"value_toggle": 'BO', 'toggle_field': 'situation_sociale'}
+        )
+    )
+    class Meta:
+        model = DossierInscription
+        fields =(
+            'situation_sociale',
+            'echelon',
+            'num_boursier',
+            'boursier_crous',
+        )
+
+class SecuriteSocialeForm(forms.ModelForm):
+    affiliation_parent = forms.ModelChoiceField(
+        label=u"Affiliation au régime de sécurité sociale des parents :",
+        help_text=u"Vous devrez fournir des justificatifs.",
+        queryset=RegimeParent.objects.all(),
+        empty_label=u"Aucune",
+        required=False
+    )
+
+    non_affiliation = forms.ModelChoiceField(
+        label=u"Cas de non affiliation au régime de sécurité sociale des étudiants (salarié, +28 ans ...)",
+        help_text=u"Vous devrez fournir des justificatifs.",
+        queryset=MtfNonAflSso.objects.all(),
+        empty_label=u"Aucun",
+        required=False
+    )
+
+    centre_payeur = forms.ChoiceField(
+        label=u"Indiquez votre centre payeur :",
+        choices=(('', '------'), ('SMEREP', 'SMEREP'), ('LMDE', 'LMDE')),
+        required=False,
+        widget=forms.Select(attrs={"value_toggle": '', 'toggle_field': 'non_affiliation'})
+    )
+
+    class Meta:
+        model = DossierInscription
+        fields = (
+           'affiliation_parent',
+            'non_affiliation',
+            'num_secu',
+            'centre_payeur',
+        )
+
+
+class NumSecuForm(forms.ModelForm):
+    num_secu = forms.CharField(
+        label=u"Votre numéro de sécurité sociale :",
+        max_length=15,
+        min_length=5,
+    )
+
+    class Meta:
+        model = DossierInscription
+        fields = (
+             'num_secu',
+        )
+
+

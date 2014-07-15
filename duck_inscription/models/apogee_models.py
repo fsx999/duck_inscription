@@ -13,7 +13,6 @@ from duck_inscription.managers import SettingAnneeUniManager
 class SettingAnneeUni(AnneeUni):
     inscription = models.BooleanField(default=False)
     objects = SettingAnneeUniManager()
-
     class Meta:
         app_label = 'duck_inscription'
         verbose_name = 'Setting année universitaire'
@@ -38,6 +37,10 @@ class SettingsEtape(Etape):
     date_fermeture_equivalence = models.DateTimeField(null=True, blank=True)
     date_ouverture_candidature = models.DateTimeField(null=True, blank=True)
     date_fermeture_candidature = models.DateTimeField(null=True, blank=True)
+    date_ouverture_inscription = models.DateTimeField(null=True, blank=True)
+    date_fermeture_inscription = models.DateTimeField(null=True, blank=True)
+    date_fermeture_reinscription = models.DateTimeField(null=True, blank=True)
+
     label_formation = models.CharField(max_length=120, null=True, blank=True)
     annee = models.ForeignKey(SettingAnneeUni, default=2014)
     document_equivalence = models.FileField(upload_to='document_equivalence',

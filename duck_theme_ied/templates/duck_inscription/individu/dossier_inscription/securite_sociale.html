@@ -1,0 +1,14 @@
+{% load floppyforms %}
+<div class="well">
+    <div class="alert alert-info">Si vous avez moins de 28 ans et que vous êtes affiliés à la sécurité sociale de vos parents, veuillez choisir une situation ci-dessous</div>
+{% formrow form.affiliation_parent %}
+</div>
+<div class="well">
+    <div class="alert alert-info">Si vous avez moins de 28 ans et que vous ne devez pas être affiliés à la sécurité sociale étudiante Veuillez choisir un cas si dessous</div>
+
+{% formrow form.non_affiliation %}
+</div>
+<div class="well">
+    <div class="alert alert-info">Dans tous les autres cas, vous devez choisir une caisse de sécurité sociale.</div>
+{% formrow form.centre_payeur %}
+</div>

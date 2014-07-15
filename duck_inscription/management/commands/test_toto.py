@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from datetime import datetime
 
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -18,19 +19,6 @@ APOGEE_CONNECTION = getattr(settings, 'APOGEE_CONNECTION', 'oracle')
 class Command(BaseCommand):
     def handle(self, *args, **options):
         # on récupére les personnes du jour (soit la date de création, de modif plus grand que la veille
-        text = u"""
-        Bonjour,
-
-        Suite à des retards techniques, nous ne sommes pas en mesure d'ouvrir les inscriptions à la date du 8 juillet.
-
-        Nous remettons cette ouverture au 17 juillet en fin de matinée.
-
-        Veuillez nous excuser pour la gêne occasionnée.
-
-        L'équipe informatique de l'IED.
-        """
-        for user in User.objects.filter(is_staff=False):
-            send_mail(u"[IED]Inscription retardée", text, 'nepasrepondre@iedparis8.net', [user.email])
-
-
-
+        for x in SettingsEtape.objects.filter(annee__cod_anu=2014):
+            x.date_ouverture_inscription = x.date_fermeture_reinscription = datetime.now()
+            x.save()
