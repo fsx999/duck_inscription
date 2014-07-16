@@ -8,16 +8,54 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
+        # Adding field 'SettingsEtape.droit'
+        db.add_column(u'duck_inscription_settingsetape', 'droit',
+                      self.gf('django.db.models.fields.FloatField')(default=186),
+                      keep_default=False)
 
-        # Changing field 'Wish.centre_gestion'
-        db.delete_column(u'duck_inscription_wish', 'centre_gestion_id')
-        db.add_column(u'duck_inscription_wish', 'centre_gestion',
-                      self.gf('django.db.models.fields.related.ForeignKey')(to=orm['duck_inscription.CentreGestionModel'], null=True))
+        # Adding field 'SettingsEtape.frais'
+        db.add_column(u'duck_inscription_settingsetape', 'frais',
+                      self.gf('django.db.models.fields.FloatField')(default=1596),
+                      keep_default=False)
+
+        # Adding field 'SettingsEtape.nb_paiement'
+        db.add_column(u'duck_inscription_settingsetape', 'nb_paiement',
+                      self.gf('django.db.models.fields.IntegerField')(default=3),
+                      keep_default=False)
+
+        # Adding field 'SettingsEtape.demi_tarif'
+        db.add_column(u'duck_inscription_settingsetape', 'demi_tarif',
+                      self.gf('django.db.models.fields.BooleanField')(default=False),
+                      keep_default=False)
+
+        # Adding field 'SettingsEtape.semestre'
+        db.add_column(u'duck_inscription_settingsetape', 'semestre',
+                      self.gf('django.db.models.fields.BooleanField')(default=False),
+                      keep_default=False)
+
+
+        # Changing field 'Wish.state'
+        db.alter_column(u'duck_inscription_wish', 'state', self.gf(u'django_xworkflows.models.StateField')(max_length=25, workflow=__import__('xworkflows', globals(), locals()).base.WorkflowMeta('WishWorkflow', (), {'states': (('creation', 'creation'), ('ouverture_equivalence', 'ouverture_equivalence'), ('liste_diplome', 'liste_diplome'), ('demande_equivalence', 'demande_equivalence'), ('equivalence', 'equivalence'), ('liste_attente_equivalence', 'liste_attente_equivalence'), ('ouverture_candidature', 'ouverture_candidature'), ('note_master', 'note_master'), ('candidature', 'candidature'), ('liste_attente_candidature', 'liste_attente_candidature'), ('ouverture_inscription', 'ouverture_inscription'), ('dossier_inscription', 'dossier_inscription'), ('choix_ied_fp', 'choix_ied_fp'), ('droit_univ', 'droit_univ')), 'initial_state': 'creation'})))
 
     def backwards(self, orm):
+        # Deleting field 'SettingsEtape.droit'
+        db.delete_column(u'duck_inscription_settingsetape', 'droit')
 
-        # Changing field 'Wish.centre_gestion'
-        pass
+        # Deleting field 'SettingsEtape.frais'
+        db.delete_column(u'duck_inscription_settingsetape', 'frais')
+
+        # Deleting field 'SettingsEtape.nb_paiement'
+        db.delete_column(u'duck_inscription_settingsetape', 'nb_paiement')
+
+        # Deleting field 'SettingsEtape.demi_tarif'
+        db.delete_column(u'duck_inscription_settingsetape', 'demi_tarif')
+
+        # Deleting field 'SettingsEtape.semestre'
+        db.delete_column(u'duck_inscription_settingsetape', 'semestre')
+
+
+        # Changing field 'Wish.state'
+        db.alter_column(u'duck_inscription_wish', 'state', self.gf(u'django_xworkflows.models.StateField')(max_length=25, workflow=__import__('xworkflows', globals(), locals()).base.WorkflowMeta('WishWorkflow', (), {'states': (('creation', 'creation'), ('ouverture_equivalence', 'ouverture_equivalence'), ('liste_diplome', 'liste_diplome'), ('demande_equivalence', 'demande_equivalence'), ('equivalence', 'equivalence'), ('liste_attente_equivalence', 'liste_attente_equivalence'), ('ouverture_candidature', 'ouverture_candidature'), ('note_master', 'note_master'), ('candidature', 'candidature'), ('liste_attente_candidature', 'liste_attente_candidature'), ('ouverture_inscription', 'ouverture_inscription'), ('dossier_inscription', 'dossier_inscription'), ('choix_ied_fp', 'choix_ied_fp')), 'initial_state': 'creation'})))
 
     models = {
         u'auth.group': {
@@ -346,12 +384,26 @@ class Migration(SchemaMigration):
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'label': ('django.db.models.fields.CharField', [], {'max_length': '100'})
         },
+        'duck_inscription.moyenpaiementmodel': {
+            'Meta': {'object_name': 'MoyenPaiementModel', 'db_table': "u'pal_moyen_paiement'"},
+            'label': ('django.db.models.fields.CharField', [], {'max_length': '60'}),
+            'type': ('django.db.models.fields.CharField', [], {'max_length': '3', 'primary_key': 'True'})
+        },
         'duck_inscription.notemastermodel': {
             'Meta': {'object_name': 'NoteMasterModel'},
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'moyenne_general': ('django.db.models.fields.FloatField', [], {'null': 'True', 'blank': 'True'}),
             'note_memoire': ('django.db.models.fields.FloatField', [], {'null': 'True', 'blank': 'True'}),
             'note_stage': ('django.db.models.fields.FloatField', [], {'null': 'True', 'blank': 'True'}),
+            'wish': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['duck_inscription.Wish']", 'unique': 'True'})
+        },
+        'duck_inscription.paiementallmodel': {
+            'Meta': {'object_name': 'PaiementAllModel'},
+            'demi_annee': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
+            'etape': ('django.db.models.fields.CharField', [], {'default': "'droit_univ'", 'max_length': '20'}),
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'moyen_paiement': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['duck_inscription.MoyenPaiementModel']", 'null': 'True'}),
+            'nb_paiement_frais': ('django.db.models.fields.IntegerField', [], {'default': '1'}),
             'wish': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['duck_inscription.Wish']", 'unique': 'True'})
         },
         u'duck_inscription.settinganneeuni': {
@@ -370,23 +422,33 @@ class Migration(SchemaMigration):
             'date_ouverture_candidature': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'}),
             'date_ouverture_equivalence': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'}),
             'date_ouverture_inscription': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'}),
+            'demi_tarif': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'diplome': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['duck_inscription.DiplomeEtape']", 'null': 'True', 'blank': 'True'}),
             'document_candidature': ('django.db.models.fields.files.FileField', [], {'max_length': '100', 'null': 'True', 'blank': 'True'}),
             'document_equivalence': ('django.db.models.fields.files.FileField', [], {'max_length': '100', 'null': 'True', 'blank': 'True'}),
+            'droit': ('django.db.models.fields.FloatField', [], {'default': '186'}),
             u'etape_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': u"orm['django_apogee.Etape']", 'unique': 'True', 'primary_key': 'True'}),
+            'frais': ('django.db.models.fields.FloatField', [], {'default': '1596'}),
             'grille_de_equivalence': ('django.db.models.fields.files.FileField', [], {'max_length': '100', 'null': 'True', 'blank': 'True'}),
             'is_inscription_ouverte': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
             'label': ('django.db.models.fields.CharField', [], {'max_length': '120', 'null': 'True'}),
             'label_formation': ('django.db.models.fields.CharField', [], {'max_length': '120', 'null': 'True', 'blank': 'True'}),
+            'nb_paiement': ('django.db.models.fields.IntegerField', [], {'default': '3'}),
             'note_maste': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'path_template_equivalence': ('django.db.models.fields.CharField', [], {'max_length': '1000', 'null': 'True', 'blank': 'True'}),
-            'required_equivalence': ('django.db.models.fields.BooleanField', [], {'default': 'True'})
+            'required_equivalence': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
+            'semestre': ('django.db.models.fields.BooleanField', [], {'default': 'False'})
         },
         u'duck_inscription.settingsuser': {
             'Meta': {'object_name': 'SettingsUser'},
             'etapes': ('django.db.models.fields.related.ManyToManyField', [], {'related_name': "u'etapes'", 'symmetrical': 'False', 'to': u"orm['duck_inscription.SettingsEtape']"}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'user': ('django.db.models.fields.related.OneToOneField', [], {'related_name': "u'setting_user'", 'unique': 'True', 'to': u"orm['auth.User']"})
+        },
+        'duck_inscription.typepaiementmodel': {
+            'Meta': {'object_name': 'TypePaiementModel', 'db_table': "u'pal_type_paiement'"},
+            'label': ('django.db.models.fields.CharField', [], {'max_length': '40'}),
+            'type': ('django.db.models.fields.CharField', [], {'max_length': '5', 'primary_key': 'True'})
         },
         'duck_inscription.wish': {
             'Meta': {'object_name': 'Wish'},
@@ -399,7 +461,7 @@ class Migration(SchemaMigration):
             'etape': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['duck_inscription.SettingsEtape']", 'null': 'True'}),
             'individu': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'wishes'", 'null': 'True', 'to': u"orm['duck_inscription.Individu']"}),
             'is_reins': ('django.db.models.fields.NullBooleanField', [], {'default': 'None', 'null': 'True', 'blank': 'True'}),
-            'state': (u'django_xworkflows.models.StateField', [], {'default': "'creation'", 'max_length': '25', u'workflow': u"__import__('xworkflows', globals(), locals()).base.WorkflowMeta('WishWorkflow', (), {'states': (('creation', 'creation'), ('ouverture_equivalence', 'ouverture_equivalence'), ('liste_diplome', 'liste_diplome'), ('demande_equivalence', 'demande_equivalence'), ('equivalence', 'equivalence'), ('liste_attente_equivalence', 'liste_attente_equivalence'), ('ouverture_candidature', 'ouverture_candidature'), ('note_master', 'note_master'), ('candidature', 'candidature'), ('liste_attente_candidature', 'liste_attente_candidature'), ('ouverture_inscription', 'ouverture_inscription'), ('dossier_inscription', 'dossier_inscription'), ('choix_ied_fp', 'choix_ied_fp')), 'initial_state': 'creation'})"}),
+            'state': (u'django_xworkflows.models.StateField', [], {'default': "'creation'", 'max_length': '25', u'workflow': u"__import__('xworkflows', globals(), locals()).base.WorkflowMeta('WishWorkflow', (), {'states': (('creation', 'creation'), ('ouverture_equivalence', 'ouverture_equivalence'), ('liste_diplome', 'liste_diplome'), ('demande_equivalence', 'demande_equivalence'), ('equivalence', 'equivalence'), ('liste_attente_equivalence', 'liste_attente_equivalence'), ('ouverture_candidature', 'ouverture_candidature'), ('note_master', 'note_master'), ('candidature', 'candidature'), ('liste_attente_candidature', 'liste_attente_candidature'), ('ouverture_inscription', 'ouverture_inscription'), ('dossier_inscription', 'dossier_inscription'), ('choix_ied_fp', 'choix_ied_fp'), ('droit_univ', 'droit_univ')), 'initial_state': 'creation'})"}),
             'suivi_dossier': (u'django_xworkflows.models.StateField', [], {'default': "'inactif'", 'max_length': '21', u'workflow': u"__import__('xworkflows', globals(), locals()).base.WorkflowMeta('SuiviDossierWorkflow', (), {'states': (('inactif', 'inactif'), ('equivalence_reception', 'equivalence_reception'), ('equivalence_complet', 'equivalence_complet'), ('equivalence_incomplet', 'equivalence_incomplet'), ('equivalence_traite', 'equivalence_traite'), ('equivalence_refuse', 'equivalence_refuse'), ('candidature_reception', 'candidature_reception'), ('candidature_complet', 'candidature_complet'), ('candidature_incomplet', 'candidature_incomplet'), ('candidature_traite', 'candidature_traite'), ('inscription_reception', 'inscription_reception'), ('inscription_complet', 'inscription_complet'), ('inscription_incomplet', 'inscription_incomplet'), ('inscription_traite', 'inscription_traite')), 'initial_state': 'inactif'})"}),
             'valide': ('django.db.models.fields.BooleanField', [], {'default': 'False'})
         },

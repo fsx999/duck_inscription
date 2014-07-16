@@ -8,16 +8,42 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
+        # Adding model 'PaiementAllModel'
+        db.create_table(u'duck_inscription_paiementallmodel', (
+            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('wish', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['duck_inscription.Wish'], unique=True)),
+            ('moyen_paiement', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['duck_inscription.MoyenPaiementModel'], null=True)),
+            ('nb_paiement_frais', self.gf('django.db.models.fields.IntegerField')(default=1)),
+            ('etape', self.gf('django.db.models.fields.CharField')(default='droit_univ', max_length=20)),
+            ('demi_annee', self.gf('django.db.models.fields.BooleanField')(default=False)),
+        ))
+        db.send_create_signal('duck_inscription', ['PaiementAllModel'])
 
-        # Changing field 'Wish.centre_gestion'
-        db.delete_column(u'duck_inscription_wish', 'centre_gestion_id')
-        db.add_column(u'duck_inscription_wish', 'centre_gestion',
-                      self.gf('django.db.models.fields.related.ForeignKey')(to=orm['duck_inscription.CentreGestionModel'], null=True))
+        # Adding model 'TypePaiementModel'
+        db.create_table(u'pal_type_paiement', (
+            ('type', self.gf('django.db.models.fields.CharField')(max_length=5, primary_key=True)),
+            ('label', self.gf('django.db.models.fields.CharField')(max_length=40)),
+        ))
+        db.send_create_signal('duck_inscription', ['TypePaiementModel'])
+
+        # Adding model 'MoyenPaiementModel'
+        db.create_table(u'pal_moyen_paiement', (
+            ('type', self.gf('django.db.models.fields.CharField')(max_length=3, primary_key=True)),
+            ('label', self.gf('django.db.models.fields.CharField')(max_length=60)),
+        ))
+        db.send_create_signal('duck_inscription', ['MoyenPaiementModel'])
+
 
     def backwards(self, orm):
+        # Deleting model 'PaiementAllModel'
+        db.delete_table(u'duck_inscription_paiementallmodel')
 
-        # Changing field 'Wish.centre_gestion'
-        pass
+        # Deleting model 'TypePaiementModel'
+        db.delete_table(u'pal_type_paiement')
+
+        # Deleting model 'MoyenPaiementModel'
+        db.delete_table(u'pal_moyen_paiement')
+
 
     models = {
         u'auth.group': {
@@ -346,12 +372,26 @@ class Migration(SchemaMigration):
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'label': ('django.db.models.fields.CharField', [], {'max_length': '100'})
         },
+        'duck_inscription.moyenpaiementmodel': {
+            'Meta': {'object_name': 'MoyenPaiementModel', 'db_table': "u'pal_moyen_paiement'"},
+            'label': ('django.db.models.fields.CharField', [], {'max_length': '60'}),
+            'type': ('django.db.models.fields.CharField', [], {'max_length': '3', 'primary_key': 'True'})
+        },
         'duck_inscription.notemastermodel': {
             'Meta': {'object_name': 'NoteMasterModel'},
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'moyenne_general': ('django.db.models.fields.FloatField', [], {'null': 'True', 'blank': 'True'}),
             'note_memoire': ('django.db.models.fields.FloatField', [], {'null': 'True', 'blank': 'True'}),
             'note_stage': ('django.db.models.fields.FloatField', [], {'null': 'True', 'blank': 'True'}),
+            'wish': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['duck_inscription.Wish']", 'unique': 'True'})
+        },
+        'duck_inscription.paiementallmodel': {
+            'Meta': {'object_name': 'PaiementAllModel'},
+            'demi_annee': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
+            'etape': ('django.db.models.fields.CharField', [], {'default': "'droit_univ'", 'max_length': '20'}),
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'moyen_paiement': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['duck_inscription.MoyenPaiementModel']", 'null': 'True'}),
+            'nb_paiement_frais': ('django.db.models.fields.IntegerField', [], {'default': '1'}),
             'wish': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['duck_inscription.Wish']", 'unique': 'True'})
         },
         u'duck_inscription.settinganneeuni': {
@@ -387,6 +427,11 @@ class Migration(SchemaMigration):
             'etapes': ('django.db.models.fields.related.ManyToManyField', [], {'related_name': "u'etapes'", 'symmetrical': 'False', 'to': u"orm['duck_inscription.SettingsEtape']"}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'user': ('django.db.models.fields.related.OneToOneField', [], {'related_name': "u'setting_user'", 'unique': 'True', 'to': u"orm['auth.User']"})
+        },
+        'duck_inscription.typepaiementmodel': {
+            'Meta': {'object_name': 'TypePaiementModel', 'db_table': "u'pal_type_paiement'"},
+            'label': ('django.db.models.fields.CharField', [], {'max_length': '40'}),
+            'type': ('django.db.models.fields.CharField', [], {'max_length': '5', 'primary_key': 'True'})
         },
         'duck_inscription.wish': {
             'Meta': {'object_name': 'Wish'},
