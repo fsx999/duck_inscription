@@ -13,6 +13,7 @@ from duck_inscription.managers import SettingAnneeUniManager
 class SettingAnneeUni(AnneeUni):
     inscription = models.BooleanField(default=False)
     objects = SettingAnneeUniManager()
+
     class Meta:
         app_label = 'duck_inscription'
         verbose_name = 'Setting année universitaire'
@@ -51,6 +52,12 @@ class SettingsEtape(Etape):
     path_template_equivalence = models.CharField('Path Template Equivalence', max_length=1000, null=True, blank=True)
     grille_de_equivalence = models.FileField(upload_to='grilles_evaluations', null=True, blank=True,
                                              verbose_name="Grille evaluations")
+
+    droit = models.FloatField(u"Droit", default=186)
+    frais = models.FloatField(u"Frais", default=1596)
+    nb_paiement = models.IntegerField(u"Nombre paiement", default=3)
+    demi_tarif = models.BooleanField(u"Demi tarif en cas de réins", default=False)
+    semestre = models.BooleanField(u"Demie année", default=False)
 
     class Meta:
         app_label = 'duck_inscription'
@@ -100,3 +107,17 @@ class CursusEtape(models.Model):
 
     def __str__(self):
         return self.label or ''
+
+
+@python_2_unicode_compatible
+class CentreGestionModel(models.Model):
+    centre_gestion = models.CharField('', max_length=3)
+    label = models.CharField(max_length=100)
+
+    class Meta:
+        verbose_name = u"Centre de gestion"
+        verbose_name_plural = u"Centres de gestion"
+        app_label = "duck_inscription"
+
+    def __str__(self):
+        return unicode(self.label)

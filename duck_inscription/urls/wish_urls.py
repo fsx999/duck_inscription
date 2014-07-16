@@ -4,7 +4,8 @@ from django.contrib.auth.decorators import login_required
 from duck_inscription.utils import wish_verif_etape_and_login
 from duck_inscription.views import NewWishView, StepView, ListeDiplomeAccesView, DemandeEquivalenceView, \
     EquivalenceView, DeleteWish, OuvertureCandidature, OuvertureEquivalence, OuverturePaiementView, EquivalencePdfView, \
-    ListeAttenteEquivalenceView, NoteMasterView, CandidatureView, CandidaturePdfView, ListeAttenteCandidatureView
+    ListeAttenteEquivalenceView, NoteMasterView, CandidatureView, CandidaturePdfView, ListeAttenteCandidatureView, \
+    ChoixIedFpView, DroitView
 
 
 urlpatterns = patterns('', url(r'^nouveau_voeu/$', login_required(NewWishView.as_view()), name='new_wish'),
@@ -42,11 +43,11 @@ urlpatterns = patterns('', url(r'^nouveau_voeu/$', login_required(NewWishView.as
                                                         name="liste_attente_candidature"),
                        url(r'^ouverture_inscription/(?P<pk>\d+)/$',
                            wish_verif_etape_and_login(OuverturePaiementView.as_view()), name="ouverture_inscription"),
-                       #                        url(r'^choix_ied_fp/(?P<pk>\d+)/$', wish_verif_etape_and_login(ChoixIedFpView.as_view()),
-                       #                            name="choix_ied_fp"),
-                       #                        url(r'^droit_univ/(?P<pk>\d+)/$',
-                       #                            wish_verif_etape_and_login(DroitView.as_view()),
-                       #                            name="droit_universitaire"),
+                       url(r'^choix_ied_fp/(?P<pk>\d+)/$', wish_verif_etape_and_login(ChoixIedFpView.as_view()),
+                                                  name="choix_ied_fp"),
+                      url(r'^droit_univ/(?P<pk>\d+)/$',
+                                                  wish_verif_etape_and_login(DroitView.as_view()),
+                                                  name="droit_univ"),
                        #                        url(r'^inscription/(?P<pk>\d+)/$', wish_verif_etape_and_login(InscriptionView.as_view()),
                        #                            name="inscription"),
                        #                        url(r'^liste_attente_inscription/(?P<pk>\d+)/$',

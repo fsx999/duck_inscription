@@ -9,15 +9,16 @@ from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.template import RequestContext
 from django.template.loader import render_to_string
-from django.views.generic import TemplateView, View
+from django.views.generic import TemplateView, View, UpdateView
 from django.views.generic.edit import FormView
 from floppyforms import ModelChoiceField
 from wkhtmltopdf.views import PDFTemplateResponse, PDFTemplateView
 import xworkflows
 import json
 from duck_inscription.forms import WishGradeForm, ListeDiplomeAccesForm, DemandeEquivalenceForm, \
-    ListeAttenteEquivalenceForm, NoteMasterForm, ListeAttenteCandidatureForm
-from duck_inscription.models import Wish, SettingsEtape, NoteMasterModel
+    ListeAttenteEquivalenceForm, NoteMasterForm, ListeAttenteCandidatureForm, ChoixPaiementDroitForm, DemiAnneeForm, \
+    NbPaiementPedaForm, ValidationPaiementForm
+from duck_inscription.models import Wish, SettingsEtape, NoteMasterModel, CentreGestionModel, PaiementAllModel
 from xhtml2pdf import pdf as pisapdf
 from xhtml2pdf import pisa
 from duck_inscription.templatetags.lib_inscription import annee_en_cour
@@ -319,66 +320,66 @@ class OuverturePaiementView(TemplateView):
     def get(self, request, *args, **kwargs):
         context = self.get_context_data(**kwargs)
         wish = context['wish']
-        # if wish.etape == 'ouverture_paiement' or wish.dispatch_etape == 'ouverture_paiement' and wish.etape != wish.dispatch_etape:
-        # wish.etape = wish.dispatch_etape = 'ouverture_paiement'
-        #     wish.save()
-        # if wish.dispatch():
-        #
-        #     return redirect(wish.get_absolute_url())
+        try:
+
+            wish.dossier_inscription()
+            return redirect(wish.get_absolute_url())
+        except xworkflows.ForbiddenTransition as e:
+            pass
         return self.render_to_response(context)
 
-#
-#
-# class ChoixIedFpView(TemplateView):
-# template_name = "wish/choix_ied_fp.html"
-#
-#     def get(self, request, *args, **kwargs):
-#         centre = self.request.GET.get('centre', None)
-#         if centre in ['ied', 'fp']:
-#             wish = self.request.user.individu.wishes.get(pk=self.kwargs['pk'])
-#             wish.centre_gestion = CentreGestionModel.objects.get(centre_gestion=centre)
-#             wish.dispatch()
-#             return redirect(wish.get_absolute_url())
-#         return super(ChoixIedFpView, self).get(request, *args, **kwargs)
-#
-#
-# class DroitView(UpdateView):
-#     model = PaiementAllModel
-#     template_name = "inscription/dossier_inscription/base_formulaire.html"
-#     forms = {
-#         'droit_univ': ChoixPaiementDroitForm,
-#         'choix_demi_annee': DemiAnneeForm,
-#         'nb_paiement': NbPaiementPedaForm,
-#         "recapitulatif": ValidationPaiementForm
-#     }
-#
-#     def get_template_names(self):
-#         if self.object.etape == "recapitulatif":
-#             return "inscription/wish/recapitulatif.html"
-#         return self.template_name
-#
-#     def post(self, request, *args, **kwargs):
-#         if request.POST.get('precedent', None):
-#             self.object = self.get_object()
-#             if self.object.precedente_etape():
-#                 return redirect(reverse(self.request.resolver_match.url_name, kwargs=self.kwargs))
-#         return super(DroitView, self).post(request, *args, **kwargs)
-#
-#     def get_success_url(self):
-#         if self.object.next_etape():
-#             return reverse(self.request.resolver_match.url_name, kwargs=self.kwargs)
-#         else:
-#             wish = self.request.user.individu.wishes.get(pk=self.kwargs['pk'])
-#             wish.etape = wish.dispatch_etape = 'inscription'
-#             wish.save()
-#             return wish.get_absolute_url()
-#
-#     def get_form_class(self):
-#         return self.forms[self.object.etape]
-#
-#     def get_object(self, queryset=None):
-#         wish = self.request.user.individu.wishes.get(pk=self.kwargs['pk'])
-#         return PaiementAllModel.objects.get_or_create(wish=wish)[0]
+
+
+class ChoixIedFpView(TemplateView):
+    template_name = "duck_inscription/wish/choix_ied_fp.html"
+
+    def get(self, request, *args, **kwargs):
+        centre = self.request.GET.get('centre', None)
+        if centre in ['ied', 'fp']:
+            wish = self.request.user.individu.wishes.get(pk=self.kwargs['pk'])
+            wish.centre_gestion = CentreGestionModel.objects.get(centre_gestion=centre)
+            wish.droit_univ()
+            return redirect(wish.get_absolute_url())
+        return super(ChoixIedFpView, self).get(request, *args, **kwargs)
+
+
+class DroitView(UpdateView):
+    model = PaiementAllModel
+    template_name = "duck_inscription/individu/dossier_inscription/base_formulaire.html"
+    forms = {
+        'droit_univ': ChoixPaiementDroitForm,
+        'choix_demi_annee': DemiAnneeForm,
+        'nb_paiement': NbPaiementPedaForm,
+        "recapitulatif": ValidationPaiementForm
+    }
+
+    def get_template_names(self):
+        if self.object.etape == "recapitulatif":
+            return "duck_inscription/wish/recapitulatif.html"
+        return self.template_name
+
+    def post(self, request, *args, **kwargs):
+        if request.POST.get('precedent', None):
+            self.object = self.get_object()
+            if self.object.precedente_etape():
+                return redirect(reverse(self.request.resolver_match.url_name, kwargs=self.kwargs))
+        return super(DroitView, self).post(request, *args, **kwargs)
+
+    def get_success_url(self):
+        if self.object.next_etape():
+            return reverse(self.request.resolver_match.url_name, kwargs=self.kwargs)
+        else:
+            wish = self.request.user.individu.wishes.get(pk=self.kwargs['pk'])
+            wish.etape = wish.dispatch_etape = 'inscription'
+            wish.save()
+            return wish.get_absolute_url()
+
+    def get_form_class(self):
+        return self.forms[self.object.etape]
+
+    def get_object(self, queryset=None):
+        wish = self.request.user.individu.wishes.get(pk=self.kwargs['pk'])
+        return PaiementAllModel.objects.get_or_create(wish=wish)[0]
 #
 #
 # class InscriptionView(TemplateView):

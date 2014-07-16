@@ -139,6 +139,12 @@ class Individu(xwf_models.WorkflowEnabled, models.Model):
     def __str__(self):
         return u"%s %s" % (self.last_name, self.first_name1)
 
+    def p28(self):
+        e = (date.today() - self.birthday)
+        if e.days / 365 > 28:
+            return True
+        return False
+
     def save(self, force_insert=False, force_update=False, using=None):
         if not self.code_opi:
             individus = Individu.objects.filter(code_opi__isnull=False).order_by('-code_opi')
@@ -155,6 +161,18 @@ class Individu(xwf_models.WorkflowEnabled, models.Model):
     @property
     def transitions_logs(self):
         return TransitionLog.objects.filter(content_id=self.id).order_by('timestamp')
+
+    def droit_univ(self):
+        if self.dossier_inscription.situation_sociale.pk != 'NO':
+            return False
+        return True
+
+    def need_secu(self):
+        if self.p28() or self.dossier_inscription.affiliation_parent or\
+                self.dossier_inscription.non_affiliation or self.dossier_inscription.situation_sociale.pk != 'NO':
+            return False
+        else:
+            return True
 
 
 class AdresseIndividu(models.Model):
@@ -245,6 +263,7 @@ PRECEDENT = 0
 TITLE = 1
 NEXT = 2
 
+
 class DossierInscription(models.Model):
     class Meta:
         verbose_name = "Dossier d'inscription"
@@ -275,12 +294,8 @@ class DossierInscription(models.Model):
     individu = models.OneToOneField(Individu, related_name="dossier_inscription")
 
     annee_premiere_inscription_p8 = models.CharField(null=True, max_length=4, blank=True)
-    #    annee_premiere_inscription_p8 = models.CharField(choices=ANNEE_P8, null=True, max_length=4, blank=True)
     annee_premiere_inscription_enseignement_sup_fr = models.CharField(null=True, max_length=4)
-    # annee_premiere_inscription_enseignement_sup_fr
-    #  = models.CharField(choices=ANNEE_INSCRIPTION, null=True, max_length=4)
     annee_premiere_inscription_universite_fr = models.CharField(null=True, max_length=4, blank=True)
-    #    annee_premiere_inscription_universite_fr= models.CharField(choices=ANNEE_INSCRIPTION, null=True, max_length=4)
     premier_universite_fr = models.ForeignKey(Etablissement, null=True, default=None,
                                               related_name="premiere_universite_fr", blank=True)
     bac = models.ForeignKey(BacOuxEqu, null=True, blank=True)
@@ -294,7 +309,6 @@ class DossierInscription(models.Model):
 
     annee_dernier_etablissement = models.CharField(null=True, max_length=4, blank=True)
     annee_derniere_inscription_universite_hors_p8 = models.CharField(null=True, max_length=4, blank=True)
-    #    annee_dernier_etablissement = models.CharField(choices=ANNEE, null=True, max_length=4)
     dernier_etablissement = models.ForeignKey(Etablissement, related_name="dernier_etablissement", null=True)
 
     sise_annee_precedente = models.ForeignKey(SituationSise, verbose_name="size_annee_precedente", null=True)
@@ -303,7 +317,6 @@ class DossierInscription(models.Model):
 
     type_dernier_diplome = models.ForeignKey(TypeDiplomeExt, null=True)
     annee_dernier_diplome = models.CharField(null=True, max_length=4)
-    #    annee_dernier_diplome = models.CharField(choices=ANNEE, null=True, max_length=4)
     etablissement_dernier_diplome = models.ForeignKey(Etablissement, related_name="etablissement_dernier_diplome",
                                                       null=True)
 
@@ -362,7 +375,7 @@ class DossierInscription(models.Model):
         return self.liste_etapes[self.etape][PRECEDENT]
 
     def template_name(self):
-        return 'inscription/dossier_inscription/%s.html' % self.etape
+        return 'duck_inscription/individu/dossier_inscription/%s.html' % self.etape
 
     def title(self):
         return self.liste_etapes[self.etape][TITLE]

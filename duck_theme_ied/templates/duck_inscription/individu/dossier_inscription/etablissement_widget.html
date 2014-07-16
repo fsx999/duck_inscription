@@ -1,22 +1,16 @@
-{% load i18n %}
+{% load i18n l10n %}
 {% load staticfiles %}
 {% load autocomplete_light_tags %}
 {% load url from future %}
 
 {% block widget_open %}
-<span class="autocomplete-light-widget {{ name }}
-    {% if widget.widget_js_attributes.max_values == 1 %}single{% else %}multiple{% endif %}"
-    id="{{ widget.html_id }}-wrapper"
-    {{ widget.widget_js_attributes|autocomplete_light_data_attributes }}
-    {{ widget.autocomplete_js_attributes|autocomplete_light_data_attributes:'autocomplete-' }}
-    >
+<span id="{{ widget.html_id }}-wrapper" {{ widget_attrs }} >
 {% endblock %}
 
 {% block deck %}
     {# a deck that should contain the list of selected options #}
-    {{ choices }}
-    <span id="{{ widget.html_id }}-deck" class="deck div" >
-        {% for choice in autocomplete.choices_for_values %}
+    <span id="{{ widget.html_id }}-deck" class="deck" >
+        {% for choice in choices %}
             {{ choice|autocomplete_light_choice_html:autocomplete }}
         {% endfor %}
     </span>
@@ -24,7 +18,7 @@
 
 {% block input %}
     {# a text input, that is the 'autocomplete input' #}
-    <input type="text" class="autocomplete" name="{{ name }}-autocomplete" id="{{ widget.html_id }}_text" value="" {{ extra_attrs }} />
+    <input type="text" name="{{ name }}-autocomplete" id="{{ widget.html_id }}-autocomplete" value="" {{ attrs }} />
 {% endblock %}
 
 {% block add_another %}
@@ -40,28 +34,28 @@
     {# a hidden select, that contains the actual selected values #}
     <select style="display:none" class="value-select" name="{{ name }}" id="{{ widget.html_id }}" multiple="multiple">
         {% for value in values %}
-            <option value="{{ value }}" selected="selected">{{ value }}</option>
+            <option value="{{ value|unlocalize }}" selected="selected">{{ value }}</option>
         {% endfor %}
     </select>
 {% endblock %}
 
 {% block remove_template %}
-    {# a hidden div that serves as template for the 'remove from deck' button #}
-    <span style="display:none" class="remove div">
+    {# a hidden element that serves as template for the 'remove from deck' button #}
+    <span style="display:none" class="remove">
         {# This will be appended to choices on the deck, it's the remove button #}
-        X
+        ˣ
     </span>
 {% endblock %}
 
 {% block choice_template %}
-    <span style="display:none" class="choice-template div">
+    <span style="display:none" class="choice-template">
         {% comment %}
         the contained element will be used to render options that are added to the select
         via javascript, for example in django admin with the + sign
 
         The text of the option will be inserted in the html of this tag
         {% endcomment %}
-        <span class="choice div prepend-remove append-option-html">
+        <span class="choice prepend-remove append-option-html">
         </span>
     </span>
 {% endblock %}
@@ -72,7 +66,7 @@
 
 {% block js %}
 
-    <script>
+<script>
 
 $(document).ready(function() {
     function etablisement(element){

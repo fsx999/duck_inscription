@@ -305,9 +305,9 @@ class DossierInscriptionView(UpdateView):
             return reverse('dossier_inscription', kwargs=self.kwargs)
         else:
             wish = self.request.user.individu.wishes.get(pk=self.kwargs['pk'])
-            wish.etape = 'ouverture_paiement'
-            wish.save()
-            return reverse('ouverture_paiement', kwargs=self.kwargs)
+            wish.choix_ied_fp()
+
+            return wish.get_absolute_url()
 
     def get_object(self, queryset=None):
         try:
