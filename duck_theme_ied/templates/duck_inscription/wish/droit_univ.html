@@ -1,5 +1,5 @@
 {% load floppyforms %}
-<legend>Vos droits universitaires s'élèvent à : {{ object.wish.droit_universitaire|floatformat:2 }} euros. <br>
+<legend>Vos droits universitaires s'élèvent à : {{ object.wish.droit_univ|floatformat:2 }} euros. <br>
             {% if object.wish.tarif_secu %} <legend>La sécurité sociale s'élève à  :
              {{ object.wish.tarif_secu }} euros.</legend>{%endif%}
                  </legend>
