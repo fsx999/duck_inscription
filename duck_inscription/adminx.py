@@ -19,7 +19,7 @@ from xadmin.layout import Main, Fieldset, Container, Side, Row
 from xadmin.plugins.inline import Inline
 from xadmin import views
 import xadmin
-from duck_inscription.models import Individu, SettingsEtape, WishWorkflow
+from duck_inscription.models import Individu, SettingsEtape, WishWorkflow, SettingAnneeUni
 from .models import Wish, SuiviDossierWorkflow, IndividuWorkflow, SettingsUser, CursusEtape
 from xadmin.util import User
 from xadmin.views import filter_hook, CommAdminView
@@ -407,3 +407,4 @@ xadmin.site.register(Mail)
 xadmin.site.register(Address)
 xadmin.site.register(Signature)
 xadmin.site.register(CursusEtape)
+xadmin.site.register(SettingAnneeUni)

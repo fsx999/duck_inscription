@@ -493,17 +493,15 @@ class InscriptionPdfView(TemplateView):
 
     def get_template_names(self):
         tempate_names = super(InscriptionPdfView, self).get_template_names()
-        tempate_names.append('wish/%s_pdf.html' % (self.etape,))  # permet d'avoir la meme classe pour candidature
+        tempate_names.append('duck_inscription/wish/%s_pdf.html' % (self.etape,))  # permet d'avoir la meme classe pour candidature
         return tempate_names
 
     def render_to_response(self, context, **response_kwargs):
-    #        response = HttpResponse("coucoucou")
         response = HttpResponse(mimetype='application/pdf')
         try:
             response['Content-Disposition'] = 'attachment; filename=inscription_%s.pdf' % context['wish'].etape.label
         except KeyError:
             return redirect(reverse('home'))
-            #        f = open('documents/static/inscription.pdf','w')
 
         pdf = pisapdf.pisaPDF()
         wish = context['wish']
@@ -529,27 +527,16 @@ class InscriptionPdfView(TemplateView):
             pdf.addDocument(pisa.CreatePDF(render_to_string(self.templates['formulaire_paiement_frais'], context,
                                                             context_instance=RequestContext(self.request))))
             if not wish.paiementallmodel.moyen_paiement:
-                wish.etape = wish.dispatch_etape = 'droit_universitaire'
-                wish.save()
+                wish.droit_universitaire()
                 return redirect(wish.get_absolute_url())
 
             if wish.paiementallmodel.moyen_paiement.type == 'v':
                 pdf.addDocument(pisa.CreatePDF(render_to_string(self.templates['ordre_virement'], context,
                                                                 context_instance=RequestContext(self.request))))
+        pdf.addFromFileName(wish.etape.annee.transfert_pdf.file)
+        pdf.addFromFileName(wish.etape.annee.bourse_pdf.file)
+        pdf.addFromFileName(wish.etape.annee.pieces_pdf.file)
 
-        pdf.addFromFileName(
-            os.path.join(
-                os.path.dirname(__file__),
-                '../documents/transfert.pdf').replace('\\', '/'))
-        pdf.addFromFileName(
-            os.path.join(
-                os.path.dirname(__file__),
-                '../documents/bourse.pdf').replace('\\', '/'))
-        pdf.addFromFileName(
-            os.path.join(
-                os.path.dirname(__file__),
-                '../documents/pieces.pdf').replace('\\', '/'))
-               # pdf.join(f)
         pdf.join(response)
         return response
 

@@ -13,7 +13,9 @@ from duck_inscription.managers import SettingAnneeUniManager
 class SettingAnneeUni(AnneeUni):
     inscription = models.BooleanField(default=False)
     objects = SettingAnneeUniManager()
-
+    transfert_pdf = models.FileField(upload_to='document_inscription', null=True, blank=True)
+    bourse_pdf = models.FileField(upload_to='document_inscription', null=True, blank=True)
+    pieces_pdf = models.FileField(upload_to='document_inscription', null=True, blank=True)
 
     class Meta:
         app_label = 'duck_inscription'
