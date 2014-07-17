@@ -69,8 +69,11 @@
     <br>
 
 <div>
-    Vous devez libeller votre chèque à l'ordre de : <b>{{ label|default:"Agent comptable de l'université Paris 8" }}</b>.
+Important : <br/>
+le traitement des chèques étant automatisé vous veillerez tout particulièrement à renseigner et de manière très lisible, sans rature, surcharge ou grattage , les ordre, date, signature, prix concordants en chiffres et lettres.
+    <br/>
 
+--Vous devez libeller votre chèque à l'ordre de : <strong>IED Université Paris 8.</strong>
 
     <br>
 
@@ -81,7 +84,20 @@
 </div>
 {% else %}
     <br>
-    <div>Vous devez impérativement joindre au dossier une preuve de l'émission de ce virement (extrait de compte, relevé d'opération...). Attention, les frais de virement sont à votre charge. Veillez à prévoir le versement de la somme exacte due à l'université sous peine de vous voir opposer un refus d'inscription.</div> 
+    <div>Important : <br/>
+
+vous voudrez bien programmer le virement pour acquittement des droits d'inscription universitaires à partir du <strong>04 septembre 2014.</strong><br/>
+<br/>
+--La somme est à virer sur le compte bancaire de l'IED Université Paris 8.<br/>
+
+--Vous devez impérativement joindre le récépissé d'ordre de virement établi et tamponné par votre banque. <br/>
+
+--Vous veillerez obligatoirement à faire enregistrer par votre banque l'intitulé de virement suivant :
+IED Etudiant {{ paiement_droit.wish.etape.cod_etp }} {{ individu.code_opi }} {{ individu.last_name }} 0<br/>
+
+--Les frais de commission bancaire et interbancaire requis le cas échéant pour la réalisation du virement sont à votre charge<br/>
+
+--Veillez à prévoir le versement de la somme exacte due sous peine de vous voir opposer un refus d'inscription. </div> 
 {% endif %}
 <hr>
 

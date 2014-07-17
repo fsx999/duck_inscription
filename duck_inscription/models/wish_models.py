@@ -531,7 +531,7 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
             return date
         else:
             return self.etape.date_fermeture_inscription
-    #
+
     def droit_total(self):
         return float(self.droit_univ() + self.tarif_secu())
 

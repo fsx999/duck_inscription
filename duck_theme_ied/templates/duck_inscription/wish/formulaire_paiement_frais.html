@@ -64,6 +64,7 @@
     {% with paiements=paiement_frais %}
     {% for paiement, date in paiements.range %}
         <div>
+
             Au dos du chèque pour le versement numéro {{ paiement|add:1}} veuillez écrire :<b>
             IED {{ paiement_droit.wish.etape.cod_etp }} {{ individu.code_opi }} {{ individu.last_name }} {{ paiement|add:1}}
         </b>

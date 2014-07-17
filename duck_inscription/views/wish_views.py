@@ -482,7 +482,7 @@ class InscriptionPdfView(TemplateView):
             except ZeroDivisionError:
                 #context['wish'].paiementmodel_set.all().delete()
 
-                context['wish'].etape = context['wish'].dispatch_etape = 'droit_universitaire'
+                context['wish'].droit_universitaire()
                 context['wish'].save()
                 return redirect(context['wish'].get_absolute_url())
         context['static'] = os.path.join(BASE_DIR+'/duck_inscription/duck_theme_ied/static/images/').replace('\\', '/')
