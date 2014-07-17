@@ -349,6 +349,8 @@ class IndividuXadmin(object):
 
 class SettingsEtapeXadmin(object):
     exclude = ('lib_etp', 'cod_cyc', 'cod_cur', 'annee')
+    list_display = ['__unicode__', 'date_ouverture_inscription', 'date_fermeture_inscription',
+                    'date_fermeture_reinscription', 'droit', 'frais']
     list_filter = ['cursus']
     quickfilter = ['cursus']
     form_layout = (

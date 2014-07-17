@@ -55,7 +55,7 @@ class WishWorkflow(xwf_models.Workflow):
          'candidature', 'dossier_inscription'), 'ouverture_inscription'),
         ('dossier_inscription', ('ouverture_inscription',), 'dossier_inscription'),
         ('choix_ied_fp', 'dossier_inscription', 'choix_ied_fp'),
-        ('droit_univ', 'choix_ied_fp', 'droit_univ'),
+        ('droit_universitaire', 'choix_ied_fp', 'droit_univ'),
     )
 
     initial_state = 'creation'
@@ -500,7 +500,7 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
     #         pass
     #
 
-    def droit_universitaire(self):
+    def droit_univ(self):
         if self.individu.droit_univ():
             return self.etape.droit
         else:
@@ -529,7 +529,7 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
         return self.etape.get_tarif_paiement(self.is_reins_formation(), self.demi_annee)
 
     def can_demi_annee(self):
-        return self.step.can_demi_annee(self.is_reins_formation())
+        return self.etape.can_demi_annee(self.is_reins_formation())
 
     def name_url(self):
         name_url = unicode(self.etape.label)

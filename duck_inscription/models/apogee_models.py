@@ -64,6 +64,11 @@ class SettingsEtape(Etape):
         verbose_name = 'Settings Etape'
         verbose_name_plural = 'Settings Etapes'
 
+    def can_demi_annee(self, reins):
+        if self.semestre and not reins:
+            return True
+        return False
+
     def __str__(self):
         result = self.label or ""
         return result

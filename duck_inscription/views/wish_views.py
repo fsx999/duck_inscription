@@ -338,7 +338,7 @@ class ChoixIedFpView(TemplateView):
         if centre in ['ied', 'fp']:
             wish = self.request.user.individu.wishes.get(pk=self.kwargs['pk'])
             wish.centre_gestion = CentreGestionModel.objects.get(centre_gestion=centre)
-            wish.droit_univ()
+            wish.droit_universitaire()
             return redirect(wish.get_absolute_url())
         return super(ChoixIedFpView, self).get(request, *args, **kwargs)
 

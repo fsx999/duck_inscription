@@ -12,7 +12,8 @@ https://docs.djangoproject.com/en/1.6/ref/settings/
 
 from import_settings import *
 SITE_ID = 1
-
+TARIF_MEDICAL = 5.10
+TARIF_SECU = 213
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.6/howto/deployment/checklist/
 
