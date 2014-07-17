@@ -434,7 +434,7 @@ class ListeAttenteInscriptionView(ListeAttenteCandidatureView):
                 wish.date_liste_inscription = datetime.datetime.today()
             wish.save()
         else:
-            return redirect(reverse('home'))
+            return redirect(reverse('accueil'))
         return redirect(wish.get_absolute_url())
 
     # def get_context_data(self, **kwargs):

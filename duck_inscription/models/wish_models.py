@@ -666,8 +666,8 @@ NEXT = 2
 class PaiementAllModel(models.Model):
     moment_paiement = [
         u"Au moment de l'inscription",
-        u'02/01/14',
-        u'15/02/14'
+        u'01/01/15',
+        u'15/02/15'
     ]
     liste_etapes = {
         'droit_univ': [None, u'Droit universitaire', 'choix_demi_annee'],
