@@ -59,6 +59,8 @@ class SettingsEtape(Etape):
     demi_tarif = models.BooleanField(u"Demi tarif en cas de réins", default=False)
     semestre = models.BooleanField(u"Demie année", default=False)
 
+    limite_etu = models.IntegerField(u"Capacité d'accueil", null=True, blank=True)
+
     class Meta:
         app_label = 'duck_inscription'
         verbose_name = 'Settings Etape'
@@ -68,6 +70,12 @@ class SettingsEtape(Etape):
         if self.semestre and not reins:
             return True
         return False
+
+    def get_tarif_paiement(self, reins=False, semestre=False):
+        tarif = self.frais
+        if self.demi_tarif and (reins or semestre):
+            tarif /= 2
+        return tarif
 
     def __str__(self):
         result = self.label or ""

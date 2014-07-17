@@ -38,7 +38,9 @@ class WishWorkflow(xwf_models.Workflow):
         ('ouverture_inscription', 'Ouverture inscription'),
         ('dossier_inscription', 'Dossier inscription'),
         ('choix_ied_fp', 'Choix centre gestion'),
-        ('droit_univ', 'Droit universitaire')
+        ('droit_univ', 'Droit universitaire'),
+        ('inscription', 'Dossier inscription pdf'),
+        ('liste_attente_inscription', 'Liste attente inscription')
     )
 
     transitions = (
@@ -56,6 +58,8 @@ class WishWorkflow(xwf_models.Workflow):
         ('dossier_inscription', ('ouverture_inscription',), 'dossier_inscription'),
         ('choix_ied_fp', 'dossier_inscription', 'choix_ied_fp'),
         ('droit_universitaire', 'choix_ied_fp', 'droit_univ'),
+        ('inscription', 'droit_univ', 'inscription'),
+        ('liste_attente_inscription', 'inscription', 'liste_attente_inscription')
     )
 
     initial_state = 'creation'
@@ -299,6 +303,10 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
     date_validation = models.DateTimeField(null=True, blank=True)
     state = xwf_models.StateField(WishWorkflow)
     suivi_dossier = xwf_models.StateField(SuiviDossierWorkflow)
+    demi_annee = models.BooleanField(default=False, choices=((True, '1'), (False, '0')))
+
+    is_ok = models.BooleanField(default=False)
+    date_liste_inscription = models.DateTimeField(null=True, blank=True)
 
     @on_enter_state('ouverture_equivalence')
     def on_enter_state_ouverture_equivalence(self, res, *args, **kwargs):
@@ -404,36 +412,38 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
     @property
     def transitions_logs(self):
         return TransitionLog.objects.filter(content_id=self.code_dossier).order_by('timestamp')
-    # def not_place(self):
-    #     if self.step.limite_etu and not self.is_ok and not self.place_dispo():
-    #         return True
-    #     return False
-    #
-    # def place_dispo(self):
-    #     if self.step.limite_etu:
-    #         nb = self.step.limite_etu-self.step.wish_set.filter(date_validation__isnull=False, annee=self.annee).count()
-    #         if nb < 0:
-    #             nb = 0
-    #     else:
-    #         nb = 0
-    #     return nb
-    #
+
+    def valide_liste(self):
+        self.date_validation = datetime.datetime.today()
+        if self.place_dispo() or not self.etape.limite_etu or self.is_reins_formation() or self.is_ok:
+            self.is_ok = True
+            self.valide = True
+        self.save()
+
+    def not_place(self):
+        if self.etape.limite_etu and not self.is_ok and not self.place_dispo():
+            return True
+        return False
+
+    def place_dispo(self):
+        if self.etape.limite_etu:
+            nb = self.etape.limite_etu-self.etape.wish_set.filter(date_validation__isnull=False, annee=self.annee).count()
+            if nb < 0:
+                nb = 0
+        else:
+            nb = 0
+        return nb
+
     # def rang(self):
-    #     rang = self.step.wish_set.filter(date_validation__lt=self.date_validation,
+    #     rang = self.etape.wish_set.filter(date_validation__lt=self.date_validation,
     #                               etape='liste_attente_inscription',
     #                               annee=self.annee).count() - self.place_dispo()
     #
     #     if rang < 0:
     #         rang = 0
     #     return rang
-    #
-    # def valide_liste(self):
-    #     self.date_validation = datetime.datetime.today()
-    #     if self.place_dispo() or not self.step.limite_etu or self.is_reins_formation() or self.is_ok:
-    #         self.is_ok = True
-    #         self.valide = True
-    #     self.save()
-    #
+
+
     def save(self, force_insert=False, force_update=False, using=None):
         if not self.code_dossier:
             nb = Wish.objects.count()
@@ -675,7 +685,7 @@ class PaiementAllModel(models.Model):
     def liste_motif(self):
         a = []
         for x in range(self.nb_paiement_frais):
-            chaine = u'IED  %s %s %s %s' % (self.wish.step.name,
+            chaine = u'IED  %s %s %s %s' % (self.wish.etape.cod_etp,
                                                     self.wish.individu.code_opi,
                                                     self.wish.individu.last_name,
                                                     str(x+1))
