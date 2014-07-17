@@ -14,6 +14,7 @@ class SettingAnneeUni(AnneeUni):
     inscription = models.BooleanField(default=False)
     objects = SettingAnneeUniManager()
 
+
     class Meta:
         app_label = 'duck_inscription'
         verbose_name = 'Setting année universitaire'

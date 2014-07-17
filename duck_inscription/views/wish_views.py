@@ -469,8 +469,7 @@ class InscriptionPdfView(TemplateView):
         try:
             context['paiement_droit'] = context['wish'].paiementallmodel
         except PaiementAllModel.DoesNotExist:
-            context['wish'].etape = context['wish'].dispatch_etape = 'droit_universitaire'
-            context['wish'].save()
+            context['wish'].droit_universitaire()
             return redirect(context['wish'].get_absolute_url())
         if not context['wish'].centre_gestion:
             context['wish'].centre_gestion = CentreGestionModel.objects.get(centre_gestion='ied')
