@@ -2,7 +2,7 @@
 {% load floppyforms%}
 {% block content %}
 
-    {% if not wish.liste_attente %}
+    {% if not wish.date_liste_inscription %}
 
 <form id="form" class=" form-horizontal well" method="post" novalidate="novalidate">{% csrf_token %}
     <legend style="text-align: center">Liste d'attente</legend>
