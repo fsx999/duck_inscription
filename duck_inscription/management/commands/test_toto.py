@@ -19,6 +19,5 @@ APOGEE_CONNECTION = getattr(settings, 'APOGEE_CONNECTION', 'oracle')
 class Command(BaseCommand):
     def handle(self, *args, **options):
         # on récupére les personnes du jour (soit la date de création, de modif plus grand que la veille
-        for x in SettingsEtape.objects.filter(annee__cod_anu=2014):
-            x.date_ouverture_inscription = x.date_fermeture_reinscription = datetime.now()
-            x.save()
+        pass
+        # print Wish.objects.filter(state='equivalence', suivi_dossier='inactif', etape__cod_etp__in=['L1NPSY', 'L2NPSY', 'L3NPSY']).delete()
