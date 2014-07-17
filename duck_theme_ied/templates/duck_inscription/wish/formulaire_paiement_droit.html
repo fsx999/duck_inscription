@@ -1,6 +1,7 @@
 {% include 'duck_inscription/wish/include/entete_formulaire_paiement.html' %}
+{% load lib_inscription %}
 <center>
-<h1><b>FORMULAIRE DE PAIEMENT </b>{{ annee_univ }}</h1>
+<h1><b>FORMULAIRE DE PAIEMENT </b>{% annee_en_cour %}</h1>
 <h1>Droits universitaires (et sécurité sociale étudiante)</h1>
 </center>
 
@@ -8,7 +9,7 @@
 <table>
 	<tr>
 		<td><b>DIPLÔME PRÉPARÉ : </b></td>
-        <td>{{ wish.step.label }}</td>
+        <td>{{ wish.etape.label }}</td>
 	</tr>
     <tr>
 		<td><b>ETUDIANT : </b></td>
@@ -74,7 +75,7 @@
     <br>
 
     Au dos du chèque veuillez reporter les informations suivantes :<b>
-    IED Etudiant {{ paiement_droit.wish.step.name }} {{ individu.code_opi }} {{ individu.last_name }} 0
+    IED Etudiant {{ paiement_droit.wish.etape.cod_etp }} {{ individu.code_opi }} {{ individu.last_name }} 0
 
 </b>
 </div>

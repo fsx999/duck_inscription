@@ -130,8 +130,8 @@ Ce document contient tous les renseignements à transmettre à votre banque pour
 <center><h1>Il faudra réaliser les {{ paiement_frais.nb_paiement_frais|add:1 }} virements suivants.</h1></center>
 <div>
     <h4>Virement concernant les droits universitaires</h4>
-   <p> <strong>Le libellé du virement doit être : IED  {{ paiement_droit.wish.step.name }} {{ individu.code_opi }} {{ individu.last_name }} 0</strong> <br>
-    Le motif du virement doit être : IED  {{ paiement_droit.wish.step.name }} {{ individu.code_opi }} {{ individu.last_name }} 0 <br>
+   <p> <strong>Le libellé du virement doit être : IED  {{ paiement_droit.wish.etape.cod_etp }} {{ individu.code_opi }} {{ individu.last_name }} 0</strong> <br>
+    Le motif du virement doit être : IED  {{ paiement_droit.wish.etape.cod_etp }} {{ individu.code_opi }} {{ individu.last_name }} 0 <br>
        Le montant doit être de : {{ wish.droit_total|floatformat:2 }} euros <br>
         Le virement doit être effectué au moment de l'inscription
     </p>

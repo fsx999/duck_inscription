@@ -1,3 +1,4 @@
+{% load lib_inscription %}
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
@@ -45,7 +46,9 @@ text-align: justify;
 img{
     zoom:60%;
     }
-
+.zoom {
+    zoom: 30%;
+}
 .info tr{
     padding-top:3pt;
 }
@@ -185,7 +188,7 @@ td{
     <table>
         <tr>
             {% if wish.centre_gestion.centre_gestion == 'ied' %}
-            <td><img id="logo_p8" src="{{ static }}/logop8.jpg" /></td>
+            <td><img id="logo_p8" class="zoom" src="{{ static }}/logop8.jpg" /></td>
             {% else %}
             <td><img id="logo_p8" src="{{ static }}/logo_fp.jpg"/></td>
             {% endif %}
@@ -215,7 +218,7 @@ td{
     {% endif %}
 </p>
 <p>
-   inscription pour l'année universitaire 2013 – 2014 (précisez la formation et l’année d’études) :<br>
+   inscription pour l'année universitaire {% annee_en_cour %} (précisez la formation et l’année d’études) :<br>
    {{ wish.step.label }}
 </p>
 <p>

@@ -1,12 +1,13 @@
 {% include 'duck_inscription/wish/include/entete_formulaire_paiement.html' %}
+{% load lib_inscription %}
 <center>
-<h1><b>FORMULAIRE DE PAIEMENT</b> {{ annee_univ }}</h1>
+<h1><b>FORMULAIRE DE PAIEMENT</b> {% annee_en_cour %}</h1>
 <h1>Frais propres à l’enseignement à distance</h1>
 </center>
 <table>
     <tr>
         <td><b>DIPLÔME PRÉPARÉ : </b></td>
-        <td>{{ wish.step.label }}</td>
+        <td>{{ wish.etape.label }}</td>
     </tr>
     <tr>
         <td><b>ETUDIANT : </b></td>
@@ -64,7 +65,7 @@
     {% for paiement, date in paiements.range %}
         <div>
             Au dos du chèque pour le versement numéro {{ paiement|add:1}} veuillez écrire :<b>
-            IED {{ paiement_droit.wish.step.name }} {{ individu.code_opi }} {{ individu.last_name }} {{ paiement|add:1}}
+            IED {{ paiement_droit.wish.etape.cod_etp }} {{ individu.code_opi }} {{ individu.last_name }} {{ paiement|add:1}}
         </b>
         </div>
     {% endfor %}

@@ -174,6 +174,26 @@ class Individu(xwf_models.WorkflowEnabled, models.Model):
         else:
             return True
 
+    def is_ancien_p8(self):
+        if self.student_code:
+            return u'Oui'
+        return u'Non'
+
+    def lieu_naissance(self):
+        chaine = u''
+        if self.code_departement_birth:
+            chaine += u'Département : %s, ' % self.code_departement_birth
+        chaine += u'Pays : %s' % self.code_pays_birth
+        if self.town_birth:
+            chaine += u', Ville : %s' % self.town_birth
+        return chaine
+
+    def sex_display(self):
+        if self.sex == 'M':
+            return unicode('Homme')
+        else:
+            return unicode('Femme')
+
 
 class AdresseIndividu(models.Model):
     """c'est l'addresse de l'étudiant

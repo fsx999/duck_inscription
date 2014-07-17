@@ -26,6 +26,7 @@ from xhtml2pdf import pdf as pisapdf
 from xhtml2pdf import pisa
 from duck_inscription.templatetags.lib_inscription import annee_en_cour
 from django.conf import settings
+from settings import BASE_DIR
 
 __author__ = 'paul'
 
@@ -484,9 +485,7 @@ class InscriptionPdfView(TemplateView):
                 context['wish'].etape = context['wish'].dispatch_etape = 'droit_universitaire'
                 context['wish'].save()
                 return redirect(context['wish'].get_absolute_url())
-
-        # context['static'] = os.path.join(os.path.dirname(__file__),
-        #                                  PROJECT_DIR+'/documents/static/images/').replace('\\', '/')
+        context['static'] = os.path.join(BASE_DIR+'/duck_inscription/duck_theme_ied/static/images/').replace('\\', '/')
         # context['annee_univ'] = '%s-%s' % (ANNEE_UNIV, ANNEE_UNIV + 1)
 
         return context
