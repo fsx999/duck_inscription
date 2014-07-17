@@ -373,7 +373,6 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
 
     @transition_check('dossier_inscription')
     def check_dossier_inscription(self):
-        print self.etape.date_ouverture_inscription
         if self.etape.date_ouverture_inscription <= now():
             return True
         return False
