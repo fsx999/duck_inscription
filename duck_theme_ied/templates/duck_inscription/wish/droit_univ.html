@@ -1,0 +1,14 @@
+{% load floppyforms %}
+<legend>Vos droits universitaires s'élèvent à : {{ object.wish.droit_universitaire|floatformat:2 }} euros. <br>
+            {% if object.wish.tarif_secu %} <legend>La sécurité sociale s'élève à  :
+             {{ object.wish.tarif_secu }} euros.</legend>{%endif%}
+                 </legend>
+<div class="alert alert-info">
+            <p>Vous avez la possibilité de payer par chèque ou par virement (c'est le même mode de paiement qui sera utilisé pour les frais pédagogiques)</p>
+            </div>
+<div class="alert alert-danger">
+    <strong>Attention :</strong><br>
+    Ne confondez pas virement et prélèvement. Les prélèvements ne sont pas acceptés.
+</div>
+{% formrow form.moyen_paiement %}
+

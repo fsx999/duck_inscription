@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 from datetime import datetime
 from django.contrib.auth.decorators import login_required
+from django.core.urlresolvers import reverse
 from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.views.decorators.csrf import csrf_exempt
@@ -9,8 +10,11 @@ from django.views.generic import RedirectView, FormView, View, UpdateView, Templ
 from extra_views import InlineFormSetView
 from xworkflows import InvalidTransitionError
 from duck_inscription.forms.individu_forms import CodeEtudiantForm, InfoPersoForm, AdresseForm, AdresseBaseFormSet, \
-    RecapitulatifIndividuForm, GMT0
-from duck_inscription.models.individu_models import Individu as IndividuInscription, AdresseIndividu
+    RecapitulatifIndividuForm, GMT0, PremiereInscriptionForm, ComplementBacForm, CatSocForm, DernierEtablissementForm, \
+    SituationAnneePrecedenteForm, EtablissementSituationAnneePrecedenteForm, EtablissementDernierDiplomeForm, \
+    TestAutreEtablissementForm, AutreEtablissementForm, SituationSocialeForm, SecuriteSocialeForm, NumSecuForm, \
+    ValidationForm
+from duck_inscription.models.individu_models import Individu as IndividuInscription, AdresseIndividu, DossierInscription
 from django_apogee.models import Individu as IndividuApogee
 from django_apogee.models import BacOuxEqu
 from duck_inscription.utils import verif_ine
@@ -257,3 +261,59 @@ class RecapitulatifIndividuView(FormView):
     def form_valid(self, form):
         self.request.user.individu.accueil()
         return redirect(self.get_success_url())
+
+
+class DossierInscriptionView(UpdateView):
+    template_name = "duck_inscription/individu/dossier_inscription/base_formulaire.html"
+    model = DossierInscription
+    forms = {
+        'scolarite': PremiereInscriptionForm,
+        'info_bac': ComplementBacForm,
+        'cat_soc': CatSocForm,
+        'dernier_eta': DernierEtablissementForm,
+        'situation_sise': SituationAnneePrecedenteForm,
+        'etablissement_sise': EtablissementSituationAnneePrecedenteForm,
+        'eta_dernier_dip': EtablissementDernierDiplomeForm,
+        'test_autre_eta': TestAutreEtablissementForm,
+        'autre_eta': AutreEtablissementForm,
+        'situation_sociale': SituationSocialeForm,
+        'securite_sociale': SecuriteSocialeForm,
+        'num_secu': NumSecuForm,
+        'recapitulatif': ValidationForm
+
+    }
+
+    def get_template_names(self):
+        if self.object.etape == "recapitulatif":
+
+            return "duck_inscription/individu/dossier_inscription/recapitulatif.html"
+        return self.template_name
+
+    def post(self, request, *args, **kwargs):
+        if request.POST.get('precedent', None):
+
+            self.object = self.get_object()
+            if self.object.precedente_etape():
+                return redirect(reverse('dossier_inscription', kwargs=self.kwargs))
+        return super(DossierInscriptionView, self).post(request, *args, **kwargs)
+
+    def get_form_class(self):
+        return self.forms[self.object.etape]
+
+    def get_success_url(self):
+        if self.object.next_etape():
+            return reverse('dossier_inscription', kwargs=self.kwargs)
+        else:
+            wish = self.request.user.individu.wishes.get(pk=self.kwargs['pk'])
+            wish.choix_ied_fp()
+
+            return wish.get_absolute_url()
+
+    def get_object(self, queryset=None):
+        try:
+            return self.request.user.individu.dossier_inscription
+        except DossierInscription.DoesNotExist:
+            return DossierInscription.objects.get_or_create(
+                individu=self.request.user.individu,
+                bac=self.request.user.individu.diplome_acces,
+                annee_bac=self.request.user.individu.annee_obtention)[0]

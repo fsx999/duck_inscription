@@ -1,0 +1,131 @@
+{% load i18n l10n %}
+{% load staticfiles %}
+{% load autocomplete_light_tags %}
+{% load url from future %}
+
+{% block widget_open %}
+<span id="{{ widget.html_id }}-wrapper" {{ widget_attrs }} >
+{% endblock %}
+
+{% block deck %}
+    {# a deck that should contain the list of selected options #}
+    <span id="{{ widget.html_id }}-deck" class="deck" >
+        {% for choice in choices %}
+            {{ choice|autocomplete_light_choice_html:autocomplete }}
+        {% endfor %}
+    </span>
+{% endblock %}
+
+{% block input %}
+    {# a text input, that is the 'autocomplete input' #}
+    <input type="text" name="{{ name }}-autocomplete" id="{{ widget.html_id }}-autocomplete" value="" {{ attrs }} />
+{% endblock %}
+
+{% block add_another %}
+    {# A link to add a new choice using a popup #}
+    {% if autocomplete.add_another_url_name %}
+    <a href="{% block add_another_href %}{% url autocomplete.add_another_url_name %}?_popup=1{% endblock %}" class="autocomplete-add-another" id="add_{{ widget.html_id }}" style="display:none;">
+        <img src="{% static 'admin/img/icon_addlink.gif' %}" width="10" height="10" alt="{% trans 'Add another' %}" />
+    </a>
+    {% endif %}
+{% endblock %}
+
+{% block select %}
+    {# a hidden select, that contains the actual selected values #}
+    <select style="display:none" class="value-select" name="{{ name }}" id="{{ widget.html_id }}" multiple="multiple">
+        {% for value in values %}
+            <option value="{{ value|unlocalize }}" selected="selected">{{ value }}</option>
+        {% endfor %}
+    </select>
+{% endblock %}
+
+{% block remove_template %}
+    {# a hidden element that serves as template for the 'remove from deck' button #}
+    <span style="display:none" class="remove">
+        {# This will be appended to choices on the deck, it's the remove button #}
+        ˣ
+    </span>
+{% endblock %}
+
+{% block choice_template %}
+    <span style="display:none" class="choice-template">
+        {% comment %}
+        the contained element will be used to render options that are added to the select
+        via javascript, for example in django admin with the + sign
+
+        The text of the option will be inserted in the html of this tag
+        {% endcomment %}
+        <span class="choice prepend-remove append-option-html">
+        </span>
+    </span>
+{% endblock %}
+
+{% block widget_close %}
+</span>
+{% endblock %}
+
+{% block js %}
+
+<script>
+
+$(document).ready(function() {
+    function etablisement(element){
+        var countrySelectElement = $(element);
+        var etablissement_select = $('#{{ widget.html_id }}');
+        var etablissement_widget = etablissement_select.parents('.autocomplete-light-widget');
+        var input_code_postal =  $('#{{ widget.html_id }}_text');
+
+        // When the country select changes
+        value = $(element).val();
+
+        if (value) {
+            // If value is contains something, add it to autocomplete.data
+
+                etablissement_widget.yourlabsWidget().autocomplete.data = {
+                    'cod_tpe_id': value
+                };
+            if(!etablissement_select.val()){
+                if(value=='15' || value=='10'){
+
+                   etablissement_widget.yourlabsWidget().autocomplete.fetch();
+                   input_code_postal.attr('disabled', 'disabled');
+                }
+                else{
+
+                    input_code_postal.removeAttr('disabled');
+                    etablissement_widget.yourlabsWidget().autocomplete.hide();
+                }
+            }
+
+        } else {
+            // If value is empty, empty autocomplete.data
+            etablissement_widget.yourlabsWidget().autocomplete.data = {}
+        }
+    }
+    etablisement('select[name$=type_etablissement]');
+    $('body').on('change', 'select[name$=type_etablissement]', function() {
+        etablisement(this);
+    });
+});
+</script>
+{% endblock %}
+{% block consigne %}
+    <p> </p>
+    <div> Votre établissement se trouve en <strong>France métropolitaine/DOM/TOM</strong> :
+        <ul>
+            <li>Veuillez choisir un type d'établissement puis veuiller saisir soit un <strong>code de département</strong> soit un <strong>code postal</strong></li>
+        </ul>
+        Votre établissement est <strong>français</strong> (lyçée français par exemple) situé à <strong>l'étranger</strong> :
+        <ul>
+            <li>Veuillez choisir un type d'établissement puis veuiller saisir le code <strong>99</strong></li>
+        </ul>
+        Votre établissement n'est pas français :
+        <ul>
+            <li>Veuillez choisir type d'établissement : <strong>Autre école et autre cursus</strong> puis <strong>AUTRE ETABLISSEMENT HORS LYCEE</strong></li>
+        </ul>
+        Votre établissement est introuvable ou bien vous êtes dans un cas particulier :
+        <ul>
+            <li>Veuillez choisir type d'établissement : <strong>Autre école et autre cursus</strong> puis <strong>AUTRE ETABLISSEMENT HORS LYCEE</strong></li>
+        </ul>
+    </div>
+{% endblock %}

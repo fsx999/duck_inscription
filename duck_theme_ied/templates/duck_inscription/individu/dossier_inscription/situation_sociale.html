@@ -1,0 +1,11 @@
+{% load floppyforms %}
+<div class="alert alert-info">Vous devez indiquez votre situation pouvant entrainer une exonération. Sauf cas particulier vous <strong>devez choisir "normale"</strong></div>
+<div class="well">
+{% formrow form.situation_sociale %}
+</div>
+<div class="alert alert-info">Uniquement si vous êtes boursier</div>
+<div class="well">
+{% formrow form.echelon %}
+{% formrow form.num_boursier %}
+{% formrow form.boursier_crous %}
+</div>

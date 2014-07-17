@@ -31,12 +31,17 @@ class SettingAnneeUni(AnneeUni):
 class SettingsEtape(Etape):
     label = models.CharField('Label', max_length=120, null=True)
     diplome = models.ForeignKey('DiplomeEtape', null=True, blank=True)
+    cursus = models.ForeignKey('CursusEtape', null=True, blank=True)
     required_equivalence = models.BooleanField('Equivalence obligatoire', default=True)
     is_inscription_ouverte = models.BooleanField('ouverture campagne inscription', default=True)
     date_ouverture_equivalence = models.DateTimeField(null=True, blank=True)
     date_fermeture_equivalence = models.DateTimeField(null=True, blank=True)
     date_ouverture_candidature = models.DateTimeField(null=True, blank=True)
     date_fermeture_candidature = models.DateTimeField(null=True, blank=True)
+    date_ouverture_inscription = models.DateTimeField(null=True, blank=True)
+    date_fermeture_inscription = models.DateTimeField(null=True, blank=True)
+    date_fermeture_reinscription = models.DateTimeField(null=True, blank=True)
+
     label_formation = models.CharField(max_length=120, null=True, blank=True)
     annee = models.ForeignKey(SettingAnneeUni, default=2014)
     document_equivalence = models.FileField(upload_to='document_equivalence',
@@ -48,10 +53,21 @@ class SettingsEtape(Etape):
     grille_de_equivalence = models.FileField(upload_to='grilles_evaluations', null=True, blank=True,
                                              verbose_name="Grille evaluations")
 
+    droit = models.FloatField(u"Droit", default=186)
+    frais = models.FloatField(u"Frais", default=1596)
+    nb_paiement = models.IntegerField(u"Nombre paiement", default=3)
+    demi_tarif = models.BooleanField(u"Demi tarif en cas de réins", default=False)
+    semestre = models.BooleanField(u"Demie année", default=False)
+
     class Meta:
         app_label = 'duck_inscription'
         verbose_name = 'Settings Etape'
         verbose_name_plural = 'Settings Etapes'
+
+    def can_demi_annee(self, reins):
+        if self.semestre and not reins:
+            return True
+        return False
 
     def __str__(self):
         result = self.label or ""
@@ -70,6 +86,7 @@ class SettingsEtape(Etape):
         return dict(WishTransitionLog.objects.filter(
             wish__etape=self).values_list('to_state').annotate(Count('to_state')))
 
+
 @python_2_unicode_compatible
 class DiplomeEtape(models.Model):
     label = models.CharField('Label web', max_length=120, null=True)
@@ -82,3 +99,30 @@ class DiplomeEtape(models.Model):
 
     def __str__(self):
         return self.label or ''
+
+
+@python_2_unicode_compatible
+class CursusEtape(models.Model):
+    label = models.CharField('Label web', max_length=200, null=True)
+
+    class Meta:
+        app_label = 'duck_inscription'
+        verbose_name_plural = 'Cursus'
+        verbose_name = 'Cursus'
+
+    def __str__(self):
+        return self.label or ''
+
+
+@python_2_unicode_compatible
+class CentreGestionModel(models.Model):
+    centre_gestion = models.CharField('', max_length=3)
+    label = models.CharField(max_length=100)
+
+    class Meta:
+        verbose_name = u"Centre de gestion"
+        verbose_name_plural = u"Centres de gestion"
+        app_label = "duck_inscription"
+
+    def __str__(self):
+        return unicode(self.label)

@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block content %}
+{#{{ form.media }}#}
+<h3>
+    Veuillez remplir soigneusement les formulaires suivants :
+</h3>
+
+
+<form id="form" class=" form-horizontal well" method="post" novalidate="novalidate">{% csrf_token %}
+
+    <div class="page-header">
+        <h4 class="text-center">{% block titre_form %}{{ form.instance.title }}{% endblock %}</h4>
+    </div>
+    {% block form %}{% include form.instance.template_name %}{% endblock %}
+    <div class="form-actions">
+        {% if form.instance.prev %}
+        <input class="btn btn-primary cancel" type="submit" value="Précédent" name="precedent">
+        {% endif %}
+
+        <input  class="btn btn-primary" type="submit" value="Suivant" name="valide">
+    </div>
+</form>
+    {% block form_script %}{% endblock %}
+{% endblock %}

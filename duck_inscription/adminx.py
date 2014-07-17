@@ -20,7 +20,7 @@ from xadmin.plugins.inline import Inline
 from xadmin import views
 import xadmin
 from duck_inscription.models import Individu, SettingsEtape, WishWorkflow
-from .models import Wish, SuiviDossierWorkflow, IndividuWorkflow, SettingsUser
+from .models import Wish, SuiviDossierWorkflow, IndividuWorkflow, SettingsUser, CursusEtape
 from xadmin.util import User
 from xadmin.views import filter_hook, CommAdminView
 from django.utils.translation import ugettext as _
@@ -184,6 +184,7 @@ class EquivalenceView(views.FormAdminView):
                     try:
                         wish.equivalece_refuse()
                         self._envoi_email(wish, Mail.objects.get(name='email_equivalence_refuse'))
+                        self.message_user('Dossier traité', 'success')
                     except InvalidTransitionError as e:
                         raise e
 
@@ -310,8 +311,8 @@ class WishInline(object):
 class IndividuXadmin(object):
     site_title = 'Consultation des dossiers étudiants'
     show_bookmarks = False
-    fields = ('code_opi', 'last_name', 'first_name1', 'birthday', 'personal_email', 'state')
-    readonly_fields = ('code_opi', 'last_name', 'first_name1', 'birthday', 'personal_email', 'get_transition_log')
+    fields = ('code_opi', 'last_name', 'first_name1', 'birthday', 'personal_email', 'state', 'user')
+    readonly_fields = ('user', 'code_opi', 'last_name', 'first_name1', 'birthday', 'personal_email', 'get_transition_log')
     list_display = ('__unicode__', 'last_name')
     list_export = []
     list_per_page = 10
@@ -348,11 +349,16 @@ class IndividuXadmin(object):
 
 class SettingsEtapeXadmin(object):
     exclude = ('lib_etp', 'cod_cyc', 'cod_cur', 'annee')
+    list_display = ['__unicode__', 'date_ouverture_inscription', 'date_fermeture_inscription',
+                    'date_fermeture_reinscription', 'droit', 'frais']
+    list_filter = ['cursus']
+    quickfilter = ['cursus']
     form_layout = (
         Main(
             Fieldset('Etape',
                      'cod_etp',
                      'diplome',
+                     'cursus',
                      'label',
                      'label_formation'),
             TabHolder(
@@ -400,3 +406,4 @@ xadmin.site.register(MailBody)
 xadmin.site.register(Mail)
 xadmin.site.register(Address)
 xadmin.site.register(Signature)
+xadmin.site.register(CursusEtape)

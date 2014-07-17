@@ -13,7 +13,7 @@ from mailrobot.models import Mail
 from wkhtmltopdf.views import PDFTemplateResponse
 from xworkflows import transition, after_transition, before_transition, on_enter_state, transition_check
 from django_apogee.models import CentreGestion, Diplome, InsAdmEtp
-from duck_inscription.models import SettingAnneeUni, Individu, SettingsEtape
+from duck_inscription.models import SettingAnneeUni, Individu, SettingsEtape, CentreGestionModel
 from django_xworkflows import models as xwf_models
 from django.utils.timezone import now
 from django.conf import settings
@@ -35,7 +35,10 @@ class WishWorkflow(xwf_models.Workflow):
         ('note_master', 'Note master'),
         ('candidature', 'Candidature'),
         ('liste_attente_candidature', 'Dossier en liste attente candidature'),
-        ('ouverture_inscription', 'Ouverture inscription')
+        ('ouverture_inscription', 'Ouverture inscription'),
+        ('dossier_inscription', 'Dossier inscription'),
+        ('choix_ied_fp', 'Choix centre gestion'),
+        ('droit_univ', 'Droit universitaire')
     )
 
     transitions = (
@@ -49,7 +52,10 @@ class WishWorkflow(xwf_models.Workflow):
         ('note_master', 'ouverture_candidature', 'note_master'),
         ('candidature', ('note_master', 'ouverture_candidature'), 'candidature'),
         ('ouverture_inscription', ('creation', 'ouverture_equivalence', 'ouverture_candidature', 'equivalence',
-         'candidature'), 'ouverture_inscription'),
+         'candidature', 'dossier_inscription'), 'ouverture_inscription'),
+        ('dossier_inscription', ('ouverture_inscription',), 'dossier_inscription'),
+        ('choix_ied_fp', 'dossier_inscription', 'choix_ied_fp'),
+        ('droit_universitaire', 'choix_ied_fp', 'droit_univ'),
     )
 
     initial_state = 'creation'
@@ -64,6 +70,7 @@ class SuiviDossierWorkflow(xwf_models.Workflow):
         ('equivalence_complet', 'Dossier Equivalence complet'),
         ('equivalence_incomplet', 'Dossier Equivalence incomplet'),
         ('equivalence_traite', 'Dossier Equivalence traite'),
+        ('equivalence_refuse', 'Dossier Equivalence refuse'),
         ('candidature_reception', 'Dossier Candidature receptionné'),
         ('candidature_complet', 'Dossier Candidature complet'),
         ('candidature_incomplet', 'Dossier Candidature incomplet'),
@@ -80,6 +87,9 @@ class SuiviDossierWorkflow(xwf_models.Workflow):
         ('equivalence_incomplet', 'equivalence_reception', 'equivalence_incomplet'),
         ('equivalence_complet', ('equivalence_reception', 'equivalence_incomplet'), 'equivalence_complet'),
         ('equivalence_traite', 'equivalence_complet', 'equivalence_traite'),
+        ('equivalece_refuse', ('equivalence_reception',
+                               'equivalence_incomplet',
+                               'equivalence_complet'), 'equivalence_refuse')
     )
 
 
@@ -283,9 +293,9 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
     diplome_acces = models.ForeignKey('ListeDiplomeAces', default=None, blank=True, null=True,
                                       related_name="diplome_acces")
     annee = models.ForeignKey(SettingAnneeUni, default=2014, db_column='annee')
-    centre_gestion = models.ForeignKey(CentreGestion, null=True, blank=True)
+    centre_gestion = models.ForeignKey(CentreGestionModel, null=True, blank=True)
     is_reins = models.NullBooleanField(default=None, blank=True)
-    date_reception = models.DateTimeField(null=True,blank=True)
+
     date_validation = models.DateTimeField(null=True, blank=True)
     state = xwf_models.StateField(WishWorkflow)
     suivi_dossier = xwf_models.StateField(SuiviDossierWorkflow)
@@ -352,13 +362,15 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
             return True
         return False
 
-    def add_date_receptionne(self):
-        self.date_reception = datetime.datetime.now()
-        self.save()
+    @transition_check('dossier_inscription')
+    def check_dossier_inscription(self):
+        if self.etape.date_ouverture_inscription <= now():
+            return True
+        return False
 
     def is_reins_formation(self):
         if self.is_reins is None:
-            diplomes = self.etape.diplome.settingsetape_set.all().values_list('pk', flat=True)
+            diplomes = self.etape.cursus.settingsetape_set.all().values_list('pk', flat=True)
             if self.individu.student_code:
                 self.is_reins = InsAdmEtp.objects.filter(cod_ind__cod_etu=self.individu.student_code, cod_etp__in=diplomes).count() != 0
             else:
@@ -453,8 +465,6 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
 
     def add_decision_equi_pdf(self, pdf, request, context):
         if self.etape.path_template_equivalence and self.etape.grille_de_equivalence:
-            #on verifie si il y a un template pour le model d'equivalence
-            # template = "duck_inscription/wish/{}".format(etape.path_template_equivalence)
             template = "duck_inscription/wish/{}".format(self.etape.path_template_equivalence)
             pdf.addFromString(PDFTemplateResponse(request=request,
                                                   context=context,
@@ -489,18 +499,19 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
     #     if self.is_auditeur:
     #         pass
     #
-    # def droit_univ(self):
-    #     if self.individu.droit_univ():
-    #         return self.step.droit
-    #     else:
-    #         return import_settting.TARIF_MEDICAL
-    #
-    # def tarif_secu(self):
-    #     if self.individu.need_secu():
-    #         return import_settting.TARIF_SECU
-    #     else:
-    #         return 0
-    #
+
+    def droit_univ(self):
+        if self.individu.droit_univ():
+            return self.etape.droit
+        else:
+            return settings.TARIF_MEDICAL
+
+    def tarif_secu(self):
+        if self.individu.need_secu():
+            return settings.TARIF_SECU
+        else:
+            return 0
+
     # def date_limite_envoi(self):
     #     if self.is_reins_formation():
     #         return self.step.fin_reins
@@ -511,15 +522,14 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
     #     else:
     #         return self.step.fin_inscription
     #
-    # def droit_total(self):
-    #     return float(self.droit_univ() + self.tarif_secu())
-    #
-    # def frais_peda(self):
-    #     return self.step.get_tarif_paiement(self.is_reins_formation(), self.demi_annee)
-    #
-    # def can_demi_annee(self):
-    #     return self.step.can_demi_annee(self.is_reins_formation())
-    #
+    def droit_total(self):
+        return float(self.droit_univ() + self.tarif_secu())
+
+    def frais_peda(self):
+        return self.etape.get_tarif_paiement(self.is_reins_formation(), self.demi_annee)
+
+    def can_demi_annee(self):
+        return self.etape.can_demi_annee(self.is_reins_formation())
 
     def name_url(self):
         name_url = unicode(self.etape.label)
@@ -528,213 +538,7 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
     @models.permalink
     def get_absolute_url(self):
         return self.state.name, [str(self.pk)]
-    #
-    # def is_reins_formation(self):
-    #     if self.is_reins is None:
-    #         self.is_reins = not StudentApogeeValid.objects.filter(student_code=self.individu.student_code,
-    #                                                               step__formation=self.step.formation).count() == 0
-    #         self.is_ok = True
-    #         self.save()
-    #     return self.is_reins
-    #
-    # def dispatch(self):
-    #     """
-    #     ===========
-    #     Le principe
-    #     ===========
-    #     la méthode appelle la méthode du même nom. C'est le dispacher du systeme.
-    #     Pour chaque étape d'un voeu, doit correspondre une fonction ici
-    #
-    #     """
-    #     return getattr(self, self.dispatch_etape)()
-    #
-    # def orientation_liste_diplome(self):
-    #     if self.is_reins_formation():  # il se réinscrit dans le diplôme on pass
-    #         self.etape = self.dispatch_etape = "ouverture_paiement"
-    #
-    #     elif self.step.no_equivalence:  # il n'y a pas d'équivalence
-    #         self.etape = self.dispatch_etape = "ouverture_candidature"
-    #
-    #     elif self.step.has_diplome():  # il y a des diplômes à l'étape
-    #         self.etape = "liste_diplome"
-    #         self.dispatch_etape = "orientation_demande_equivalence"
-    #
-    #     else:
-    #         self.save()
-    #         return self.orientation_demande_equivalence()
-    #         #sinon on va en équi
-    #     self.save()
-    #     return True
-    #
-    # def orientation_demande_equivalence(self):
-    #     #date ouverte
-    #     if datetime.date.today() <= self.step.fin_equivalence:
-    #         if self.diplome_acces or not self.step.equivalence_obligatoire:
-    #             self.etape = self.dispatch_etape = "demande_equivalence_etape"
-    #         else:
-    #             self.etape = self.dispatch_etape = "ouverture_equivalence"
-    #     #date fermé:
-    #     elif datetime.date.today() > self.step.fin_equivalence:
-    #         if self.diplome_acces or not self.step.equivalence_obligatoire:
-    #             self.etape = self.dispatch_etape = "ouverture_candidature"
-    #
-    #         else:  # il n'a pas de diplome:
-    #             self.etape = self.dispatch_etape = "liste_attente_equivalence"
-    #
-    #     self.save()
-    #     return True
-    #
-    # def demande_equivalence_etape(self):
-    #     if self.demande_equivalence:
-    #         self.etape = self.dispatch_etape = "ouverture_equivalence"
-    #     else:
-    #         self.etape = self.dispatch_etape = "ouverture_candidature"
-    #     self.save()
-    #     return True
-    #
-    # def ouverture_equivalence(self):
-    #     today = datetime.date.today()
-    #     if today < self.step.debut_equivalence:  # c'est pas ouvert
-    #         return False
-    #     if self.step.debut_equivalence <= today < self.step.fin_equivalence:
-    #         self.etape = self.dispatch_etape = "equivalence"
-    #     elif today > self.step.fin_equivalence and self.step.equivalence_obligatoire and not self.diplome_acces:
-    #         self.etape = self.dispatch_etape = "liste_attente_equivalence"
-    #     else:
-    #         self.etape = self.dispatch_etape = "ouverture_candidature"
-    #     self.save()
-    #     return True
-    #
-    # def equivalence(self):
-    #     if self.step.candidature:
-    #         self.etape = self.dispatch_etape = "candidature"
-    #     else:
-    #         self.etape = self.dispatch_etape = 'ouverture_paiement'
-    #     self.save()
-    #     return True
-    #
-    # def liste_attente_equivalence(self):
-    #     if self.step.candidature:
-    #         self.etape = self.dispatch_etape = 'candidature'
-    #     else:
-    #         self.etape = self.dispatch_etape = 'ouverture_paiement'
-    #     self.save()
-    #     return True
-    #
-    # def ouverture_candidature(self):
-    #     today = datetime.date.today()
-    #
-    #     if not self.step.candidature:
-    #         self.etape = self.dispatch_etape = 'ouverture_paiement'
-    #     elif today < self.step.debut_candidature:
-    #
-    #         return False
-    #     elif self.step.debut_candidature <= today < self.step.fin_candidature:
-    #         if self.step.note:
-    #             self.etape = self.dispatch_etape = "note_master"
-    #         else:
-    #             self.etape = self.dispatch_etape = 'candidature'
-    #
-    #     elif today >= self.step.fin_candidature:
-    #         self.etape = self.dispatch_etape = "liste_attente_candidature"
-    #     else:
-    #         return False
-    #     self.save()
-    #     return True
-    #
-    # def note_master(self):
-    #     self.etape = self.dispatch_etape = "candidature"
-    #     self.save()
-    #     return True
-    #
-    # def candidature(self):
-    #     self.etape = self.dispatch_etape = "ouverture_paiement"
-    #     self.save()
-    #     return True
-    #
-    # def liste_attente_candidature(self):
-    #     self.etape = self.dispatch_etape = 'ouverture_paiement'
-    #     self.save()
-    #     return True
-    #
-    # def ouverture_paiement(self):
-    #     self.dispatch_etape = 'ouverture_paiement'
-    #     self.save()
-    #     if datetime.date.today() < self.step.debut_inscription:
-    #         return False
-    #     try:
-    #         self.individu.dossier_inscription
-    #         if self.individu.dossier_inscription.etape != 'recapitulatif' or\
-    #           self.individu.dossier_inscription.dernier_etablissement == None or self.individu.dossier_inscription.etablissement_bac == None:
-    #             self.etape = self.dispatch_etape = "dossier_inscription"
-    #             self.save()
-    #             self.individu.dossier_inscription.etape == 'scolarite'
-    #             self.individu.dossier_inscription.save()
-    #             return True
-    #     except DossierInscription.DoesNotExist:
-    #         self.etape = self.dispatch_etape = "dossier_inscription"
-    #         self.save()
-    #         return True
-    #
-    #     if self.step.debut_inscription <= datetime.date.today() <= self.step \
-    #         .fin_inscription or self.etapes.filter(name="equivalence_traite") or self.etapes \
-    #         .filter(
-    #             name='candidature_traite') or self.is_reins_formation() or self.is_ok:
-    #         self.etape = self.dispatch_etape = "choix_ied_fp"
-    #         self.save()
-    #         return True
-    #     elif self.is_reins_formation() and datetime.date.today() > self.step.fin_reins:
-    #         self.etape = self.dispatch_etape = "liste_attente_inscription"
-    #         self.save()
-    #         return True
-    #     elif datetime.date.today() > self.step.fin_inscription:
-    #         self.etape = self.dispatch_etape = "liste_attente_inscription"
-    #         self.save()
-    #         return True
-    #
-    #     return False
-    #
-    # def dossier_inscription(self):
-    #     self.etape = self.dispatch_etape = "ouverture_paiement"
-    #     self.save()
-    #     return True
-    #
-    # def situation_sociale(self):
-    #     self.etape = self.dispatch_etape = "ouverture_paiement"
-    #     self.save()
-    #     return True
-    #
-    # def choix_ied_fp(self):
-    #     if self.centre_gestion:
-    #         if self.centre_gestion.centre_gestion == 'ied':
-    #             self.etape = self.dispatch_etape = 'droit_universitaire'
-    #         else:
-    #             self.etape = self.dispatch_etape = 'inscription'
-    #         self.save()
-    #     return True
-    #
-    # def droit_universitaire(self):
-    #     try:
-    #
-    #         self.etape = self.dispatch_etape = 'inscription'
-    #         self.save()
-    #         return True
-    #     except AttributeError:
-    #         self.etape = self.dispatch_etape = "choix_ied_fp"
-    #         self.save()
-    #
-    #
-    # def paiement(self):
-    #     pass
-    #
-    # def orientation_inscription(self):
-    #     pass
-    #
-    # def inscription(self):
-    #     pass
-    #
-    # def liste_attente_inscription(self):
-    #     pass
+
 
     def __unicode__(self):
         return u"%s %s %s" % (self.individu, self.code_dossier, self.etape)
@@ -787,20 +591,6 @@ class NoteMasterModel(models.Model):
         app_label = "duck_inscription"
 
 
-# class EtapeDossier(models.Model):
-#     wish = models.ForeignKey(Wish)
-#     etape = models.ForeignKey(Etape)
-#     date = models.DateField(auto_now_add=True)
-#
-#     class Meta:
-#         db_table = u"pal_wishes_etapes"
-#         app_label = "inscription"
-#         ordering = ['date']
-#
-#     def __unicode__(self):
-#         return u"%s le %s" % (self.etape, self.date)
-#
-#
 class ListeDiplomeAces(models.Model):
     label = models.CharField("nom du diplome d'acces", max_length=100)
     etape = models.ForeignKey(SettingsEtape, related_name="diplome_aces", null=True)
@@ -825,176 +615,116 @@ class ListeDiplomeAces(models.Model):
 #         app_label = "inscription"
 #
 #
-# class MoyenPaiementModel(models.Model):
-#     """
-#     chéque virement etc
-#     """
-#     type = models.CharField('type paiement', primary_key=True, max_length=3)
-#     label = models.CharField('label', max_length=60)
-#
-#     class Meta:
-#         db_table = u'pal_moyen_paiement'
-#         verbose_name = u'Moyen de paiement'
-#         verbose_name_plural = u'Moyens de paiement'
-#         app_label = "inscription"
-#
-#     def __unicode__(self):
-#         return unicode(self.label)
-#
-#
-# class TypePaiementModel(models.Model):
-#     """
-#     Droit univ ou frais péda
-#     """
-#     type = models.CharField('type de frais', primary_key=True, max_length=5)
-#     label = models.CharField('label', max_length=40)
-#
-#     class Meta:
-#         db_table = u"pal_type_paiement"
-#         verbose_name = u"Type de paiement"
-#         verbose_name_plural = u"Types de paiement"
-#         app_label = "inscription"
-#
-#     def __unicode__(self):
-#         return unicode(self.label)
-#
-# PRECEDENT = 0
-# TITLE = 1
-# NEXT = 2
-#
-#
-# class PaiementAllModel(models.Model):
-#     moment_paiement = [
-#         u"Au moment de l'inscription",
-#         u'02/01/14',
-#         u'15/02/14'
-#     ]
-#     liste_etapes = {
-#         'droit_univ': [None, u'Droit universitaire', 'choix_demi_annee'],
-#         'choix_demi_annee': ['droit_univ', u'Inscription aux semestres', 'nb_paiement'],
-#         'nb_paiement': ['choix_demi_annee', u"Choisir le nombre de paiements", 'recapitulatif'],
-#         'recapitulatif': ['nb_paiement', u"Récapitulatif", None],
-#     }
-#     wish = models.OneToOneField(Wish)
-#     moyen_paiement = models.ForeignKey(MoyenPaiementModel, verbose_name=u'Votre moyen de paiement :',
-#                                        help_text=u"Veuillez choisir un moyen de paiement", null=True)
-#     nb_paiement_frais = models.IntegerField(verbose_name=u"Nombre de paiements pour les frais pédagogiques", default=1)
-#     etape = models.CharField(max_length=20, default="droit_univ")
-#     demi_annee = models.BooleanField(default=False)
-#
-#     def liste_motif(self):
-#         a = []
-#         for x in range(self.nb_paiement_frais):
-#             chaine = u'IED  %s %s %s %s' % (self.wish.step.name,
-#                                                     self.wish.individu.code_opi,
-#                                                     self.wish.individu.last_name,
-#                                                     str(x+1))
-#             a.append(chaine)
-#         return a
-#
-#
-#     def range(self):
-#         a = []
-#         for x in  range(self.nb_paiement_frais):
-#             a.append((x, self.moment_paiement[x]))
-#         return a
-#
-#     class Meta:
-#         app_label = "inscription"
-#
-#     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
-#         if self.demi_annee and not self.wish.demi_annee:
-#             self.wish.demi_annee = True
-#             self.wish.save()
-#         super(PaiementAllModel, self).save(force_insert, force_update, using, update_fields)
-#
-#     def precedente_etape(self):
-#         if self.liste_etapes[self.etape][PRECEDENT]:
-#             if self.etape == 'nb_paiement' and not self.wish.can_demi_annee():
-#                 self.etape = 'droit_univ'
-#             else:
-#                 self.etape = self.liste_etapes[self.etape][PRECEDENT]
-#             self.save()
-#             return True
-#         return False
-#
-#     def recap(self):
-#         return not self.liste_etapes[self.etape][NEXT]
-#
-#     def prev(self):
-#         return self.liste_etapes[self.etape][PRECEDENT]
-#
-#     def template_name(self):
-#         return 'inscription/wish/%s.html' % self.etape
-#
-#     def title(self):
-#         return self.liste_etapes[self.etape][TITLE]
-#
-#     def next_etape(self):
-#         if self.liste_etapes[self.etape][NEXT]:
-#             if self.etape == 'droit_univ' and not self.wish.can_demi_annee():
-#                 self.etape = 'nb_paiement'
-#             else:
-#                 self.etape = self.liste_etapes[self.etape][NEXT]
-#             self.save()
-#             return True
-#         return False
-#
-#
-# class PaiementModel(models.Model):
-#     moment_paiement = [
-#         u"Au moment de l'inscription",
-#         u'01/01/13',
-#         u'15/02/13'
-#     ]
-#     wish = models.ForeignKey(Wish)
-#     type = models.ForeignKey(TypePaiementModel)  # droit univ ou frais péda
-#
-#     moyen_paiement = models.ForeignKey(MoyenPaiementModel, verbose_name=u'Votre moyen de paiement :',
-#                                        help_text=u"Veuillez choisir un moyen de paiement")  # chéque ou virement
-#     num_paiement = models.IntegerField(default=1)
-#
-#     etudiant_payeur = models.NullBooleanField(null=True, default=None)
-#     autre_payeur = models.TextField(null=True, default=None, blank=True)
-#     banque = models.CharField(u'Etablissement bancaire du titulaire du compte', max_length=100, default='')
-#
-#     # virement
-#     etablissement = models.CharField(max_length=100, null=True, default=None, blank=True)
-#     guichet = models.CharField(max_length=20, null=True, default=None, blank=True)
-#     num_compte = models.CharField(max_length=20, null=True, default=None, blank=True)
-#     cle = models.CharField(max_length=4, null=True, default=None, blank=True)
-#     #cheque
-#     num_cheque = models.CharField(max_length=20, null=True, blank=True)
-#
-#     def date_paiement(self):
-#         return self.moment_paiement[self.num_paiement - 1]
-#
-#     class Meta:
-#         db_table = u'pal_paiement_droit_univ_ied'
-#         ordering = ['wish', 'type']
-#         verbose_name = u"Paiement"
-#         verbose_name_plural = u"Paiments"
-#         app_label = "inscription"
-#
-#     def __unicode__(self):
-#         return u"%s %s %s" % (self.wish, self.type, self.num_paiement)  # index humain
-#
-#     def date_limite_paiement(self):
-#         return self.date_paiement()
-#
-#     def motif(self):
-#         code_diplome = self.wish.step.name
-#
-#         if self.autre_payeur:
-#             nom_payeur = self.autre_payeur
-#         else:
-#             nom_payeur = self.wish.individu.last_name
-#         code_opi = self.wish.individu.code_opi
-#
-#         if self.type.type == 'droit':
-#             code_paiement = 0
-#         else:
-#             code_paiement = self.num_paiement
-#
-#         chaine = u'IED Etudiant %s %s %s %s' % (code_diplome, code_opi, nom_payeur, code_paiement)
-#         return chaine
+class MoyenPaiementModel(models.Model):
+    """
+    chéque virement etc
+    """
+    type = models.CharField('type paiement', primary_key=True, max_length=3)
+    label = models.CharField('label', max_length=60)
+
+    class Meta:
+        db_table = u'pal_moyen_paiement'
+        verbose_name = u'Moyen de paiement'
+        verbose_name_plural = u'Moyens de paiement'
+        app_label = "duck_inscription"
+
+    def __unicode__(self):
+        return unicode(self.label)
+
+
+class TypePaiementModel(models.Model):
+    """
+    Droit univ ou frais péda
+    """
+    type = models.CharField('type de frais', primary_key=True, max_length=5)
+    label = models.CharField('label', max_length=40)
+
+    class Meta:
+        db_table = u"pal_type_paiement"
+        verbose_name = u"Type de paiement"
+        verbose_name_plural = u"Types de paiement"
+        app_label = "duck_inscription"
+
+    def __unicode__(self):
+        return unicode(self.label)
+
+PRECEDENT = 0
+TITLE = 1
+NEXT = 2
+
+
+class PaiementAllModel(models.Model):
+    moment_paiement = [
+        u"Au moment de l'inscription",
+        u'02/01/14',
+        u'15/02/14'
+    ]
+    liste_etapes = {
+        'droit_univ': [None, u'Droit universitaire', 'choix_demi_annee'],
+        'choix_demi_annee': ['droit_univ', u'Inscription aux semestres', 'nb_paiement'],
+        'nb_paiement': ['choix_demi_annee', u"Choisir le nombre de paiements", 'recapitulatif'],
+        'recapitulatif': ['nb_paiement', u"Récapitulatif", None],
+    }
+    wish = models.OneToOneField(Wish)
+    moyen_paiement = models.ForeignKey(MoyenPaiementModel, verbose_name=u'Votre moyen de paiement :',
+                                       help_text=u"Veuillez choisir un moyen de paiement", null=True)
+    nb_paiement_frais = models.IntegerField(verbose_name=u"Nombre de paiements pour les frais pédagogiques", default=1)
+    etape = models.CharField(max_length=20, default="droit_univ")
+    demi_annee = models.BooleanField(default=False)
+
+    def liste_motif(self):
+        a = []
+        for x in range(self.nb_paiement_frais):
+            chaine = u'IED  %s %s %s %s' % (self.wish.step.name,
+                                                    self.wish.individu.code_opi,
+                                                    self.wish.individu.last_name,
+                                                    str(x+1))
+            a.append(chaine)
+        return a
+
+    def range(self):
+        a = []
+        for x in  range(self.nb_paiement_frais):
+            a.append((x, self.moment_paiement[x]))
+        return a
+
+    class Meta:
+        app_label = "duck_inscription"
+
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+        if self.demi_annee and not self.wish.demi_annee:
+            self.wish.demi_annee = True
+            self.wish.save()
+        super(PaiementAllModel, self).save(force_insert, force_update, using, update_fields)
+
+    def precedente_etape(self):
+        if self.liste_etapes[self.etape][PRECEDENT]:
+            if self.etape == 'nb_paiement' and not self.wish.can_demi_annee():
+                self.etape = 'droit_univ'
+            else:
+                self.etape = self.liste_etapes[self.etape][PRECEDENT]
+            self.save()
+            return True
+        return False
+
+    def recap(self):
+        return not self.liste_etapes[self.etape][NEXT]
+
+    def prev(self):
+        return self.liste_etapes[self.etape][PRECEDENT]
+
+    def template_name(self):
+        return 'duck_inscription/wish/%s.html' % self.etape
+
+    def title(self):
+        return self.liste_etapes[self.etape][TITLE]
+
+    def next_etape(self):
+        if self.liste_etapes[self.etape][NEXT]:
+            if self.etape == 'droit_univ' and not self.wish.can_demi_annee():
+                self.etape = 'nb_paiement'
+            else:
+                self.etape = self.liste_etapes[self.etape][NEXT]
+            self.save()
+            return True
+        return False

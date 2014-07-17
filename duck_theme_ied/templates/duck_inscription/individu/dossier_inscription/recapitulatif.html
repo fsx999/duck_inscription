@@ -1,0 +1,239 @@
+{% extends "base.html" %}
+{% load floppyforms lib_inscription %}
+{% block content %}
+{#{{ form.media }}#}
+<h3>
+    Veuillez remplir soigneusement les formulaires suivants :
+</h3>
+
+
+<form id="form" class=" form-horizontal well" method="post" novalidate="novalidate">{% csrf_token %}
+
+    <div class="page-header">
+        <h4 class="text-center">{% block titre_form %}{{ form.instance.title }}{% endblock %}</h4>
+    </div>
+
+    <div class="well">
+        <h4><strong>Votre scolarité dans l'enseignement français</strong></h4>
+        <div class="control-group">
+            <label class="control-label" for="">Année de votre 1ère inscription dans un établissement supérieur français :</label>
+
+            <div class="controls"><label class=" btn">{{ object.annee_premiere_inscription_enseignement_sup_fr}}/{{ object.annee_premiere_inscription_enseignement_sup_fr|add:1}}</label></div>
+        </div>
+        <div class="control-group">
+            <label class="control-label" for="">Année de votre 1ère inscription dans une université française :</label>
+
+            <div class="controls"><label class=" btn">{{ object.annee_premiere_inscription_universite_fr}}/{{ object.annee_premiere_inscription_enseignement_sup_fr|add:1}}</label></div>
+        </div>
+        <div class="control-group">
+            <label class="control-label" for="">Année de votre 1ère inscription dans une université française :</label>
+
+            <div class="controls"><label class=" btn">{{ object.annee_premiere_inscription_universite_fr}}/{{ object.annee_premiere_inscription_enseignement_sup_fr|add:1}}</label></div>
+        </div>
+        <div class="control-group">
+            <label class="control-label" for="">Université :</label>
+
+            <div class="controls"><label class=" btn">{{ object.premier_universite_fr}}</label></div>
+        </div>
+        <div class="control-group">
+            <label class="control-label" for="">Année de votre 1ère inscription à Paris 8 :</label>
+
+            <div class="controls"><label class=" btn">{{ object.annee_premiere_inscription_p8}}/{{ object.annee_premiere_inscription_p8|add:1}}</label></div>
+        </div>
+        {% if  object.annee_derniere_inscription_universite_hors_p8%}
+        <div class="control-group">
+            <label class="control-label" for="">Année de votre 1ère inscription à Paris 8 :</label>
+
+            <div class="controls"><label class=" btn">{{ object.annee_derniere_inscription_universite_hors_p8}}/{{ object.annee_derniere_inscription_universite_hors_p8|add:1}}</label></div>
+        </div>
+        {% endif %}
+    </div>
+    <div class="well">
+        <h4><strong>Baccalauréat ou équivalent</strong></h4>
+        <div class="control-group">
+            <label class="control-label" for="">Baccalauréat :</label>
+
+            <div class="controls"><label class=" btn">{{ object.bac}}</label></div>
+        </div>
+        {% if object.mention_bac %}
+        <div class="control-group">
+            <label class="control-label" for="">Mention :</label>
+
+            <div class="controls"><label class=" btn">{{ object.mention_bac}}</label></div>
+        </div>
+        {% endif %}
+        <div class="control-group">
+            <label class="control-label" for="">Année :</label>
+
+            <div class="controls"><label class=" btn">{{ object.annee_bac}}</label></div>
+        </div>
+         <div class="control-group">
+            <label class="control-label" for="">Etablissement :</label>
+
+            <div class="controls"><label class=" btn">{{ object.etablissement_bac}}</label></div>
+        </div>
+    </div>
+    <div class="well">
+        <h4>Situation socio-professionnelle</h4>
+        <div class="control-group">
+            <label class="control-label" for="">Votre activité professionnelle :</label>
+
+            <div class="controls"><label class=" btn">{{ object.cat_soc_etu}}</label></div>
+        </div>
+        {% if object.cat_travail %}
+        <div class="control-group">
+            <label class="control-label" for="">Dommaine d'activité :</label>
+
+            <div class="controls"><label class=" btn">{{ object.cat_travail}}</label></div>
+        </div>
+        {% endif %}
+        {% if object.quotite_travail %}
+        <div class="control-group">
+            <label class="control-label" for="">Quotité de travail :</label>
+
+            <div class="controls"><label class=" btn">{{ object.quotite_travail}}</label></div>
+        </div>
+        {% endif %}
+        {% if object.cat_soc_chef_famille %}
+         <div class="control-group">
+            <label class="control-label" for="">Catégorie socio père :</label>
+
+            <div class="controls"><label class=" btn">{{ object.cat_soc_chef_famille}}</label></div>
+        </div>
+        {% endif %}
+        {% if object.cat_soc_chef_famille %}
+         <div class="control-group">
+            <label class="control-label" for="">Catégorie socio mère :</label>
+
+            <div class="controls"><label class=" btn">{{ object.cat_soc_autre_parent}}</label></div>
+        </div>
+        {% endif %}
+        {% if object.sportif_haut_niveau %}
+        <div class="control-group">
+            <label class="control-label" for="">Sportif haut niveau :</label>
+
+            <div class="controls"><label class=" btn">{{ object.sportif_haut_niveau|yesno:"Oui, Non"}}</label></div>
+        </div>
+        {% endif %}
+    </div>
+    <div class="well">
+        <h4>Dernier établissement fréquenté</h4>
+         <div class="control-group">
+            <label class="control-label" for="">Année :</label>
+
+            <div class="controls"><label class=" btn">{{ object.annee_dernier_etablissement}}</label></div>
+        </div>
+        <div class="control-group">
+            <label class="control-label" for="">Etablissement :</label>
+
+            <div class="controls"><label class=" btn">{{ object.dernier_etablissement}}</label></div>
+        </div>
+    </div>
+    <div class="well">
+        <h4>Votre situation pour l'année précédente</h4>
+        <div class="control-group">
+            <label class="control-label" for="">Inscrit en : </label>
+
+            <div class="controls"><label class=" btn">{{ object.sise_annee_precedente}}</label></div>
+        </div>
+        {% if object.etablissement_annee_precedente %}
+        <div class="control-group">
+            <label class="control-label" for="">Etablissement : </label>
+
+            <div class="controls"><label class=" btn">{{ object.etablissement_annee_precedente}}</label></div>
+        </div>
+        {% endif %}
+
+    </div>
+    <div class="well">
+        <h4>Dernier diplôme obtenu</h4>
+        <div class="control-group">
+            <label class="control-label" for="">Diplôme : </label>
+
+            <div class="controls"><label class=" btn">{{ object.type_dernier_diplome }}</label></div>
+        </div>
+        <div class="control-group">
+            <label class="control-label" for="">Année :</label>
+
+            <div class="controls"><label class=" btn">{{ object.annee_dernier_diplome}}</label></div>
+        </div>
+        <div class="control-group">
+            <label class="control-label" for="">Etablissement : </label>
+
+            <div class="controls"><label class=" btn">{{ object.etablissement_dernier_diplome}}</label></div>
+        </div>
+    </div>
+    <div class="well">
+        <h4>Autre établissement pour l'année en cours</h4>
+        <div class="control-group">
+            <label class="control-label" for="">Autre établissement : </label>
+
+            <div class="controls"><label class=" btn">{{ object.autre_eta|yesno:"Oui, Non" }}</label></div>
+        </div>
+        {% if object.autre_etablissement %}
+        <div class="control-group">
+            <label class="control-label" for="">Etablissement : </label>
+
+            <div class="controls"><label class=" btn">{{ object.autre_etablissement}}</label></div>
+        </div>
+        {% endif %}
+    </div>
+    <div class="well">
+        <h4>Situation sociale pour le calcul des droits</h4>
+        <div class="control-group">
+            <label class="control-label" for="">Votre situation : </label>
+
+            <div class="controls"><label class=" btn">{{ object.situation_sociale}}</label></div>
+        </div>
+        {% if object.num_boursier %}
+        <div class="control-group">
+            <label class="control-label" for="">Numéro de bourse : </label>
+
+            <div class="controls"><label class=" btn">{{ object.num_boursier}}</label></div>
+        </div>
+        {% endif %}
+        {% if object.echelon %}
+        <div class="control-group">
+            <label class="control-label" for="">Numéro de bourse : </label>
+
+            <div class="controls"><label class=" btn">{{ object.echelon}}</label></div>
+        </div>
+        {% endif %}
+        {% if object.boursier_crous %}
+        <div class="control-group">
+            <label class="control-label" for="">Boursier du CROUS : </label>
+            <div class="controls"><label class=" btn">{{ object.boursier_crous|yesno:"Oui, Non"}}</label></div>
+        </div>
+        {% endif %}
+    </div>
+    {% if not object.individu.p28 %}
+        <div class="well">
+            <h4>Sécurité sociale</h4>
+            <div class="control-group">
+                <label class="control-label" for="">Affiliation sécu parentale : </label>
+                <div class="controls"><label class=" btn">{{ object.affiliation_parent}}</label></div>
+            </div>
+            <div class="control-group">
+                <label class="control-label" for="">Non affiliation : </label>
+                <div class="controls"><label class=" btn">{{ object.non_affiliation}}</label></div>
+            </div>
+            <div class="control-group">
+                <label class="control-label" for="">Centre payeur : </label>
+                <div class="controls"><label class=" btn">{{ object.centre_payeur}}</label></div>
+            </div>
+            <div class="control-group">
+                <label class="control-label" for="">Numéro de sécurité sociale : </label>
+                <div class="controls"><label class=" btn">{{ object.num_secu}}</label></div>
+            </div>
+        </div>
+    {% endif %}
+    <div class="form-actions">
+        {% if form.instance.prev %}
+        <input class="btn btn-primary cancel" type="submit" value="Précédent" name="precedent">
+        {% endif %}
+
+        <input  class="btn btn-primary" type="submit" value="Je valide" name="valider">
+    </div>
+</form>
+    {% block form_script %}{% endblock %}
+{% endblock %}
