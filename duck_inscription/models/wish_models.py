@@ -58,7 +58,7 @@ class WishWorkflow(xwf_models.Workflow):
         ('dossier_inscription', ('ouverture_inscription',), 'dossier_inscription'),
         ('choix_ied_fp', 'dossier_inscription', 'choix_ied_fp'),
         ('droit_universitaire', 'choix_ied_fp', 'droit_univ'),
-        ('inscription', 'droit_univ', 'inscription'),
+        ('inscription', ('droit_univ', 'choix_ied_fp'), 'inscription'),
         ('liste_attente_inscription', 'inscription', 'liste_attente_inscription')
     )
 
@@ -103,6 +103,7 @@ class WishTransitionLog(django_xworkflows.models.BaseTransitionLog):
 
     class Meta:
         app_label = 'duck_inscription'
+
 
 class WishParcourTransitionLog(django_xworkflows.models.BaseTransitionLog):
     wish = models.ForeignKey('Wish', related_name='parcours_dossier')
@@ -415,7 +416,8 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
 
     def valide_liste(self):
         self.date_validation = datetime.datetime.today()
-        if self.place_dispo() or not self.etape.limite_etu or self.is_reins_formation() or self.is_ok:
+        if self.place_dispo() or not self.etape.limite_etu or self.is_reins_formation() or self.is_ok or\
+                        self.centre_gestion.centre_gestion == 'fp':
             self.is_ok = True
             self.valide = True
         self.save()

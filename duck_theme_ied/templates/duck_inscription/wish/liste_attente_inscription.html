@@ -5,7 +5,7 @@
     {% if not wish.liste_attente %}
 
 <form id="form" class=" form-horizontal well" method="post" novalidate="novalidate">{% csrf_token %}
-    <legend style="text-align: center">Liste d\'attente</legend>
+    <legend style="text-align: center">Liste d'attente</legend>
         <p>L'accès à votre voeu  de formation (<b>{{ wish.etape.label }}</b>
             nécessite le passage par l'étape de l'inscription.
             {% if wish.not_place %}
@@ -14,7 +14,6 @@
 {% else %}
 Cette inscription étant fermées depuis le <b>{{ wish.etape.date_fermeture_inscription }}</b></p>
             {% endif %} 
-
 
         {% form form %}
   <div class="form-actions">

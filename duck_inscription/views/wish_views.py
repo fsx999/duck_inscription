@@ -306,7 +306,7 @@ class CandidaturePdfView(EquivalencePdfView):
 
 
 class ListeAttenteCandidatureView(ListeAttenteEquivalenceView):
-    template_name = 'wish/liste_attente_candidature.html'
+    template_name = 'duck_inscription/wish/liste_attente_candidature.html'
     form_class = ListeAttenteCandidatureForm
 
     def get(self, request, *args, **kwargs):
@@ -342,7 +342,10 @@ class ChoixIedFpView(TemplateView):
         if centre in ['ied', 'fp']:
             wish = self.request.user.individu.wishes.get(pk=self.kwargs['pk'])
             wish.centre_gestion = CentreGestionModel.objects.get(centre_gestion=centre)
-            wish.droit_universitaire()
+            if centre == 'fp':
+                wish.inscription()
+            else:
+                wish.droit_universitaire()
             return redirect(wish.get_absolute_url())
         return super(ChoixIedFpView, self).get(request, *args, **kwargs)
 
@@ -416,12 +419,13 @@ class InscriptionView(TemplateView):
             if not wish.is_ok and not wish.is_reins_formation() and not wish.centre_gestion.centre_gestion == 'fp':
                 wish.liste_attente_inscription()
                 return redirect(wish.get_absolute_url())
+            print "coucou"
         context = self.get_context_data()
         context['wish'] = wish
         return self.render_to_response(context)
 
 
-class ListeAttenteInscriptionView(ListeAttenteCandidatureView):
+class ListeAttenteInscriptionView(FormView):
     template_name = 'duck_inscription/wish/liste_attente_inscription.html'
     form_class = ListeAttenteInscriptionForm
 
@@ -434,16 +438,14 @@ class ListeAttenteInscriptionView(ListeAttenteCandidatureView):
                 wish.date_liste_inscription = datetime.datetime.today()
             wish.save()
         else:
+            wish.delete()
             return redirect(reverse('accueil'))
         return redirect(wish.get_absolute_url())
 
-    # def get_context_data(self, **kwargs):
-    #     context = super(ListeAttenteEquivalenceView, self).get_context_data(**kwargs)
-    #     if self.wish:
-    #         context['wish'] = self.wish
-    #     else:
-    #         self.wish = context['wish'] = self.request.user.individu.wishes.get(pk=self.kwargs['pk'])
-    #     return context
+    def get_context_data(self, **kwargs):
+        context = super(ListeAttenteInscriptionView, self).get_context_data(**kwargs)
+        self.wish = context['wish'] = self.request.user.individu.wishes.get(pk=self.kwargs['pk'])
+        return context
 
 # ##le dossier d'inscription
 
@@ -466,12 +468,12 @@ class InscriptionPdfView(TemplateView):
             context['wish'] = context['voeu'] = self.request.user.individu.wishes.select_related().get(
                 pk=self.kwargs['pk'])
         except Wish.DoesNotExist:
-            return redirect(reverse('home'))
-        try:
-            context['paiement_droit'] = context['wish'].paiementallmodel
-        except PaiementAllModel.DoesNotExist:
-            context['wish'].droit_universitaire()
-            return redirect(context['wish'].get_absolute_url())
+            return redirect(reverse('accueil'))
+        # try:
+        #     context['paiement_droit'] = context['wish'].paiementallmodel
+        # except PaiementAllModel.DoesNotExist:
+        #     context['wish'].droit_universitaire()
+        #     return redirect(context['wish'].get_absolute_url())
         if not context['wish'].centre_gestion:
             context['wish'].centre_gestion = CentreGestionModel.objects.get(centre_gestion='ied')
             context['wish'].save()
@@ -486,13 +488,11 @@ class InscriptionPdfView(TemplateView):
                 context['wish'].save()
                 return redirect(context['wish'].get_absolute_url())
         context['static'] = os.path.join(BASE_DIR+'/duck_inscription/duck_theme_ied/static/images/').replace('\\', '/')
-        # context['annee_univ'] = '%s-%s' % (ANNEE_UNIV, ANNEE_UNIV + 1)
-
         return context
 
     def get_template_names(self):
         tempate_names = super(InscriptionPdfView, self).get_template_names()
-        tempate_names.append('duck_inscription/wish/%s_pdf.html' % (self.etape,))  # permet d'avoir la meme classe pour candidature
+        tempate_names.append('duck_inscription/wish/%s_pdf.html' % (self.etape,))
         return tempate_names
 
     def render_to_response(self, context, **response_kwargs):
