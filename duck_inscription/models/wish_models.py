@@ -490,7 +490,7 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
                 request))))  # on construit le pdf
             #il faut fusionner la suite
 
-        pdf.addFromString(self.do_pdf(context['url_doc']).getvalue())
+        pdf.ADD(self.do_pdf(context['url_doc']).getvalue())
         pdf.join(flux)
         return flux
 
