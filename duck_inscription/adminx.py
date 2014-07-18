@@ -4,26 +4,20 @@ import test_duck_inscription.settings as preins_settings
 from crispy_forms.bootstrap import TabHolder, Tab
 from django.contrib.sites.models import Site
 from django.core.exceptions import PermissionDenied
-from django.core.mail import send_mail
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
-from django.template import RequestContext
-from django.template.loader import render_to_string
 from mailrobot.models import Mail, MailBody, Address, Signature
 from django.conf import settings
 from xadmin.plugins.auth import UserAdmin
 from xworkflows import InvalidTransitionError, ForbiddenTransition
 from duck_inscription.forms.adminx_forms import DossierReceptionForm, EquivalenceForm
-from duck_inscription.xadmin_plugins.topnav import IEDPlugin
 from xadmin.layout import Main, Fieldset, Container, Side, Row
-from xadmin.plugins.inline import Inline
 from xadmin import views
 import xadmin
 from duck_inscription.models import Individu, SettingsEtape, WishWorkflow, SettingAnneeUni
 from .models import Wish, SuiviDossierWorkflow, IndividuWorkflow, SettingsUser, CursusEtape
 from xadmin.util import User
-from xadmin.views import filter_hook, CommAdminView
-from django.utils.translation import ugettext as _
+from xadmin.views import filter_hook
 
 
 class IncriptionDashBoard(views.website.IndexView):

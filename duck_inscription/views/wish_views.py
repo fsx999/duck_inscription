@@ -532,9 +532,9 @@ class InscriptionPdfView(TemplateView):
             if wish.paiementallmodel.moyen_paiement.type == 'v':
                 pdf.addDocument(pisa.CreatePDF(render_to_string(self.templates['ordre_virement'], context,
                                                                 context_instance=RequestContext(self.request))))
-        pdf.addFromFileName(wish.etape.annee.transfert_pdf.file)
-        pdf.addFromFileName(wish.etape.annee.bourse_pdf.file)
-        pdf.addFromFileName(wish.etape.annee.pieces_pdf.file)
+        pdf.addFromFileName(wish.etape.annee.transfert_pdf.file.file.name)
+        pdf.addFromFileName(wish.etape.annee.bourse_pdf.file.file.name)
+        pdf.addFromFileName(wish.etape.annee.pieces_pdf.file.file.name)
 
         pdf.join(response)
         return response
