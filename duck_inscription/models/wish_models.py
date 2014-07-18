@@ -464,7 +464,7 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
                 request))))  # on construit le pdf
             #il faut fusionner la suite
 
-        pdf.addFromFile(self.do_pdf(context['url_doc']))
+        pdf.addFromString(self.do_pdf(context['url_doc']).getvalue())
         self.add_decision_equi_pdf(pdf, request, context)
         pdf.join(flux)
         return flux
@@ -490,7 +490,7 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
                 request))))  # on construit le pdf
             #il faut fusionner la suite
 
-        pdf.addFromFile(self.do_pdf(context['url_doc']))
+        pdf.addFromFile(self.do_pdf(context['url_doc']).getvalue())
         pdf.join(flux)
         return flux
 
