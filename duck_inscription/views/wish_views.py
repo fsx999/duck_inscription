@@ -342,10 +342,13 @@ class ChoixIedFpView(TemplateView):
         if centre in ['ied', 'fp']:
             wish = self.request.user.individu.wishes.get(pk=self.kwargs['pk'])
             wish.centre_gestion = CentreGestionModel.objects.get(centre_gestion=centre)
-            if centre == 'fp':
-                wish.inscription()
-            else:
-                wish.droit_universitaire()
+            try:
+                if centre == 'fp':
+                    wish.inscription()
+                else:
+                    wish.droit_universitaire()
+            except xworkflows.InvalidTransitionError:
+                pass
             return redirect(wish.get_absolute_url())
         return super(ChoixIedFpView, self).get(request, *args, **kwargs)
 
@@ -417,9 +420,11 @@ class InscriptionView(TemplateView):
                 wish.centre_gestion = CentreGestionModel.objects.get(centre_gestion='ied')
 
             if not wish.is_ok and not wish.is_reins_formation() and not wish.centre_gestion.centre_gestion == 'fp':
-                wish.liste_attente_inscription()
+                try:
+                    wish.liste_attente_inscription()
+                except xworkflows.InvalidTransitionError:
+                    pass
                 return redirect(wish.get_absolute_url())
-            print "coucou"
         context = self.get_context_data()
         context['wish'] = wish
         return self.render_to_response(context)
