@@ -481,7 +481,7 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
             pdf.addFromString(PDFTemplateResponse(request=request,
                                                   context=context,
                                                   template=[template, ]).rendered_content)
-            pdf.addFromFile(self.etape.grille_de_equivalence.file)
+            pdf.addFromFileName(self.etape.grille_de_equivalence.file.file.name)
 
     def do_pdf_candi(self, flux, templates, request, context):
         pdf = pisapdf.pisaPDF()
