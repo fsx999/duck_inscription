@@ -1,5 +1,6 @@
 # coding=utf-8
 from __future__ import unicode_literals
+from django.views.decorators.cache import never_cache
 import test_duck_inscription.settings as preins_settings
 from crispy_forms.bootstrap import TabHolder, Tab
 from django.contrib.sites.models import Site
@@ -17,7 +18,7 @@ import xadmin
 from duck_inscription.models import Individu, SettingsEtape, WishWorkflow, SettingAnneeUni
 from .models import Wish, SuiviDossierWorkflow, IndividuWorkflow, SettingsUser, CursusEtape
 from xadmin.util import User
-from xadmin.views import filter_hook
+from xadmin.views import filter_hook, CommAdminView
 
 
 class IncriptionDashBoard(views.website.IndexView):
@@ -28,7 +29,6 @@ class IncriptionDashBoard(views.website.IndexView):
                 {'title': 'Dossier Equivalence', 'url': 'dossier_equivalence'},
                 {'title': 'Dossier inscription', 'model': Individu},
             ]},
-
         ]
     ]
     site_title = 'Backoffice'
@@ -41,9 +41,7 @@ class StatistiqueDashBoard(views.website.IndexView):
     widgets = [
         [
             {"type": "qbutton", "title": "Inscription", "btns": [
-                {'title': 'Reception', 'url': 'dossier_receptionner'},
-                {'title': 'Dossier inscription', 'model': Individu},
-                {'title': 'Imprimer decisions ', 'url': 'imprimer_decisions_ordre'}
+                {'title': 'Statistique Preins', 'url': 'stats_preins'},
             ]},
         ]
     ]
@@ -52,6 +50,21 @@ class StatistiqueDashBoard(views.website.IndexView):
     widget_customiz = False
 xadmin.site.register_view(r'statistiques/$', StatistiqueDashBoard,  'statistiques')
 
+
+class StatistiquePreins(views.Dashboard):
+    base_template = 'statistique/stats_preins.html'
+    widget_customiz = False
+
+    def get_context(self):
+        context = super(StatistiquePreins, self).get_context()
+        context['etapes'] = SettingsEtape.objects.filter(is_inscription_ouverte=True).order_by('diplome')
+        return context
+
+    @never_cache
+    def get(self, request, *args, **kwargs):
+        self.widgets = self.get_widgets()
+        return self.template_response(self.base_template, self.get_context())
+xadmin.site.register_view(r'stats_preins/$', StatistiquePreins, 'statistiques_preins')
 
 class DossierReception(views.FormAdminView):
     form = DossierReceptionForm
@@ -69,7 +82,12 @@ class DossierReception(views.FormAdminView):
 
             try:
                 wish = Wish.objects.get(code_dossier=code_dossier)
-                wish.equivalence_receptionner()
+                if wish.state == 'equivalence':
+                    wish.equivalence_receptionner()
+                elif wish.state == 'candidature':
+                    wish.candidature_receptionner()
+                elif wish.state == 'inscription':
+                    wish.inscription_receptionner()
                 wish.envoi_email_reception()
                 msg = u'''Le dossier {} avec l\'email {} est bien traité'''.format(wish.code_dossier,
                                                                                    wish.individu.personal_email)
@@ -309,15 +327,10 @@ class IndividuXadmin(object):
     readonly_fields = ('user', 'student_code', 'code_opi', 'last_name', 'first_name1', 'birthday', 'personal_email',
                        'get_transition_log')
     list_display = ('__unicode__', 'last_name')
-    # list_display_links = ['user']
-    # related_list = ['user']
-    # list_export = []
-    # show_detail_fields = ['user']
     list_per_page = 10
     search_fields = ('last_name', 'first_name1', 'common_name', 'student_code', 'code_opi', 'wishes__code_dossier')
     list_exclude = ('id', 'personal_email_save', 'opi_save', 'year')
     list_select_related = None
-    # use_related_menu = False
     inlines = [WishInline]
     hidden_menu = True
 

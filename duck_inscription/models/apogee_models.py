@@ -85,12 +85,13 @@ class SettingsEtape(Etape):
         return result
 
     def stat_parcours_dossier(self):
-        from duck_inscription.models import WishParcourTransitionLog
-        return dict(WishParcourTransitionLog.objects.filter(wish__etape=self, to_state__in=[
-            'ouverture_equivalence',
+        from duck_inscription.models import WishParcourTransitionLog, Wish
+        result =  dict(WishParcourTransitionLog.objects.filter(wish__etape=self, to_state__in=[
             'equivalence',
-            'candidature'
+            'candidature',
         ]).values_list('to_state').annotate(Count('to_state')))
+        result.update({'inscription': Wish.objects.filter(etape=self, annee=self.annee, state='inscription', is_ok=True).count()})
+        return result
 
     def stat_suivi_dossier(self):
         from duck_inscription.models import WishTransitionLog
