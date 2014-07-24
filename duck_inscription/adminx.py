@@ -41,7 +41,8 @@ class StatistiqueDashBoard(views.website.IndexView):
     widgets = [
         [
             {"type": "qbutton", "title": "Inscription", "btns": [
-                {'title': 'Statistique Preins', 'url': 'stats_preins'},
+                {'title': 'Statistique Pal (équivalence, candidature)', 'url': 'stats_pal'},
+                {'title': 'Statistique Piel (préinscription)', 'url': 'stats_piel'},
             ]},
         ]
     ]
@@ -51,12 +52,39 @@ class StatistiqueDashBoard(views.website.IndexView):
 xadmin.site.register_view(r'statistiques/$', StatistiqueDashBoard,  'statistiques')
 
 
-class StatistiquePreins(views.Dashboard):
-    base_template = 'statistique/stats_preins.html'
+class StatistiquePal(views.Dashboard):
+    base_template = 'statistique/stats_pal.html'
     widget_customiz = False
 
     def get_context(self):
-        context = super(StatistiquePreins, self).get_context()
+        context = super(StatistiquePal, self).get_context()
+        context['etapes'] = SettingsEtape.objects.filter(is_inscription_ouverte=True).order_by('diplome')
+        return context
+
+    @filter_hook
+    def get_breadcrumb(self):
+        return [{
+                'url': self.get_admin_url('index'),
+                'title': 'Accueil'}, {
+                'url': self.get_admin_url('statistiques'),
+                'title': 'Statistique'}, {
+                'url': self.get_admin_url('stats_pal'),
+                'title': 'Statistique PAL'
+                }]
+
+    @never_cache
+    def get(self, request, *args, **kwargs):
+        self.widgets = self.get_widgets()
+        return self.template_response(self.base_template, self.get_context())
+xadmin.site.register_view(r'stats_pal/$', StatistiquePal, 'stats_pal')
+
+
+class StatistiquePiel(views.Dashboard):
+    base_template = 'statistique/stats_piel.html'
+    widget_customiz = False
+
+    def get_context(self):
+        context = super(StatistiquePiel, self).get_context()
         context['etapes'] = SettingsEtape.objects.filter(is_inscription_ouverte=True).order_by('diplome')
         return context
 
@@ -64,7 +92,19 @@ class StatistiquePreins(views.Dashboard):
     def get(self, request, *args, **kwargs):
         self.widgets = self.get_widgets()
         return self.template_response(self.base_template, self.get_context())
-xadmin.site.register_view(r'stats_preins/$', StatistiquePreins, 'statistiques_preins')
+
+    @filter_hook
+    def get_breadcrumb(self):
+        return [{
+                'url': self.get_admin_url('index'),
+                'title': 'Accueil'}, {
+                'url': self.get_admin_url('statistiques'),
+                'title': 'Statistique'}, {
+                'url': self.get_admin_url('stats_piel'),
+                'title': 'Statistique PIEL'
+                }]
+xadmin.site.register_view(r'stats_piel/$', StatistiquePiel, 'stats_piel')
+
 
 class DossierReception(views.FormAdminView):
     form = DossierReceptionForm

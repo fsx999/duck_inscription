@@ -1,0 +1,35 @@
+{% extends "xadmin/base_site.html" %}
+{% block nav_title %}Statistique Pré-inscription{% endblock %}
+{% block content %}
+    <table class="table table-bordered table-striped">
+        <thead>
+        <tr>
+            <th></th>
+            <th colspan="6">Dossier de pré-inscription</th>
+        </tr>
+        <tr>
+            <th>Etape</th>
+            <th>Effectué</th>
+            <th>Réceptionné</th>
+            <th>Incomplet</th>
+            <th>Complet</th>
+            <th>Traité (OPI)</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for etape in etapes %}
+        {% with stat=etape.stat_parcours_dossier %}
+        <tr>
+            <td>{{ etape.label }}</td>
+            <td>{{ stat.inscription }}</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+        </tr>
+        {% endwith %}
+
+        {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
