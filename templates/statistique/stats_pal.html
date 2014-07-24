@@ -25,7 +25,7 @@
         {% for etape in etapes %}
         {% with stat=etape.stat_parcours_dossier stat_suivi=etape.stat_suivi_dossier %}
         <tr>
-            <td>{{ etape.label }}</td>
+            <td>{{ etape.label }} / {{ etape.cod_etp }}</td>
             <td>{{ stat.equivalence }}</td>
             <td>{{ stat_suivi.equivalence_reception }}</td>
             <td>{{ stat_suivi.equivalence_refuse }}</td>
