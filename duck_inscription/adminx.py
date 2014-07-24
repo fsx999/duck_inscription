@@ -306,9 +306,13 @@ class IndividuXadmin(object):
     site_title = 'Consultation des dossiers étudiants'
     show_bookmarks = False
     fields = ('code_opi', 'last_name', 'first_name1', 'birthday', 'personal_email', 'state', 'user')
-    readonly_fields = ('user', 'code_opi', 'last_name', 'first_name1', 'birthday', 'personal_email', 'get_transition_log')
+    readonly_fields = ('user', 'student_code', 'code_opi', 'last_name', 'first_name1', 'birthday', 'personal_email',
+                       'get_transition_log')
     list_display = ('__unicode__', 'last_name')
+    list_display_links = ['user']
+    related_list = ['user']
     list_export = []
+    show_detail_fields = ['user']
     list_per_page = 10
     search_fields = ('last_name', 'first_name1', 'common_name', 'student_code', 'code_opi', 'wishes__code_dossier')
     list_exclude = ('id', 'personal_email_save', 'opi_save', 'year')
