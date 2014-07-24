@@ -309,15 +309,15 @@ class IndividuXadmin(object):
     readonly_fields = ('user', 'student_code', 'code_opi', 'last_name', 'first_name1', 'birthday', 'personal_email',
                        'get_transition_log')
     list_display = ('__unicode__', 'last_name')
-    list_display_links = ['user']
-    related_list = ['user']
-    list_export = []
-    show_detail_fields = ['user']
+    # list_display_links = ['user']
+    # related_list = ['user']
+    # list_export = []
+    # show_detail_fields = ['user']
     list_per_page = 10
     search_fields = ('last_name', 'first_name1', 'common_name', 'student_code', 'code_opi', 'wishes__code_dossier')
     list_exclude = ('id', 'personal_email_save', 'opi_save', 'year')
     list_select_related = None
-    use_related_menu = False
+    # use_related_menu = False
     inlines = [WishInline]
     hidden_menu = True
 
