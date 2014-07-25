@@ -18,11 +18,11 @@
         </thead>
         <tbody>
         {% for etape in etapes %}
-        {% with stat=etape.stat_parcours_dossier %}
+        {% with stat=etape.stat_parcours_dossier stat_suivi=etape.stat_suivi_dossier%}
         <tr>
             <td>{{ etape.label }}</td>
             <td>{{ stat.inscription }}</td>
-            <td></td>
+            <td>{{ stat_suivi.inscription_reception }}</td>
             <td></td>
             <td></td>
             <td></td>
