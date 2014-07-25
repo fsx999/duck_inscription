@@ -125,9 +125,9 @@ class DossierReception(views.FormAdminView):
                 if wish.state == 'equivalence':
                     wish.equivalence_receptionner()
                 elif wish.state == 'candidature':
-                    wish.candidature_receptionner()
+                    wish.candidature_reception()
                 elif wish.state == 'inscription':
-                    wish.inscription_receptionner()
+                    wish.inscription_reception()
                 wish.envoi_email_reception()
                 msg = u'''Le dossier {} avec l\'email {} est bien traité'''.format(wish.code_dossier,
                                                                                    wish.individu.personal_email)

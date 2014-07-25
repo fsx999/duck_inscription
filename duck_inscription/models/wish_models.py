@@ -396,7 +396,7 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
 
         elif self.state.name == "candidature":
             etape = u"de candidature"
-        elif self.etape == u"inscription":
+        elif self.state.name == u"inscription":
             etape = u"d'inscripiton"
         else:
             raise Exception(u"Etape inconnu")
