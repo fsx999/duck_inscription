@@ -547,13 +547,12 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
         return self.etape.can_demi_annee(self.is_reins_formation())
 
     def name_url(self):
-        name_url = unicode(self.etape.label)
+        name_url = u"{}  Code dossier : {}".format(self.etape.label, self.code_dossier)
         return name_url
-    #
+
     @models.permalink
     def get_absolute_url(self):
         return self.state.name, [str(self.pk)]
-
 
     def __unicode__(self):
         return u"%s %s %s" % (self.individu, self.code_dossier, self.etape)

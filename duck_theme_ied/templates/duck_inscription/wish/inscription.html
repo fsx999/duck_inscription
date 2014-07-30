@@ -39,7 +39,7 @@
     <div class="alert alert-info">Vous serez mis au courant par courrier électronique des étapes du traitement de votre dossier.</div>
 
 
-    <div class="form-actions">
+    <div class="text-center">
     <a href="{% url "inscription_pdf" wish.pk %}" class="btn btn-primary">Imprimer votre dossier d'inscription</a>
     </div>
 {% else %}
@@ -47,7 +47,7 @@
     <div class="alert alert-success"><strong>Validez</strong> votre vœu afin de pouvoir imprimer votre dossier d'inscription pour son envoi définitif.</div>
     <div class="alert alert-danger">La validation du voeu, l'impression du dossier et son envoi doivent être faits
         avant le <b>{{ wish.date_limite_envoi}}.</b></div>
-    <div class="form-actions">
+    <div class="text-center">
         <p><a href="{% url "inscription" wish.pk%}?valide=ok" class="btn btn-success">Valider votre vœu</a></p>
 
         <p><a href="{% url "delete_wish" pk=wish.pk %}" class="btn btn-danger">Supprimer le vœu</a></p>
