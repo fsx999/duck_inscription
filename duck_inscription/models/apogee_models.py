@@ -89,6 +89,7 @@ class SettingsEtape(Etape):
         result =  dict(WishParcourTransitionLog.objects.filter(wish__etape=self, to_state__in=[
             'equivalence',
             'candidature',
+            'liste_attente_inscription'
         ]).values_list('to_state').annotate(Count('to_state')))
         result.update({'inscription': Wish.objects.filter(etape=self, annee=self.annee, state='inscription', is_ok=True).count()})
         return result
