@@ -229,7 +229,7 @@ class EquivalenceView(views.FormAdminView):
                             raise e
                     wish.etape = etape
                     wish.save()
-                    wish.ouverture_inscription()
+                    wish.ouverture_candidature()
                     self._envoi_email(wish, Mail.objects.get(name=mail))
                     self.message_user('Dossier traité', 'success')
                 elif choix == 'refuse':
