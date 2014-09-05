@@ -22,7 +22,7 @@
         {% with stat=etape.stat_parcours_dossier stat_suivi=etape.stat_suivi_dossier%}
         <tr>
             <td>{{ etape.label }}</td>
-            <td><a href="{% url 'extraction_stat' %}/stat_parcours_dossier/inscription/{{ etape.cod_etp }}"> {{ stat.inscription }}</a> </td>
+            <td><a href=" {% url 'xadmin:extraction_stat' 'stat_parcours_dossier' 'inscription' etape.cod_etp %}"> {{ stat.inscription }}</a></td>
             <td>{{ stat_suivi.inscription_reception }}</td>
             <td></td>
             <td></td>

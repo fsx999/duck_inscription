@@ -79,6 +79,7 @@ class StatistiquePiel(views.Dashboard):
     base_template = 'statistique/stats_piel.html'
     widget_customiz = False
 
+    @filter_hook
     def get_context(self):
         context = super(StatistiquePiel, self).get_context()
         context['etapes'] = SettingsEtape.objects.filter(is_inscription_ouverte=True).order_by('diplome')
@@ -434,8 +435,13 @@ class CustomUserAdmin(UserAdmin):
 
 class ExtrationStatistique(BaseAdminView):
     def get(self, request, *args, **kwargs):
-        wb = Workbook()
+        type_stat = kwargs.get('type_stat', 'stat_parcours_dossier')
 
+        wb = Workbook()
+        if type_stat == 'stat_parcours_dossier':
+            queryset = Wish.objects.filter(state=kwargs['etat'], etape__cod_etp=kwargs['step'])
+        else:
+            queryset = Wish.objects.filter(suivi_dossier=kwargs['etat'], etape__cod_etp=kwargs['step'])
         response = HttpResponse(save_virtual_workbook(wb), mimetype='application/vnd.ms-excel')
         date = datetime.datetime.today().strftime('%d-%m-%Y')
         response['Content-Disposition'] = 'attachment; filename=%s_%s.xls' % ('extraction', date)
