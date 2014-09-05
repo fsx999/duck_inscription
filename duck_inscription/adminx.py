@@ -1,12 +1,15 @@
 # coding=utf-8
 from __future__ import unicode_literals
+import datetime
 from django.views.decorators.cache import never_cache
+from django.views.generic import TemplateView, View
+from openpyxl.writer.excel import save_virtual_workbook
 import test_duck_inscription.settings as preins_settings
 from crispy_forms.bootstrap import TabHolder, Tab
 from django.contrib.sites.models import Site
 from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse
 from mailrobot.models import Mail, MailBody, Address, Signature
 from django.conf import settings
 from xadmin.plugins.auth import UserAdmin
@@ -18,8 +21,8 @@ import xadmin
 from duck_inscription.models import Individu, SettingsEtape, WishWorkflow, SettingAnneeUni
 from .models import Wish, SuiviDossierWorkflow, IndividuWorkflow, SettingsUser, CursusEtape
 from xadmin.util import User
-from xadmin.views import filter_hook, CommAdminView
-
+from xadmin.views import filter_hook, CommAdminView, BaseAdminView
+from openpyxl import Workbook
 
 class IncriptionDashBoard(views.website.IndexView):
     widgets = [
@@ -448,6 +451,18 @@ class UserSettingsInline(object):
 class CustomUserAdmin(UserAdmin):
     inlines = [UserSettingsInline]
 
+
+class ExtrationStatistique(BaseAdminView):
+
+    def get(self, request, *args, **kwargs):
+        wb = Workbook()
+
+        response = HttpResponse(save_virtual_workbook(wb), mimetype='application/vnd.ms-excel')
+        date = datetime.datetime.today().strftime('%d-%m-%Y')
+        response['Content-Disposition'] = 'attachment; filename=%s_%s.xls' % ('extraction', date)
+        return response
+
+xadmin.site.register_view(r'extraction/(?P<etat>\w+)/(?P<step>\w+)/$', ExtrationStatistique,  'extration_stat')
 
 xadmin.site.unregister(User)
 xadmin.site.register(User, CustomUserAdmin)

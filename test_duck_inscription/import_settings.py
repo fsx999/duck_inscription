@@ -56,7 +56,8 @@ INSTALLED_APPS = (
     'wiki.plugins.macros',
     'linaro_django_pagination',
     'djangobb_forum',
-    'haystack'
+    'haystack',
+    'openpyxl'
 
 )
 
