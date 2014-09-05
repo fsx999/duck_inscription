@@ -14,6 +14,7 @@ urlpatterns = patterns('',
                        url(r'^', include(xadmin.site.urls)),
 (r'^forum/', include('djangobb_forum.urls', namespace='djangobb')),
                       )
+print xadmin.site.urls
 from wiki.urls import get_pattern as get_wiki_pattern
 from django_notify.urls import get_pattern as get_nyt_pattern
 urlpatterns += patterns('',

@@ -24,7 +24,3 @@ class IEDPlugin(BaseAdminPlugin):
         nodes.append(
             loader.render_to_string('xadmin_plugins/comm.top.lien.html', {'urls': self.urls}))
 
-
-
-
-site.register_plugin(IEDPlugin, CommAdminView)
