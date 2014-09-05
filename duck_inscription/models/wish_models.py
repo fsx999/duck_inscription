@@ -360,7 +360,7 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
             self.ouverture_inscription()
         elif self.etape.date_ouverture_candidature <= now() <= self.etape.date_fermeture_candidature:  # l'équi est ouverte
             self.note_master()
-        elif self.etape.date_fermeture_equivalence <= now():  # équi ferme
+        elif self.etape.date_fermeture_candidature <= now():  # équi ferme
             self.liste_attente_candidature()
 
     @on_enter_state('note_master')
