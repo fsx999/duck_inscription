@@ -19,7 +19,7 @@ from duck_inscription.forms.adminx_forms import DossierReceptionForm, Equivalenc
 from xadmin.layout import Main, Fieldset, Container, Side, Row
 from xadmin import views
 import xadmin
-from duck_inscription.models import Individu, SettingsEtape, WishWorkflow, SettingAnneeUni
+from duck_inscription.models import Individu, SettingsEtape, WishWorkflow, SettingAnneeUni, WishParcourTransitionLog
 from .models import Wish, SuiviDossierWorkflow, IndividuWorkflow, SettingsUser, CursusEtape
 from xadmin.util import User
 from xadmin.views import filter_hook, CommAdminView, BaseAdminView
@@ -438,10 +438,21 @@ class ExtrationStatistique(BaseAdminView):
         type_stat = kwargs.get('type_stat', 'stat_parcours_dossier')
 
         wb = Workbook()
+        ws = wb.active
+
         if type_stat == 'stat_parcours_dossier':
-            queryset = Wish.objects.filter(state=kwargs['etat'], etape__cod_etp=kwargs['step'])
+            queryset = WishParcourTransitionLog.objects.filter(to_state=kwargs['etat'], wish__etape__cod_etp=kwargs['step'])
+
+            for row, x in enumerate(queryset):
+                ws.cell(row=row+1, column=1).value = 'couou'
+
         else:
-            queryset = Wish.objects.filter(suivi_dossier=kwargs['etat'], etape__cod_etp=kwargs['step'])
+            queryset = Wish.objects.filter(state=kwargs['etat'], etape__cod_etp=kwargs['step'])
+            for row, x in enumerate(queryset):
+                ws.cell(row=row+1, column=1).value = 'couou'
+
+
+
         response = HttpResponse(save_virtual_workbook(wb), mimetype='application/vnd.ms-excel')
         date = datetime.datetime.today().strftime('%d-%m-%Y')
         response['Content-Disposition'] = 'attachment; filename=%s_%s.xls' % ('extraction', date)

@@ -8,7 +8,6 @@ from django.db import models
 from duck_inscription.managers import SettingAnneeUniManager
 
 
-
 @python_2_unicode_compatible
 class SettingAnneeUni(AnneeUni):
     inscription = models.BooleanField(default=False)
@@ -86,12 +85,14 @@ class SettingsEtape(Etape):
 
     def stat_parcours_dossier(self):
         from duck_inscription.models import WishParcourTransitionLog, Wish
-        result =  dict(WishParcourTransitionLog.objects.filter(wish__etape=self, to_state__in=[
+        result = dict(WishParcourTransitionLog.objects.filter(wish__etape=self, to_state__in=[
             'equivalence',
             'candidature',
             'liste_attente_inscription'
         ]).values_list('to_state').annotate(Count('to_state')))
-        result.update({'inscription': Wish.objects.filter(etape=self, annee=self.annee, state='inscription', is_ok=True).count()})
+        result.update({'inscription': Wish.objects.filter(etape=self,
+                                                          annee=self.annee,
+                                                          state='inscription', is_ok=True).count()})
         return result
 
     def stat_suivi_dossier(self):
