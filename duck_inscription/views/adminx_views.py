@@ -31,8 +31,6 @@ class DossierReceptionView(FormView):
             context['form'] = self.get_form_class()()
             wish.equivalence_receptionner()
             wish.envoi_email_reception()
-            wish.add_date_receptionne()
-            print wish.date_reception
             context['message'] = u'''<div class="text-success">Le dossier {}
              avec l\'email {} est bien trairé</div>'''.format(wish.code_dossier, wish.individu.personal_email)
         except Wish.DoesNotExist:
