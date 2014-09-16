@@ -1,3 +1,4 @@
+{% load static lib_inscription %}
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
@@ -170,6 +171,9 @@ table{
 td{
     padding-left: 5px;
 }
+.zomm{
+ zoom: 30%;
+}
 </style>
 
 </head>
@@ -178,9 +182,9 @@ td{
     <table>
         <tr>
             {% if wish.centre_gestion.centre_gestion == 'ied' %}
-            <td><img id="logo_p8" src="{{ static }}/logop8.jpg" /></td>
+            <td><img class="zomm" id="logo_p8" src="{{ static }}logop8.jpg" /></td>
             {% else %}
-            <td><img id="logo_p8" src="{{ static }}/logo_fp.jpg"/></td>
+            <td><img id="logo_p8" src="{{ static }}logo_fp.jpg"/></td>
             {% endif %}
             <td class="barcode"><img id="logo_ied" src="{{ static }}/logo-ied.jpg"/></td>
         </tr>
@@ -191,8 +195,8 @@ td{
     Page <pdf:pagenumber />
   </div>
 
-<h2 class="titre_pdf">{% if wish.is_reins_formation %} DOSSIER DE RÉINSCRIPTION {% else %}DOSSIER D'INSCRIPTION{% endif %} 2013 - 2014</h2>
-<h2 class="titre_pdf">En {{ wish.step.label }}</h2>
+<h2 class="titre_pdf">{% if wish.is_reins_formation %} DOSSIER DE RÉINSCRIPTION {% else %}DOSSIER D'INSCRIPTION{% endif %} {% annee_en_cour %}</h2>
+<h2 class="titre_pdf">En {{ wish.etape.label }}</h2>
 
 <table>
     <tr>
@@ -225,7 +229,8 @@ td{
 
 <table class="info">
     <tr class="fields">
-        <td><b>Nom :</b> {{ individu.last_name|capfirst|default:"Anomalie" }}</td>
+        <td><b>Nom :</b></td>
+        <td>{{ individu.last_name|capfirst|default:"Anomalie" }}</td>
     </tr>
 
     <tr class="fields">
@@ -242,7 +247,7 @@ td{
     </tr>
 
     <tr class="fields">
-        <td>Lieu de naissance : {{ individu.lieu_naissance|default:"Anomalie" }} </td>
+        <td>Lieu de naissance :</td><td> {{ individu.lieu_naissance|default:"Anomalie" }} </td>
     </tr>
     <tr class="fields">
         <td>Nationalité : {{ individu.code_pays_nationality.lib_nat }}</td>
@@ -252,10 +257,10 @@ td{
         <td>{{ individu.type_handicap|default:"Non renseigné" }}</td>
     </tr>
     <tr class="fields">
-        <td>Situation familiale pour l’année universitaire : {{ individu.family_status|default:"Anomalie" }} </td>
+        <td>Situation familiale pour l’année universitaire : </td><td>{{ individu.family_status|default:"Anomalie" }} </td>
     </tr>
     <tr class="fields">
-        <td>Situation militaire pour l’année universitaire : {{ individu.situation_militaire|default:"Non renseignée" }}</td>
+        <td>Situation militaire pour l’année universitaire : </td><td>{{ individu.situation_militaire|default:"Non renseignée" }}</td>
     </tr>
 </table>
 
@@ -345,9 +350,9 @@ td{
             {% endif %}
 
             {% if  address.com_bdi %}
-            {{ address.com_bdi.cod_bdi.cod_bdi  }}
+            {{ address.com_bdi.cod_bdi  }}
             {% endif %}
-                        {% if  address.com_bdi %}
+            {% if  address.com_bdi %}
             {{ address.com_bdi.lib_ach  }}
             {% endif %}
             {% if  address.code_pays %}

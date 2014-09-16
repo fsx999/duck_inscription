@@ -8,11 +8,13 @@ from django.db import models
 from duck_inscription.managers import SettingAnneeUniManager
 
 
-
 @python_2_unicode_compatible
 class SettingAnneeUni(AnneeUni):
     inscription = models.BooleanField(default=False)
     objects = SettingAnneeUniManager()
+    transfert_pdf = models.FileField(upload_to='document_inscription', null=True, blank=True)
+    bourse_pdf = models.FileField(upload_to='document_inscription', null=True, blank=True)
+    pieces_pdf = models.FileField(upload_to='document_inscription', null=True, blank=True)
 
     class Meta:
         app_label = 'duck_inscription'
@@ -59,6 +61,8 @@ class SettingsEtape(Etape):
     demi_tarif = models.BooleanField(u"Demi tarif en cas de réins", default=False)
     semestre = models.BooleanField(u"Demie année", default=False)
 
+    limite_etu = models.IntegerField(u"Capacité d'accueil", null=True, blank=True)
+
     class Meta:
         app_label = 'duck_inscription'
         verbose_name = 'Settings Etape'
@@ -69,17 +73,27 @@ class SettingsEtape(Etape):
             return True
         return False
 
+    def get_tarif_paiement(self, reins=False, semestre=False):
+        tarif = self.frais
+        if self.demi_tarif and (reins or semestre):
+            tarif /= 2
+        return tarif
+
     def __str__(self):
         result = self.label or ""
         return result
 
     def stat_parcours_dossier(self):
-        from duck_inscription.models import WishParcourTransitionLog
-        return dict(WishParcourTransitionLog.objects.filter(wish__etape=self, to_state__in=[
-            'ouverture_equivalence',
+        from duck_inscription.models import WishParcourTransitionLog, Wish
+        result = dict(WishParcourTransitionLog.objects.filter(wish__etape=self, to_state__in=[
             'equivalence',
-            'candidature'
+            'candidature',
+            'liste_attente_inscription'
         ]).values_list('to_state').annotate(Count('to_state')))
+        result.update({'inscription': Wish.objects.filter(etape=self,
+                                                          annee=self.annee,
+                                                          state='inscription', is_ok=True).count()})
+        return result
 
     def stat_suivi_dossier(self):
         from duck_inscription.models import WishTransitionLog

@@ -349,14 +349,14 @@ class PremiereInscriptionForm(forms.ModelForm):
                                                    help_text=u"Choisir l'université Paris 8 s'il s'agit de votre première inscription dans l'enseignement supérieur français", )
     annee_premiere_inscription_p8 = forms.ChoiceField(
         label=u"Année de la première inscription à l'université Paris 8 :", choices=ANNEE_P8, required=False,
-        help_text=u"Depuis 2000. Choisir 2013/2014  s'il s'agit de votre première inscription à l'université Paris 8")
+        help_text=u"Depuis 2000. Choisir 2014/2015  s'il s'agit de votre première inscription à l'université Paris 8")
     annee_premiere_inscription_universite_fr = forms.ChoiceField(
         label=u"Année de votre première inscription dans une université française :", choices=ANNEE_INSCRIPTION,
-        help_text=u"Choisir 2013/2014 s'il s'agit de votre première inscription dans une université française.",
+        help_text=u"Choisir 2014/2015 s'il s'agit de votre première inscription dans une université française.",
         required=False)
     annee_premiere_inscription_enseignement_sup_fr = forms.ChoiceField(
         label=u"Année de votre première inscription dans l'enseignement supérieur français :",
-        help_text=u"Choisir 2013/2014 s'il s'agit de votre première inscription dans l'enseignement supérieur français",
+        help_text=u"Choisir 2014/2015 s'il s'agit de votre première inscription dans l'enseignement supérieur français",
         choices=ANNEE_INSCRIPTION, required=False)
 
     annee_derniere_inscription_universite_hors_p8 = forms.ChoiceField(

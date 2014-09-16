@@ -5,7 +5,7 @@ from duck_inscription.utils import wish_verif_etape_and_login
 from duck_inscription.views import NewWishView, StepView, ListeDiplomeAccesView, DemandeEquivalenceView, \
     EquivalenceView, DeleteWish, OuvertureCandidature, OuvertureEquivalence, OuverturePaiementView, EquivalencePdfView, \
     ListeAttenteEquivalenceView, NoteMasterView, CandidatureView, CandidaturePdfView, ListeAttenteCandidatureView, \
-    ChoixIedFpView, DroitView
+    ChoixIedFpView, DroitView, InscriptionView, ListeAttenteInscriptionView, InscriptionPdfView
 
 
 urlpatterns = patterns('', url(r'^nouveau_voeu/$', login_required(NewWishView.as_view()), name='new_wish'),
@@ -48,14 +48,14 @@ urlpatterns = patterns('', url(r'^nouveau_voeu/$', login_required(NewWishView.as
                       url(r'^droit_univ/(?P<pk>\d+)/$',
                                                   wish_verif_etape_and_login(DroitView.as_view()),
                                                   name="droit_univ"),
-                       #                        url(r'^inscription/(?P<pk>\d+)/$', wish_verif_etape_and_login(InscriptionView.as_view()),
-                       #                            name="inscription"),
-                       #                        url(r'^liste_attente_inscription/(?P<pk>\d+)/$',
-                       #                            wish_verif_etape_and_login(ListeAttenteInscriptionView.as_view()),
-                       #                            name="liste_attente_inscription"),
-                       #
-                       #                        url(r'^inscription_pdf/(?P<pk>\d+)/$', login_required(InscriptionPdfView.as_view()),
-                       #                            name="inscription_pdf"),
+                      url(r'^inscription/(?P<pk>\d+)/$', wish_verif_etape_and_login(InscriptionView.as_view()),
+                                                  name="inscription"),
+                      url(r'^liste_attente_inscription/(?P<pk>\d+)/$',
+                                                  wish_verif_etape_and_login(ListeAttenteInscriptionView.as_view()),
+                                                  name="liste_attente_inscription"),
+
+                      url(r'^inscription_pdf/(?P<pk>\d+)/$', login_required(InscriptionPdfView.as_view()),
+                                                  name="inscription_pdf"),
                        #                        url(r'^auditeur_libre/$', login_required(NewAuditeurView.as_view()), name='new_auditeur'),
                        #                        url(r'^auditeur/(?P<pk>\d+)/$', login_required(AuditeurView.as_view()), name="auditeur"),
                        #                        url(r'do_pdf_auditeur/(?P<pk>\d+)/$', login_required(AuditeurPdfView.as_view()),

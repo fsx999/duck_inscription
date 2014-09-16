@@ -5,13 +5,18 @@ from django.contrib.auth.models import User
 from django.utils.encoding import python_2_unicode_compatible
 from django.db import models
 import unicodedata
+import django_xworkflows
 from django_xworkflows.xworkflow_log.models import TransitionLog
 from django_apogee.models import Departement, Pays, SitFam, SitMil, TypHandicap, TypHebergement, BacOuxEqu, AnneeUni, \
     ComBdi, Etablissement, MentionBac, CatSocPfl, TypeDiplomeExt, SituationSise, QuotiteTra, DomaineActPfl, SitSociale, \
-    RegimeParent, MtfNonAflSso
+    RegimeParent, MtfNonAflSso, IndOpi, OpiBac, Individu as IndividuApogee, AdresseOpi
 from django_xworkflows import models as xwf_models
+from django.conf import settings
+
+
 
 class IndividuWorkflow(xwf_models.Workflow):
+    log_model = 'duck_inscription.IndividuTransitionLog'
     states = (
         ('first_connection', 'Première connexion'),
         ('code_etu_manquant', 'Code etudiant manquant'),
@@ -30,6 +35,14 @@ class IndividuWorkflow(xwf_models.Workflow):
         ('code_etud_manquant', 'individu', 'code_etu_manquant'),
     )
     initial_state = 'first_connection'
+
+
+class IndividuTransitionLog(django_xworkflows.models.BaseTransitionLog):
+    individu = models.ForeignKey('Individu', related_name='etape_dossier')
+    MODIFIED_OBJECT_FIELD = 'individu'
+
+    class Meta:
+        app_label = 'duck_inscription'
 
 @python_2_unicode_compatible
 class Individu(xwf_models.WorkflowEnabled, models.Model):
@@ -174,6 +187,195 @@ class Individu(xwf_models.WorkflowEnabled, models.Model):
         else:
             return True
 
+    def is_ancien_p8(self):
+        if self.student_code:
+            return u'Oui'
+        return u'Non'
+
+    def lieu_naissance(self):
+        chaine = u''
+        if self.code_departement_birth:
+            chaine += u'Département : %s, ' % self.code_departement_birth
+        chaine += u'Pays : %s' % self.code_pays_birth
+        if self.town_birth:
+            chaine += u', Ville : %s' % self.town_birth
+        return chaine
+
+    def sex_display(self):
+        if self.sex == 'M':
+            return unicode('Homme')
+        else:
+            return unicode('Femme')
+
+    def dep_or_pays(self):
+        if self.code_pays_birth_id in ['100', 100, u"100"]:
+            return self.code_departement_birth_id, 'D'
+        else:
+            return self.code_pays_birth_id, 'P'
+
+    def get_tel(self):
+        w = self.adresses.filter(type='1')
+        if len(w):
+            return unicode(w[0].listed_number)
+        else:
+            return u'Aucun téléphone'
+
+    def save_opi(self):
+        db = 'oracle_test' if settings.DEBUG else 'oracle'
+        premier_universite_fr_id = self.dossier_inscription.premier_universite_fr_id
+        ine = self.ine[:-1] if self.ine else ""
+        cle = self.ine[-1] if self.ine else ""
+        annee_premiere_inscription_universite_fr = self.dossier_inscription.annee_premiere_inscription_universite_fr
+        lieu_naiss = self.dep_or_pays()
+        etablissement_autre = Etablissement.objects.get(cod_etb=15)
+        if not self.dossier_inscription.dernier_etablissement:
+            self.dossier_inscription.dernier_etablissement = etablissement_autre
+        if not self.dossier_inscription.etablissement_annee_precedente:
+            self.dossier_inscription.etablissement_annee_precedente = etablissement_autre
+        if not self.dossier_inscription.etablissement_bac:
+            self.dossier_inscription.etablissement_bac = etablissement_autre
+
+        if not self.student_code:
+            if self.ine == u"000000000000":
+                ine = ""
+                cle = ""
+            individu = IndOpi.objects.using(db).get_or_create(
+                cod_ind_opi=self.code_opi,
+                date_nai_ind_opi=self.birthday,
+                lib_pr1_ind_opi=self.first_name1,
+                lib_nom_pat_ind_opi=self.last_name,
+                cod_opi_int_epo=self.code_opi,)[0]
+
+            individu.cod_ind_opi = self.code_opi
+            individu.cod_sim = self.situation_militaire_id
+            individu.cod_pay_nat = self.code_pays_nationality_id
+            individu.cod_etb = premier_universite_fr_id
+            individu.cod_nne_ind_opi = ine
+            individu.cod_cle_nne_ind_opi = cle
+            individu.daa_ent_etb_opi = annee_premiere_inscription_universite_fr
+            individu.lib_nom_pat_ind_opi = self.last_name
+            individu.lib_nom_usu_ind_opi = self.common_name
+            individu.lib_pr1_ind_opi = self.first_name1
+            individu.lib_pr2_ind_opi = self.first_name2
+            individu.lib_pr3_ind_opi = self.first_name3
+            individu.num_tel_ind_opi = self.get_tel()
+            individu.cod_etu_opi = self.student_code
+            individu.lib_vil_nai_etu_opi = self.town_birth
+            individu.cod_opi_int_epo = self.code_opi
+            individu.cod_fam = self.family_status_id
+            individu.cod_pcs = self.dossier_inscription.cat_soc_etu_id
+            individu.cod_dep_pay_nai = lieu_naiss[0]
+            individu.cod_typ_dep_pay_nai = lieu_naiss[1]
+            individu.daa_ens_sup_opi = self.dossier_inscription.annee_premiere_inscription_enseignement_sup_fr
+            individu.daa_etb_opi = self.dossier_inscription.annee_premiere_inscription_p8
+            individu.cod_sex_etu_opi = self.sex
+            individu.cod_thp_opi = self.type_handicap_id
+            individu.cod_thb_opi = self.type_hebergement_annuel_id
+            individu.adr_mail_opi = self.personal_email
+            individu.num_tel_por_opi = self.get_tel()
+            individu.cod_tpe_ant_iaa = self.dossier_inscription.dernier_etablissement.cod_tpe_id
+            individu.cod_etb_ant_iaa = self.dossier_inscription.dernier_etablissement_id
+            individu.cod_dep_pay_ant_iaa_opi = self.dossier_inscription.dernier_etablissement.get_pays_dep()
+            individu.cod_typ_dep_pay_ant_iaa_opi = self.dossier_inscription.dernier_etablissement.get_type()
+            individu.daa_etb_ant_iaa_opi = self.dossier_inscription.annee_dernier_etablissement
+            individu.cod_sis_ann_pre_opi = self.dossier_inscription.sise_annee_precedente_id
+            individu.cod_etb_ann_pre_opi = self.dossier_inscription.etablissement_annee_precedente_id
+            individu.cod_tds_opi = self.dossier_inscription.sise_annee_precedente_id
+            #COD_DEP_PAY_DER_DIP=self.dossier_inscription.etablissement_dernier_diplome.get_pays_dep(),
+            #COD_TYP_DEP_PAY_DER_DIP=self.dossier_inscription.etablissement_dernier_diplome.get_type(),
+            #COD_ETB_DER_DIP=self.dossier_inscription.etablissement_dernier_diplome_id,
+            individu.daa_etb_der_dip = self.dossier_inscription.annee_dernier_diplome
+            individu.cod_etb_ann_crt = self.dossier_inscription.autre_etablissement_id
+            #COD_TDE_DER_DIP=self.dossier_inscription.type_dernier_diplome_id,
+            individu.cod_pcs_ap = self.dossier_inscription.cat_soc_autre_parent_id
+
+            individu.save(using=db)
+            opi_bac = OpiBac.objects.using(db).get_or_create(cod_ind_opi=self.code_opi,
+                                                                   cod_bac=self.dossier_inscription.bac.cod_bac)[0]
+
+            opi_bac.cod_etb = self.dossier_inscription.etablissement_bac_id
+            opi_bac.cod_dep = self.dossier_inscription.etablissement_bac.cod_dep.cod_dep
+            opi_bac.cod_mnb = self.dossier_inscription.mention_bac_id
+            opi_bac.daa_obt_bac_oba = self.dossier_inscription.annee_bac
+            opi_bac.save(using=db)
+
+        elif self.student_code:
+
+            cod_ind = IndividuApogee.objects.get(cod_etu=self.student_code).cod_ind
+            individu = IndOpi.objects.using(db).get_or_create(
+                cod_ind_opi=self.code_opi,
+                date_nai_ind_opi=self.birthday,
+                lib_pr1_ind_opi=self.first_name1,
+                lib_nom_pat_ind_opi=self.last_name,
+                cod_opi_int_epo=self.code_opi,)[0]
+
+            individu.cod_ind_opi = self.code_opi
+            individu.cod_ind = cod_ind
+            individu.date_nai_ind_opi = self.birthday
+            individu.lib_nom_pat_ind_opi = self.last_name
+            individu.lib_nom_usu_ind_opi = self.common_name
+            individu.lib_pr1_ind_opi = self.first_name1
+            individu.lib_pr2_ind_opi = self.first_name2
+            individu.lib_pr3_ind_opi = self.first_name3
+            individu.num_tel_ind_opi = self.get_tel()
+            individu.cod_etu_opi = self.student_code
+            individu.cod_opi_int_epo = self.code_opi
+            individu.cod_pcs = self.dossier_inscription.cat_soc_etu_id
+            individu.cod_thb_opi = self.type_hebergement_annuel_id
+            individu.adr_mail_opi = self.personal_email
+            individu.num_tel_por_opi = self.get_tel()
+            individu.cod_pcs_ap = self.dossier_inscription.cat_soc_autre_parent_id
+            individu.save(using=db)
+
+        if self.adresses.count() != 2:
+            adresse = self.adresses.all()[0]
+            cod_bdi = ""
+            cod_com = ""
+            if adresse.com_bdi:
+                cod_bdi = adresse.com_bdi.cod_bdi
+                cod_com = adresse.com_bdi.cod_com
+            AdresseOpi.objects.using(db).get_or_create(
+                cod_ind_opi=self.code_opi,
+                cod_typ_adr_opi=adresse.type,
+                cod_pay=adresse.code_pays_id,
+                cod_bdi=cod_bdi,
+                cod_com=cod_com,
+                lib_ad1=adresse.label_adr_1,
+                lib_ad2=adresse.label_adr_2,
+                lib_ad3=adresse.label_adr_3,
+                lib_ade=adresse.label_adr_etr,
+            )
+            AdresseOpi.objects.using(db).get_or_create(
+                cod_ind_opi=self.code_opi,
+                cod_typ_adr_opi=2,
+                cod_pay=adresse.code_pays_id,
+                cod_bdi=cod_bdi,
+                cod_com=cod_com,
+                lib_ad1=adresse.label_adr_1,
+                lib_ad2=adresse.label_adr_2,
+                lib_ad3=adresse.label_adr_3,
+                lib_ade=adresse.label_adr_etr,
+            )
+        else:
+            for adresse in self.adresses.all():
+                cod_bdi = ""
+                cod_com = ""
+                if adresse.com_bdi:
+                    cod_bdi = adresse.com_bdi.cod_bdi
+                    cod_com = adresse.com_bdi.cod_com
+
+                AdresseOpi.objects.using(db).get_or_create(
+                    cod_ind_opi=self.code_opi,
+                    cod_typ_adr_opi=2 if adresse.type == 1 else 1,  # bug
+                    cod_pay=adresse.code_pays_id,
+                    cod_bdi=cod_bdi,
+                    cod_com=cod_com,
+                    lib_ad1=adresse.label_adr_1,
+                    lib_ad2=adresse.label_adr_2,
+                    lib_ad3=adresse.label_adr_3,
+                    lib_ade=adresse.label_adr_etr,
+                )
+
 
 class AdresseIndividu(models.Model):
     """c'est l'addresse de l'étudiant
@@ -250,6 +452,8 @@ class AdresseIndividu(models.Model):
             self.listed_number = self.listed_number.strip()
 
         super(AdresseIndividu, self).save(*args, **kwargs)
+
+
 
     class Meta:
         app_label = 'duck_inscription'

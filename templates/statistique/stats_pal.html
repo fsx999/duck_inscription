@@ -1,0 +1,47 @@
+{% extends "xadmin/base_site.html" %}
+{% block nav_title %}Statistique PAL{% endblock %}
+{% block content %}
+    <table class="table table-bordered table-striped">
+        <thead>
+        <tr>
+            <th></th>
+            <th colspan="4">Dossier d'équivalence</th>
+            <th colspan="4">Dossier de candidature</th>
+        </tr>
+        <tr>
+            <th>Etape</th>
+            <th>Effectué</th>
+            <th>Réceptionné</th>
+            <th>Refusé</th>
+            <th>Traité (accepté)</th>
+            <th>Effectué</th>
+            <th>Réceptionné</th>
+            <th>Refusé</th>
+            <th>Accepté</th>
+{#            <th>Nb inscription</th>#}
+        </tr>
+        </thead>
+        <tbody>
+        {% for etape in etapes %}
+        {% with stat=etape.stat_parcours_dossier stat_suivi=etape.stat_suivi_dossier %}
+        <tr>
+            <td>{{ etape.label }} / {{ etape.cod_etp }}</td>
+            <td>{{ stat.equivalence }}</td>
+            <td>{{ stat_suivi.equivalence_reception }}</td>
+            <td>{{ stat_suivi.equivalence_refuse }}</td>
+            <td>{{ stat_suivi.equivalence_traite }}</td>
+            <td>{% if etape.date_ouverture_candidature %}
+            {{ stat.candidature }}
+            {% endif %} </td>
+            <td>{{ stat_suivi.candidature_reception }}</td>
+            <td>{{ stat_suivi.candidature_refuse }}</td>
+            <td>{{ stat_suivi.candidature_traite }}</td>
+{#            <td>{{ stat.inscription }}</td>#}
+{#            <td>{{ stat_suivi }}</td>#}
+        </tr>
+        {% endwith %}
+
+        {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

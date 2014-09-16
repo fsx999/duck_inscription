@@ -1,62 +1,103 @@
 # coding=utf-8
 from __future__ import unicode_literals
+import datetime
+from django.views.decorators.cache import never_cache
+from django.views.generic import TemplateView, View
+from openpyxl.writer.excel import save_virtual_workbook
+from duck_inscription.xadmin_plugins.topnav import IEDPlugin
 import test_duck_inscription.settings as preins_settings
 from crispy_forms.bootstrap import TabHolder, Tab
 from django.contrib.sites.models import Site
 from django.core.exceptions import PermissionDenied
-from django.core.mail import send_mail
 from django.core.urlresolvers import reverse
-from django.http import HttpResponseRedirect
-from django.template import RequestContext
-from django.template.loader import render_to_string
+from django.http import HttpResponseRedirect, HttpResponse
 from mailrobot.models import Mail, MailBody, Address, Signature
 from django.conf import settings
 from xadmin.plugins.auth import UserAdmin
 from xworkflows import InvalidTransitionError, ForbiddenTransition
 from duck_inscription.forms.adminx_forms import DossierReceptionForm, EquivalenceForm
-from duck_inscription.xadmin_plugins.topnav import IEDPlugin
 from xadmin.layout import Main, Fieldset, Container, Side, Row
-from xadmin.plugins.inline import Inline
 from xadmin import views
 import xadmin
-from duck_inscription.models import Individu, SettingsEtape, WishWorkflow
+from duck_inscription.models import Individu, SettingsEtape, WishWorkflow, SettingAnneeUni, WishParcourTransitionLog
 from .models import Wish, SuiviDossierWorkflow, IndividuWorkflow, SettingsUser, CursusEtape
 from xadmin.util import User
-from xadmin.views import filter_hook, CommAdminView
-from django.utils.translation import ugettext as _
+from xadmin.views import filter_hook, CommAdminView, BaseAdminView
+from openpyxl import Workbook
 
 
 class IncriptionDashBoard(views.website.IndexView):
-    widgets = [
-        [
-            {"type": "qbutton", "title": "Inscription", "btns": [
-                {'title': 'Reception', 'url': 'dossier_receptionner'},
-                {'title': 'Dossier Equivalence', 'url': 'dossier_equivalence'},
-                {'title': 'Dossier inscription', 'model': Individu},
-            ]},
-
-        ]
-    ]
+    widgets = [[{"type": "qbutton", "title": "Inscription",
+                 "btns": [{'title': 'Reception', 'url': 'dossier_receptionner'},
+                          {'title': 'Dossier Equivalence', 'url': 'dossier_equivalence'},
+                          {'title': 'Dossier inscription', 'model': Individu}, ]}, ]]
     site_title = 'Backoffice'
     title = 'Accueil'
     widget_customiz = False
-xadmin.site.register_view(r'inscription/$', IncriptionDashBoard,  'inscription')
+
+
+xadmin.site.register_view(r'inscription/$', IncriptionDashBoard, 'inscription')
 
 
 class StatistiqueDashBoard(views.website.IndexView):
-    widgets = [
-        [
-            {"type": "qbutton", "title": "Inscription", "btns": [
-                {'title': 'Reception', 'url': 'dossier_receptionner'},
-                {'title': 'Dossier inscription', 'model': Individu},
-                {'title': 'Imprimer decisions ', 'url': 'imprimer_decisions_ordre'}
-            ]},
-        ]
-    ]
+    widgets = [[{"type": "qbutton", "title": "Inscription",
+                 "btns": [{'title': 'Statistique Pal (équivalence, candidature)', 'url': 'stats_pal'},
+                          {'title': 'Statistique Piel (préinscription)', 'url': 'stats_piel'}, ]}, ]]
     site_title = 'Backoffice'
     title = 'Accueil'
     widget_customiz = False
-xadmin.site.register_view(r'statistiques/$', StatistiqueDashBoard,  'statistiques')
+
+
+xadmin.site.register_view(r'statistiques/$', StatistiqueDashBoard, 'statistiques')
+
+
+class StatistiquePal(views.Dashboard):
+    base_template = 'statistique/stats_pal.html'
+    widget_customiz = False
+
+    def get_context(self):
+        context = super(StatistiquePal, self).get_context()
+        context['etapes'] = SettingsEtape.objects.filter(is_inscription_ouverte=True).order_by('diplome')
+        return context
+
+    @filter_hook
+    def get_breadcrumb(self):
+        return [{'url': self.get_admin_url('index'), 'title': 'Accueil'},
+                {'url': self.get_admin_url('statistiques'), 'title': 'Statistique'},
+                {'url': self.get_admin_url('stats_pal'), 'title': 'Statistique PAL'}]
+
+    @never_cache
+    def get(self, request, *args, **kwargs):
+        self.widgets = self.get_widgets()
+        return self.template_response(self.base_template, self.get_context())
+
+
+xadmin.site.register_view(r'stats_pal/$', StatistiquePal, 'stats_pal')
+
+
+class StatistiquePiel(views.Dashboard):
+    base_template = 'statistique/stats_piel.html'
+    widget_customiz = False
+
+    @filter_hook
+    def get_context(self):
+        context = super(StatistiquePiel, self).get_context()
+        context['etapes'] = SettingsEtape.objects.filter(is_inscription_ouverte=True).order_by('diplome')
+        return context
+
+    @never_cache
+    def get(self, request, *args, **kwargs):
+        self.widgets = self.get_widgets()
+        return self.template_response(self.base_template, self.get_context())
+
+    @filter_hook
+    def get_breadcrumb(self):
+        return [{'url': self.get_admin_url('index'), 'title': 'Accueil'},
+                {'url': self.get_admin_url('statistiques'), 'title': 'Statistique'},
+                {'url': self.get_admin_url('stats_piel'), 'title': 'Statistique PIEL'}]
+
+
+xadmin.site.register_view(r'stats_piel/$', StatistiquePiel, 'stats_piel')
 
 
 class DossierReception(views.FormAdminView):
@@ -75,7 +116,12 @@ class DossierReception(views.FormAdminView):
 
             try:
                 wish = Wish.objects.get(code_dossier=code_dossier)
-                wish.equivalence_receptionner()
+                if wish.state == 'equivalence':
+                    wish.equivalence_receptionner()
+                elif wish.state == 'candidature':
+                    wish.candidature_reception()
+                elif wish.state == 'inscription':
+                    wish.inscription_reception()
                 wish.envoi_email_reception()
                 msg = u'''Le dossier {} avec l\'email {} est bien traité'''.format(wish.code_dossier,
                                                                                    wish.individu.personal_email)
@@ -92,7 +138,8 @@ class DossierReception(views.FormAdminView):
             return HttpResponseRedirect(self.get_redirect_url())
         return self.get_response()
 
-xadmin.site.register_view(r'dossier_receptionner/$', DossierReception,  'dossier_receptionner')
+
+xadmin.site.register_view(r'dossier_receptionner/$', DossierReception, 'dossier_receptionner')
 
 
 class EquivalenceView(views.FormAdminView):
@@ -120,7 +167,7 @@ class EquivalenceView(views.FormAdminView):
                 wish = Wish.objects.get(code_dossier=code_dossier)
                 if wish.etape not in self.request.user.setting_user.etapes.all():
                     raise PermissionDenied
-                if wish.suivi_dossier.is_equivalence_traite:
+                if wish.suivi_dossier.is_equivalence_traite or wish.suivi_dossier.is_equivalence_refuse:
                     msg = 'Dossier déjà traité'
                     self.message_user(msg, 'warning')
                 elif not wish.state.is_equivalence:
@@ -177,7 +224,8 @@ class EquivalenceView(views.FormAdminView):
                             raise e
                     wish.etape = etape
                     wish.save()
-                    wish.ouverture_inscription()
+                    wish.ouverture_candidature()
+
                     self._envoi_email(wish, Mail.objects.get(name=mail))
                     self.message_user('Dossier traité', 'success')
                 elif choix == 'refuse':
@@ -212,22 +260,18 @@ class EquivalenceView(views.FormAdminView):
         mail = template.make_message(context=context, recipients=[email])
         mail.send()
 
-xadmin.site.register_view(r'dossier_equivalence/$', EquivalenceView,  'dossier_equivalence')
+
+xadmin.site.register_view(r'dossier_equivalence/$', EquivalenceView, 'dossier_equivalence')
 
 
 class MainDashboard(object):
-    widgets = [
-        [
-            {"type": "qbutton", "title": "Scolarité", "btns": [
+    widgets = [[{"type": "qbutton", "title": "Scolarité", "btns": [
 
-                {'title': "Pré-Inscription", 'url': 'inscription'},
-                {'title': "Statistique", 'url': 'statistiques'},
-            ]},
-        ]
-    ]
+        {'title': "Pré-Inscription", 'url': 'inscription'}, {'title': "Statistique", 'url': 'statistiques'}, ]}, ]]
     site_title = 'Backoffice'
     title = 'Accueil'
     widget_customiz = False
+
 
 xadmin.site.register(views.website.IndexView, MainDashboard)
 
@@ -249,7 +293,6 @@ xadmin.site.register(views.CommAdminView, GlobalSetting)
 
 
 class WishInline(object):
-
     def email(self, obj):
         return obj.individu.personal_email
 
@@ -258,14 +301,15 @@ class WishInline(object):
             return 'oui'
         else:
             return 'non'
+
     reins.short_description = 'Réinscription'
 
     model = Wish
     extra = 0
     style = 'table'
     fields = ['email', 'annee']
-    readonly_fields = ['code_dossier', 'etape', 'diplome_acces', 'centre_gestion', 'reins',
-                       'date_validation', 'valide', 'get_transition_log', 'get_suivi_dossier', 'print_dossier_equi']
+    readonly_fields = ['code_dossier', 'diplome_acces', 'centre_gestion', 'reins', 'date_validation', 'valide',
+                       'get_transition_log', 'get_suivi_dossier', 'print_dossier_equi']
     exclude = ('annee', 'is_reins')
     can_delete = True
     hidden_menu = True
@@ -284,6 +328,7 @@ class WishInline(object):
                                                                 transition.timestamp.strftime('%d/%m/%Y %H:%M:%S'))
         reponse += '</table>'
         return reponse
+
     get_transition_log.short_description = 'parcours'
     get_transition_log.allow_tags = True
 
@@ -295,6 +340,7 @@ class WishInline(object):
                                                                 transition.timestamp.strftime('%d/%m/%Y %H:%M:%S'))
         reponse += '</table>'
         return reponse
+
     get_suivi_dossier.short_description = 'suivi'
     get_suivi_dossier.allow_tags = True
 
@@ -304,6 +350,7 @@ class WishInline(object):
         reponse = '<a href="{}" class="btn btn-primary">Impression</a>'.format(url)
         reponse += '<a href="{}" class="btn btn-primary">ImpressionDecision</a>'.format(url2)
         return reponse
+
     print_dossier_equi.allow_tags = True
     print_dossier_equi.short_description = 'Impression dossier équivalence'
 
@@ -312,14 +359,14 @@ class IndividuXadmin(object):
     site_title = 'Consultation des dossiers étudiants'
     show_bookmarks = False
     fields = ('code_opi', 'last_name', 'first_name1', 'birthday', 'personal_email', 'state', 'user')
-    readonly_fields = ('user', 'code_opi', 'last_name', 'first_name1', 'birthday', 'personal_email', 'get_transition_log')
+    readonly_fields = (
+        'user', 'student_code', 'code_opi', 'last_name', 'first_name1', 'birthday', 'personal_email',
+        'get_transition_log')
     list_display = ('__unicode__', 'last_name')
-    list_export = []
     list_per_page = 10
     search_fields = ('last_name', 'first_name1', 'common_name', 'student_code', 'code_opi', 'wishes__code_dossier')
     list_exclude = ('id', 'personal_email_save', 'opi_save', 'year')
     list_select_related = None
-    use_related_menu = False
     inlines = [WishInline]
     hidden_menu = True
 
@@ -343,6 +390,7 @@ class IndividuXadmin(object):
                                                                 transition.timestamp.strftime('%d/%m/%Y %H:%M:%S'))
         reponse += '</table>'
         return reponse
+
     get_transition_log.short_description = 'parcours'
     get_transition_log.allow_tags = True
 
@@ -354,34 +402,22 @@ class SettingsEtapeXadmin(object):
     list_filter = ['cursus']
     quickfilter = ['cursus']
     form_layout = (
-        Main(
-            Fieldset('Etape',
-                     'cod_etp',
-                     'diplome',
-                     'cursus',
-                     'label',
-                     'label_formation'),
-            TabHolder(
-                Tab('Equivalence',
-                    Fieldset('',
-                             'date_ouverture_equivalence',
-                             'date_fermeture_equivalence',
-                             'document_equivalence',
-                             'path_template_equivalence',
-                             'grille_de_equivalence')),
-                Tab('Candidature',
-                    Fieldset('',
-                             'date_ouverture_candidature',
-                             'date_fermeture_candidature',
-                             'note_maste',
-                             'document_candidature',)),
+        Main(Fieldset('Etape', 'cod_etp', 'diplome', 'cursus', 'label', 'label_formation'), TabHolder(Tab('Equivalence',
+                                                                                                          Fieldset('',
+                                                                                                                   'date_ouverture_equivalence',
+                                                                                                                   'date_fermeture_equivalence',
+                                                                                                                   'document_equivalence',
+                                                                                                                   'path_template_equivalence',
+                                                                                                                   'grille_de_equivalence')),
+                                                                                                      Tab('Candidature',
+                                                                                                          Fieldset('',
+                                                                                                                   'date_ouverture_candidature',
+                                                                                                                   'date_fermeture_candidature',
+                                                                                                                   'note_maste',
+                                                                                                                   'document_candidature', )),
 
 
-            )
-        ),
-        Side(Fieldset('Settings',
-                      'required_equivalence',
-                      'is_inscription_ouverte'))
+        )), Side(Fieldset('Settings', 'required_equivalence', 'is_inscription_ouverte'))
     )
 
 
@@ -397,13 +433,44 @@ class CustomUserAdmin(UserAdmin):
     inlines = [UserSettingsInline]
 
 
+class ExtrationStatistique(BaseAdminView):
+    def get(self, request, *args, **kwargs):
+        type_stat = kwargs.get('type_stat', 'stat_parcours_dossier')
+
+        wb = Workbook()
+        ws = wb.active
+
+        if type_stat == 'stat_parcours_dossier':
+            queryset = WishParcourTransitionLog.objects.filter(to_state=kwargs['etat'], wish__etape__cod_etp=kwargs['step'])
+
+            for row, x in enumerate(queryset):
+                ws.cell(row=row+1, column=1).value = 'couou'
+
+        else:
+            queryset = Wish.objects.filter(state=kwargs['etat'], etape__cod_etp=kwargs['step'])
+            for row, x in enumerate(queryset):
+                ws.cell(row=row+1, column=1).value = 'couou'
+
+
+
+        response = HttpResponse(save_virtual_workbook(wb), mimetype='application/vnd.ms-excel')
+        date = datetime.datetime.today().strftime('%d-%m-%Y')
+        response['Content-Disposition'] = 'attachment; filename=%s_%s.xls' % ('extraction', date)
+        return response
+
+
+xadmin.site.register_view(r'extraction/(?P<type_stat>\w+)/(?P<etat>\w+)/(?P<step>\w+)/$',
+                          ExtrationStatistique,
+                          'extraction_stat')
+
 xadmin.site.unregister(User)
 xadmin.site.register(User, CustomUserAdmin)
 xadmin.site.register(Individu, IndividuXadmin)
 xadmin.site.register(SettingsEtape, SettingsEtapeXadmin)
-# xadmin.site.register_plugin(IEDPlugin, CommAdminView)
+xadmin.site.register_plugin(IEDPlugin, CommAdminView)
 xadmin.site.register(MailBody)
 xadmin.site.register(Mail)
 xadmin.site.register(Address)
 xadmin.site.register(Signature)
 xadmin.site.register(CursusEtape)
+xadmin.site.register(SettingAnneeUni)

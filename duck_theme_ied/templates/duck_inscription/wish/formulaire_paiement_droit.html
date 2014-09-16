@@ -1,6 +1,7 @@
-{% include 'wish/include/entete_formulaire_paiement.html' %}
+{% include 'duck_inscription/wish/include/entete_formulaire_paiement.html' %}
+{% load lib_inscription %}
 <center>
-<h1><b>FORMULAIRE DE PAIEMENT </b>{{ annee_univ }}</h1>
+<h1><b>FORMULAIRE DE PAIEMENT </b>{% annee_en_cour %}</h1>
 <h1>Droits universitaires (et sécurité sociale étudiante)</h1>
 </center>
 
@@ -8,7 +9,7 @@
 <table>
 	<tr>
 		<td><b>DIPLÔME PRÉPARÉ : </b></td>
-        <td>{{ wish.step.label }}</td>
+        <td>{{ wish.etape.label }}</td>
 	</tr>
     <tr>
 		<td><b>ETUDIANT : </b></td>
@@ -49,7 +50,7 @@
                 </tr>
             </table>
         </td>
-        <td class="gauche first droite padding">{{ paiement_droit.moyen_paiement }}<br></td>
+        <td class="gauche first droite padding">{{ paiement_frais.moyen_paiement }}<br></td>
         <td class="gauche first droite padding">au moment de l'inscription<br></td>
     </tr>
 </table>
@@ -63,31 +64,47 @@
         </td>
     </tr>
 </table>
-{% if paiement_droit.moyen_paiement.type != 'v' %}
+{% if paiement_frais.moyen_paiement.type != 'v' %}
 <br>
     <br>
 
 <div>
-    Vous devez libeller votre chèque à l'ordre de : <b>{{ label|default:"Agent comptable de l'université Paris 8" }}</b>.
+Important : <br/>
+le traitement des chèques étant automatisé vous veillerez tout particulièrement à renseigner et de manière très lisible, sans rature, surcharge ou grattage , les ordre, date, signature, prix concordants en chiffres et lettres.
+    <br/>
 
+--Vous devez libeller votre chèque à l'ordre de : <strong>IED Université Paris 8.</strong>
 
     <br>
 
     Au dos du chèque veuillez reporter les informations suivantes :<b>
-    IED Etudiant {{ paiement_droit.wish.step.name }} {{ individu.code_opi }} {{ individu.last_name }} 0
+    IED Etudiant {{ paiement_droit.wish.etape.cod_etp }} {{ individu.code_opi }} {{ individu.last_name }} 0
 
 </b>
 </div>
 {% else %}
     <br>
-    <div>Vous devez impérativement joindre au dossier une preuve de l'émission de ce virement (extrait de compte, relevé d'opération...). Attention, les frais de virement sont à votre charge. Veillez à prévoir le versement de la somme exacte due à l'université sous peine de vous voir opposer un refus d'inscription.</div> 
+    <div>Important : <br/>
+
+vous voudrez bien programmer le virement pour acquittement des droits d'inscription universitaires à partir du <strong>04 septembre 2014.</strong><br/>
+<br/>
+--La somme est à virer sur le compte bancaire de l'IED Université Paris 8.<br/>
+
+--Vous devez impérativement joindre le récépissé d'ordre de virement établi et tamponné par votre banque. <br/>
+
+--Vous veillerez obligatoirement à faire enregistrer par votre banque l'intitulé de virement suivant :
+IED Etudiant {{ paiement_droit.wish.etape.cod_etp }} {{ individu.code_opi }} {{ individu.last_name }} 0<br/>
+
+--Les frais de commission bancaire et interbancaire requis le cas échéant pour la réalisation du virement sont à votre charge<br/>
+
+--Veillez à prévoir le versement de la somme exacte due sous peine de vous voir opposer un refus d'inscription. </div> 
 {% endif %}
 <hr>
 
 <center><h1>CONDITIONS DE PAIEMENT</h1>
 </center>
 <p><b>Le paiement des droits doit être obligatoirement joint au dossier d'inscription ;</b></p>
-{% include 'wish/include/condition_paiement.html' %}
+{% include 'duck_inscription/wish/include/condition_paiement.html' %}
 </body>
 </html>
 

@@ -9,6 +9,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import RedirectView, FormView, View, UpdateView, TemplateView
 from extra_views import InlineFormSetView
 from xworkflows import InvalidTransitionError
+import xworkflows
 from duck_inscription.forms.individu_forms import CodeEtudiantForm, InfoPersoForm, AdresseForm, AdresseBaseFormSet, \
     RecapitulatifIndividuForm, GMT0, PremiereInscriptionForm, ComplementBacForm, CatSocForm, DernierEtablissementForm, \
     SituationAnneePrecedenteForm, EtablissementSituationAnneePrecedenteForm, EtablissementDernierDiplomeForm, \
@@ -305,7 +306,10 @@ class DossierInscriptionView(UpdateView):
             return reverse('dossier_inscription', kwargs=self.kwargs)
         else:
             wish = self.request.user.individu.wishes.get(pk=self.kwargs['pk'])
-            wish.choix_ied_fp()
+            try:
+                wish.choix_ied_fp()
+            except xworkflows.InvalidTransitionError:
+                pass
 
             return wish.get_absolute_url()
 

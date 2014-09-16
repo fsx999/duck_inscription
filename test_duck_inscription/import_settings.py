@@ -23,6 +23,7 @@ INSTALLED_APPS = (
     'duck_theme_ied',
     'django.contrib.admin',
     'django.contrib.auth',
+    'django.contrib.comments',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
@@ -55,7 +56,8 @@ INSTALLED_APPS = (
     'wiki.plugins.macros',
     'linaro_django_pagination',
     'djangobb_forum',
-    'haystack'
+    'haystack',
+    'openpyxl'
 
 )
 

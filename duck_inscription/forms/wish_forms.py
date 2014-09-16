@@ -50,13 +50,13 @@ class NoteMasterForm(forms.ModelForm):
 class ListeAttenteCandidatureForm(forms.Form):
     demande_attente = forms.ChoiceField(choices=(('O', 'Oui'), ('N', 'Non')),
                                         label=u"Voulez-vous être mis en liste d'attente ?")
-#
-#
-# class ListeAttenteInscriptionForm(forms.Form):
-#     demande_attente = forms.ChoiceField(choices=(('O', 'Oui'), ('N', 'Non')),
-#                                         label=u"Voulez-vous être mis en liste d'attente ?")
-#
-#
+
+
+class ListeAttenteInscriptionForm(forms.Form):
+    demande_attente = forms.ChoiceField(choices=(('O', 'Oui'), ('N', 'Non')),
+                                        label=u"Voulez-vous être mis en liste d'attente ?")
+
+
 class ChoixPaiementDroitForm(forms.ModelForm):
 
     class Meta:
@@ -80,7 +80,7 @@ class NbPaiementPedaForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(NbPaiementPedaForm, self).__init__(*args, **kwargs)
-        choices = [('', '-----')] + [(x + 1, x + 1) for x in range(self.instance.wish.step.nb_paiement)]
+        choices = [('', '-----')] + [(x + 1, x + 1) for x in range(self.instance.wish.etape.nb_paiement)]
         self.fields['nb_paiement_frais'] = forms.ChoiceField(choices=choices, label=u"Nombre de paiements")
 
     class Meta:
