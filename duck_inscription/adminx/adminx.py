@@ -30,7 +30,7 @@ class IncriptionDashBoard(views.website.IndexView):
     widgets = [[{"type": "qbutton", "title": "Gestion dossier",
                  "btns": [{'title': 'Reception', 'url': 'dossier_receptionner'},
                           {'title': 'Gestion Equivalence', 'url': 'dossier_equivalence'},
-                          {'title': 'Gestion Dossier inscription', 'url': 'traitement_inscription'}, ]},
+                          {'title': 'Gestion Dossier inscription', 'url': '/traitement_inscription'}, ]},
                 {"type": "qbutton", "title": "Consultation des dossiers",
                 "btns": [{'title': 'Consultation dossier inscription', 'model': Individu}, ]}
                ]]
