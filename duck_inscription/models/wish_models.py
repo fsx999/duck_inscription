@@ -59,7 +59,7 @@ class WishWorkflow(xwf_models.Workflow):
         ('dossier_inscription', ('ouverture_inscription',), 'dossier_inscription'),
         ('choix_ied_fp', 'dossier_inscription', 'choix_ied_fp'),
         ('droit_universitaire', 'choix_ied_fp', 'droit_univ'),
-        ('inscription', ('droit_univ', 'choix_ied_fp'), 'inscription'),
+        ('inscription', ('droit_univ', 'choix_ied_fp', 'liste_attente_inscription'), 'inscription'),
         ('liste_attente_inscription', 'inscription', 'liste_attente_inscription')
     )
 
@@ -80,10 +80,13 @@ class SuiviDossierWorkflow(xwf_models.Workflow):
         ('candidature_complet', 'Dossier Candidature complet'),
         ('candidature_incomplet', 'Dossier Candidature incomplet'),
         ('candidature_traite', 'Dossier Candidature traite'),
+        ('candidature_refuse', 'Dossier Candidature refuse'),
         ('inscription_reception', 'Dossier inscription receptionné'),
         ('inscription_complet', 'Dossier inscription complet'),
         ('inscription_incomplet', 'Dossier inscription incomplet'),
+        ('inscription_incom_r', 'Dossier inscription incomplet avec renvoi'),
         ('inscription_traite', 'Dossier inscription traite'),
+        ('inscription_refuse', 'Dossier inscription refusé'),
     )
 
     initial_state = 'inactif'
@@ -97,7 +100,16 @@ class SuiviDossierWorkflow(xwf_models.Workflow):
                                'equivalence_complet'), 'equivalence_refuse'),
         ('candidature_reception', ('inactif', 'equivalence_traite', 'candidature_incomplet'), 'candidature_reception'),
         ('inscription_reception', ('inactif', 'equivalence_traite', 'candidature_complet', 'inscription_incomplet'),
-         'inscription_reception')
+         'inscription_reception'),
+        ('inscription_incomplet', ('inscription_reception',), 'inscription_incomplet'),
+        ('inscription_incomplet_renvoi', ('inscription_reception',), 'inscription_incom_r'),
+        ('inscription_complet', ('inscription_reception', 'inscription_incomplet'), 'inscription_complet'),
+        ('inscription_traite', ('inscription_reception', 'inscription_complet', 'inscription_incomplet'),
+         'inscription_traite',),
+        ('inscription_refuse', ('inscription_reception', 'inscription_complet', 'inscription_incomplet', 'inactif'),
+         'inscription_refuse',),
+
+
     )
 
 

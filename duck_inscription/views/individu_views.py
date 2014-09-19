@@ -39,7 +39,7 @@ def test_username(request):
         date_naissance = request.GET.get("date_naissance", "")
         print cod_etu, date_naissance
         try:
-            if IndividuApogee.objects.filter(COD_ETU=cod_etu, date_nai_ind=date_naissance).count() != 0:
+            if IndividuApogee.objects.filter(cod_etu=cod_etu, date_nai_ind=date_naissance).count() != 0:
                 return HttpResponse('true')
         except ValueError:
             pass
