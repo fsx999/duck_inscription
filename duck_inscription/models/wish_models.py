@@ -451,7 +451,6 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
         else:
             nb = 0
         return nb
-
     # def rang(self):
     #     rang = self.etape.wish_set.filter(date_validation__lt=self.date_validation,
     #                               etape='liste_attente_inscription',
@@ -460,7 +459,6 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
     #     if rang < 0:
     #         rang = 0
     #     return rang
-
 
     def save(self, force_insert=False, force_update=False, using=None):
         if not self.code_dossier:
