@@ -93,6 +93,7 @@ SOUTH_DATABASE_ADAPTERS = {
     'default': 'south.db.postgresql_psycopg2',
     'oracle': 'south.db.sqlite3',
 }
+
 LANGUAGE_CODE = 'fr-fr'
 
 TIME_ZONE = 'Europe/Paris'
