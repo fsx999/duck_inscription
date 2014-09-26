@@ -112,7 +112,7 @@ class SuiviDossierWorkflow(xwf_models.Workflow):
 
     )
 
-
+#ada
 class WishTransitionLog(django_xworkflows.models.BaseTransitionLog):
     wish = models.ForeignKey('Wish', related_name='etape_dossier')
     MODIFIED_OBJECT_FIELD = 'wish'

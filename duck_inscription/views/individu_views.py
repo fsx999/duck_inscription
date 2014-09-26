@@ -264,7 +264,8 @@ class RecapitulatifIndividuView(FormView):
         return redirect(self.get_success_url())
 
 
-class DossierInscriptionView(UpdateView):
+class \
+        DossierInscriptionView(UpdateView):
     template_name = "duck_inscription/individu/dossier_inscription/base_formulaire.html"
     model = DossierInscription
     forms = {
