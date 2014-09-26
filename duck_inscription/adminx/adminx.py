@@ -242,18 +242,18 @@ class SettingsEtapeXadmin(object):
     quickfilter = ['cursus']
     form_layout = (
         Main(Fieldset('Etape', 'cod_etp', 'diplome', 'cursus', 'label', 'label_formation'), TabHolder(Tab('Equivalence',
-                                                                                                          Fieldset('',
-                                                                                                                   'date_ouverture_equivalence',
-                                                                                                                   'date_fermeture_equivalence',
-                                                                                                                   'document_equivalence',
-                                                                                                                   'path_template_equivalence',
-                                                                                                                   'grille_de_equivalence')),
-                                                                                                      Tab('Candidature',
-                                                                                                          Fieldset('',
-                                                                                                                   'date_ouverture_candidature',
-                                                                                                                   'date_fermeture_candidature',
-                                                                                                                   'note_maste',
-                                                                                                                   'document_candidature', )), )),
+                                                                                                      Fieldset('',
+                                                                                                   'date_ouverture_equivalence',
+                                                                                                   'date_fermeture_equivalence',
+                                                                                                   'document_equivalence',
+                                                                                                   'path_template_equivalence',
+                                                                                                   'grille_de_equivalence')),
+                                                                                              Tab('Candidature',
+                                                                                                  Fieldset('',
+                                                                                                           'date_ouverture_candidature',
+                                                                                                           'date_fermeture_candidature',
+                                                                                                           'note_maste',
+                                                                                                           'document_candidature', )), )),
         Side(Fieldset('Settings', 'required_equivalence', 'is_inscription_ouverte'))
     )
 
@@ -295,9 +295,14 @@ class ExtrationStatistique(BaseAdminView):
         return response
 
 
+class OpiView(views.ModelAdminView):
+    model = Wish
+
+xadmin.site.register_modelview('r^opi/$', OpiView, name='%s_%s_opi')
+
+
 xadmin.site.register_view(r'^extraction/(?P<type_stat>\w+)/(?P<etat>\w+)/(?P<step>\w+)/$', ExtrationStatistique,
                           'extraction_stat')
-
 xadmin.site.unregister(User)
 xadmin.site.register(User, CustomUserAdmin)
 xadmin.site.register(Individu, IndividuXadmin)
