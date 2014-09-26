@@ -1,0 +1,21 @@
+{% extends "xadmin/base_site.html" %}
+{% block nav_title %}Extraction{% endblock %}
+{% block content %}
+    <table class="table table-bordered table-striped">
+        <thead>
+        <tr>
+            <th>Etape</th>
+            <th>Note Master</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for etape in etapes %}
+
+        <tr>
+            <td>{{ etape.label }} / {{ etape.cod_etp }}</td>
+            <td>{% if etape.note_maste %}<a href="{% url "xadmin:extraction_note" etape.cod_etp %}" class="btn btn-primary">Note</a> {% endif %}</td>
+        </tr>
+       {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

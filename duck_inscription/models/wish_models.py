@@ -568,6 +568,9 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
     def __unicode__(self):
         return u"%s %s %s" % (self.individu, self.code_dossier, self.etape)
 
+    def save_opi(self):
+        self.individu.save_opi()
+
     class Meta:
         verbose_name = "Voeu"
         verbose_name_plural = "Voeux"

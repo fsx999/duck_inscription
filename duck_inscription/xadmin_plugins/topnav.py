@@ -15,7 +15,6 @@ class IEDPlugin(BaseAdminPlugin):
         {'name': 'Forum', 'url': '/forum'},
     ]
 
-
     def get_context(self, context):
         return context
 

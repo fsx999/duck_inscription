@@ -1,6 +1,8 @@
 # coding=utf-8
 from __future__ import unicode_literals
 import datetime
+from django.contrib.auth.admin import csrf_protect_m
+from django.template.response import TemplateResponse
 from django.views.decorators.cache import never_cache
 from django.views.generic import TemplateView, View
 from openpyxl.writer.excel import save_virtual_workbook
@@ -19,7 +21,8 @@ from duck_inscription.forms.adminx_forms import DossierReceptionForm, Equivalenc
 from xadmin.layout import Main, Fieldset, Container, Side, Row
 from xadmin import views
 import xadmin
-from duck_inscription.models import Individu, SettingsEtape, WishWorkflow, SettingAnneeUni, WishParcourTransitionLog
+from duck_inscription.models import Individu, SettingsEtape, WishWorkflow, SettingAnneeUni, WishParcourTransitionLog, \
+    NoteMasterModel
 from duck_inscription.models import Wish, SuiviDossierWorkflow, IndividuWorkflow, SettingsUser, CursusEtape
 from xadmin.util import User
 from xadmin.views import filter_hook, CommAdminView, BaseAdminView
@@ -30,7 +33,9 @@ class IncriptionDashBoard(views.website.IndexView):
     widgets = [[{"type": "qbutton", "title": "Gestion dossier",
                  "btns": [{'title': 'Reception', 'url': '/dossier_receptionner'},
                           {'title': 'Gestion Equivalence', 'url': '/dossier_equivalence'},
-                          {'title': 'Gestion Dossier inscription', 'url': '/traitement_inscription'}, ]},
+                          {'title': 'Gestion Dossier inscription', 'url': '/traitement_inscription'},
+                          {'title': 'Remontee opi', 'model': Wish},
+                          ]},
                 {"type": "qbutton", "title": "Consultation des dossiers",
                 "btns": [{'title': 'Consultation dossier inscription', 'model': Individu}, ]}
                ]]
@@ -45,7 +50,7 @@ xadmin.site.register_view(r'^inscription/$', IncriptionDashBoard, 'inscription')
 class StatistiqueDashBoard(views.website.IndexView):
     widgets = [[{"type": "qbutton", "title": "Inscription",
                  "btns": [{'title': 'Statistique Pal (équivalence, candidature)', 'url': '/stats_pal'},
-                          {'title': 'Statistique Piel (préinscription)', 'url': '/                                   stats_piel'}, ]}, ]]
+                          {'title': 'Statistique Piel (préinscription)', 'url': '/stats_piel'}, ]}, ]]
     site_title = 'Backoffice'
     title = 'Accueil'
     widget_customiz = False
@@ -102,11 +107,68 @@ class StatistiquePiel(views.Dashboard):
 
 xadmin.site.register_view(r'^stats_piel/$', StatistiquePiel, 'stats_piel')
 
+class ExtractionPiel(views.Dashboard):
+    base_template = 'extraction/extraction_pal.html'
+    widget_customiz = False
+
+    @filter_hook
+    def get_context(self):
+        context = super(ExtractionPiel, self).get_context()
+        context['etapes'] = SettingsEtape.objects.filter(is_inscription_ouverte=True).order_by('diplome')
+        return context
+
+    @never_cache
+    def get(self, request, *args, **kwargs):
+        self.widgets = self.get_widgets()
+        return self.template_response(self.base_template, self.get_context())
+
+    @filter_hook
+    def get_breadcrumb(self):
+        return [{'url': self.get_admin_url('index'), 'title': 'Accueil'},
+                {'url': self.get_admin_url('statistiques'), 'title': 'Statistique'},
+                {'url': self.get_admin_url('stats_piel'), 'title': 'Statistique PIEL'}]
+
+
+xadmin.site.register_view(r'^extraction/$', ExtractionPiel, 'extraction')
+
+class ExtrationPalView(BaseAdminView):
+    def get(self, request, *args, **kwargs):
+        cod_etp = kwargs.get('step', '')
+        step = SettingsEtape.objects.get(cod_etp=cod_etp)
+        wb = Workbook()
+        ws = wb.active
+        queryset = step.wish_set.filter(annee__cod_anu=2014).order_by('individu__last_name')
+        ws.cell(row=1, column=1).value = "nom"
+        ws.cell(row=1, column=2).value = "prenom"
+        ws.cell(row=1, column=3).value = "code_dossier"
+        ws.cell(row=1, column=4).value = "email"
+        ws.cell(row=1, column=5).value = "moyenne generale"
+        ws.cell(row=1, column=6).value = "note memoire"
+        ws.cell(row=1, column=7).value = "note stage"
+        for row, wish in enumerate(queryset):
+            ws.cell(row=row + 2, column=1).value = wish.individu.last_name
+            ws.cell(row=row + 2, column=2).value = wish.individu.first_name1
+            ws.cell(row=row + 2, column=3).value = wish.code_dossier
+            ws.cell(row=row + 2, column=4).value = wish.individu.personal_email
+            try:
+                ws.cell(row=row + 2, column=5).value = wish.notemastermodel.moyenne_general
+                ws.cell(row=row + 2, column=6).value = wish.notemastermodel.note_memoire
+                ws.cell(row=row + 2, column=7).value = wish.notemastermodel.note_stage
+            except NoteMasterModel.DoesNotExist:
+                pass
+
+        response = HttpResponse(save_virtual_workbook(wb), mimetype='application/vnd.ms-excel')
+        date = datetime.datetime.today().strftime('%d-%m-%Y')
+        response['Content-Disposition'] = 'attachment; filename=%s_%s.xls' % ('extraction', date)
+        return response
+
+xadmin.site.register_view(r'^extraction_note_view/(?P<step>\w+)/$', ExtrationPalView, 'extraction_note')
 
 class MainDashboard(object):
     widgets = [[{"type": "qbutton", "title": "Scolarité", "btns": [
 
-        {'title': "Pré-Inscription", 'url': 'inscription'}, {'title': "Statistique", 'url': 'statistiques'}, ]}, ]]
+        {'title': "Pré-Inscription", 'url': 'inscription'}, {'title': "Statistique", 'url': 'statistiques'},
+        {'title': 'Extraction', 'url': 'extraction'}]}, ]]
     site_title = 'Backoffice'
     title = 'Accueil'
     widget_customiz = False
@@ -241,7 +303,8 @@ class SettingsEtapeXadmin(object):
     list_filter = ['cursus']
     quickfilter = ['cursus']
     form_layout = (
-        Main(Fieldset('Etape', 'cod_etp', 'diplome', 'cursus', 'label', 'label_formation'), TabHolder(Tab('Equivalence',
+        Main(Fieldset('Etape', 'cod_etp', 'diplome', 'cursus', 'label', 'label_formation'),
+             TabHolder(Tab('Equivalence',
                                                                                                       Fieldset('',
                                                                                                    'date_ouverture_equivalence',
                                                                                                    'date_fermeture_equivalence',
@@ -295,11 +358,53 @@ class ExtrationStatistique(BaseAdminView):
         return response
 
 
-class OpiView(views.ModelAdminView):
+class OpiView(object):
     model = Wish
+    show_bookmarks = False
+    list_export = []
+    list_per_page = 10
+    search_fields = ['code_dossier']
+    # list_display_links_details = True
+    # hidden_menu = True
+    list_display = ('__str__', 'opi_url')
 
-xadmin.site.register_modelview('r^opi/$', OpiView, name='%s_%s_opi')
+    def opi_url(self, obj):
+        if obj.state.is_inscription:
+            return '<a class="btn btn-primary" href="?opi={}">Remontée Opi</a>'.format(obj.code_dossier)
+        else:
+            return ''
+    opi_url.short_description = 'remontee opi'
+    opi_url.allow_tags = True
+    opi_url.is_column = True
 
+    def has_delete_permission(self, obj=None):
+        return False
+
+    def has_add_permission(self):
+        return False
+
+    @csrf_protect_m
+    @filter_hook
+    def get(self, request, *args, **kwargs):
+        """
+        The 'change list' admin view for this model.
+        """
+        response = self.get_result_list()
+        if response:
+            return response
+
+        context = self.get_context()
+        context.update(kwargs or {})
+
+        response = self.get_response(context, *args, **kwargs)
+        opi = self.request.GET.get('opi', None)
+        if opi:
+            wish = Wish.objects.get(code_dossier=opi)
+            wish.save_opi()
+            self.message_user('Etudiant {} remontee'.format(wish.individu.code_opi), 'success')
+
+        return response or TemplateResponse(request, self.object_list_template or
+                                            self.get_template_list('views/model_list.html'), context, current_app=self.admin_site.name)
 
 xadmin.site.register_view(r'^extraction/(?P<type_stat>\w+)/(?P<etat>\w+)/(?P<step>\w+)/$', ExtrationStatistique,
                           'extraction_stat')
@@ -314,3 +419,5 @@ xadmin.site.register(Address)
 xadmin.site.register(Signature)
 xadmin.site.register(CursusEtape)
 xadmin.site.register(SettingAnneeUni)
+xadmin.site.register(Wish, OpiView)
+# xadmin.site.register_view(r'^opi/$', OpiView, 'opi')
