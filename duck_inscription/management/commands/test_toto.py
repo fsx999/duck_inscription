@@ -20,19 +20,7 @@ class Command(BaseCommand):
         # on récupére les personnes du jour (soit la date de création, de modif plus grand que la veille
         mail = Mail.objects.get(name='email_inscription_ouverte')
         site = Site.objects.get(domain='preins.iedparis8.net')
-        for w in WishParcourTransitionLog.objects.filter(wish__etape__cod_etp='L1NPSY',
-                                                      from_state='liste_attente_inscription',
-                                                      to_state='inscription'):
-            wish = w.wish
-            email_etu = 'paul.guichon@iedparis8.net' if settings.DEBUG else wish.individu.personal_email
-            wish.is_ok = True
-            try:
-                wish.inscription()
-            except Exception:
-                pass
-            wish.save()
-            mail.make_message(
-                recipients=(email_etu,),
-                context={'wish': wish,
-                         'site': site}
-            ).send()
+        print WishTransitionLog.objects.filter(wish__etape__cod_etp='L3NEDU',
+                                               to_state='inscription_reception').count()
+        print Wish.objects.filter(etape__cod_etp='L3NEDU', etape_dossier__to_state='inscription_reception').count()
+

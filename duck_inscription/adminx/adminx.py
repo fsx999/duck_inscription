@@ -343,23 +343,33 @@ class ExtrationStatistique(BaseAdminView):
         wb = Workbook()
         ws = wb.active
 
-        if type_stat == 'stat_parcours_dossier':
-            queryset = WishParcourTransitionLog.objects.filter(to_state=kwargs['etat'],
-                                                               wish__etape__cod_etp=kwargs['step'])
-
-            for row, x in enumerate(queryset):
-                ws.cell(row + 1, 1).value = 'couou'
-
-        else:
+        if type_stat == 'parcours_dossier':
+            queryset = Wish.objects.filter(etape__cod_etp=kwargs['step'], parcours_dossier__to_state=kwargs['etat'])
+        elif type_stat == 'state':
             queryset = Wish.objects.filter(state=kwargs['etat'], etape__cod_etp=kwargs['step'])
-            for row, x in enumerate(queryset):
-                ws.cell(row + 1, 1).value = 'couou'
+        else:
+            queryset = Wish.objects.filter(etape_dossier__to_state=kwargs['etat'], etape__cod_etp=kwargs['step'])
+        ws.cell(row=1, column=1).value = 'Numero Etudiant:'
+        ws.cell(row=1, column=2).value = 'Nom patronimique:'
+        ws.cell(row=1, column=3).value = "Nom d'époux:"
+        ws.cell(row=1, column=4).value = "Prénom:"
+        ws.cell(row=1, column=5).value = "Deuxiéme prénom"
+        ws.cell(row=1, column=6).value = "Email:"
+        for row, wish in enumerate(queryset):
+            ws.cell(row=row + 2, column=1).value = wish.individu.student_code
+            ws.cell(row=row + 2, column=2).value = wish.individu.last_name
+            ws.cell(row=row + 2, column=3).value = wish.individu.common_name
+            ws.cell(row=row + 2, column=4).value = wish.individu.first_name1
+            ws.cell(row=row + 2, column=5).value = wish.individu.first_name2
+            ws.cell(row=row + 2, column=6).value = wish.individu.personal_email
+
 
         response = HttpResponse(save_virtual_workbook(wb), mimetype='application/vnd.ms-excel')
         date = datetime.datetime.today().strftime('%d-%m-%Y')
         response['Content-Disposition'] = 'attachment; filename=%s_%s.xls' % ('extraction', date)
         return response
-
+xadmin.site.register_view(r'^extraction/(?P<type_stat>\w+)/(?P<etat>\w+)/(?P<step>\w+)/$', ExtrationStatistique,
+                          'extraction_stat')
 
 class OpiView(object):
     model = Wish
@@ -409,8 +419,7 @@ class OpiView(object):
         return response or TemplateResponse(request, self.object_list_template or
                                             self.get_template_list('views/model_list.html'), context, current_app=self.admin_site.name)
 
-xadmin.site.register_view(r'^extraction/(?P<type_stat>\w+)/(?P<etat>\w+)/(?P<step>\w+)/$', ExtrationStatistique,
-                          'extraction_stat')
+
 xadmin.site.unregister(User)
 xadmin.site.register(User, CustomUserAdmin)
 xadmin.site.register(Individu, IndividuXadmin)

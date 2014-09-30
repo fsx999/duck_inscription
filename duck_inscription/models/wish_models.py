@@ -108,11 +108,9 @@ class SuiviDossierWorkflow(xwf_models.Workflow):
          'inscription_traite',),
         ('inscription_refuse', ('inscription_reception', 'inscription_complet', 'inscription_incomplet', 'inactif'),
          'inscription_refuse',),
-
-
     )
 
-#ada
+
 class WishTransitionLog(django_xworkflows.models.BaseTransitionLog):
     wish = models.ForeignKey('Wish', related_name='etape_dossier')
     MODIFIED_OBJECT_FIELD = 'wish'
@@ -364,8 +362,6 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
                 self.liste_attente_equivalence()
         elif self.diplome_acces and now() >= self.etape.date_fermeture_equivalence:
             self.ouverture_candidature()
-
-
 
     @on_enter_state('ouverture_candidature')
     def on_enter_state_ouverture_candidature(self, res, *args, **kwargs):
