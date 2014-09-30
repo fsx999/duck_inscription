@@ -4,20 +4,18 @@ import datetime
 from django.contrib.auth.admin import csrf_protect_m
 from django.template.response import TemplateResponse
 from django.views.decorators.cache import never_cache
-from django.views.generic import TemplateView, View
+
 from openpyxl.writer.excel import save_virtual_workbook
 from duck_inscription.xadmin_plugins.topnav import IEDPlugin
-import test_duck_inscription.settings as preins_settings
+
 from crispy_forms.bootstrap import TabHolder, Tab
-from django.contrib.sites.models import Site
-from django.core.exceptions import PermissionDenied
+
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, HttpResponse
 from mailrobot.models import Mail, MailBody, Address, Signature
 from django.conf import settings
 from xadmin.plugins.auth import UserAdmin
-from xworkflows import InvalidTransitionError, ForbiddenTransition
-from duck_inscription.forms.adminx_forms import DossierReceptionForm, EquivalenceForm
+
 from xadmin.layout import Main, Fieldset, Container, Side, Row
 from xadmin import views
 import xadmin
@@ -27,6 +25,7 @@ from duck_inscription.models import Wish, SuiviDossierWorkflow, IndividuWorkflow
 from xadmin.util import User
 from xadmin.views import filter_hook, CommAdminView, BaseAdminView
 from openpyxl import Workbook
+import xlwt
 
 
 class IncriptionDashBoard(views.website.IndexView):
@@ -131,35 +130,39 @@ class ExtractionPiel(views.Dashboard):
 
 xadmin.site.register_view(r'^extraction/$', ExtractionPiel, 'extraction')
 
+
 class ExtrationPalView(BaseAdminView):
     def get(self, request, *args, **kwargs):
         cod_etp = kwargs.get('step', '')
         step = SettingsEtape.objects.get(cod_etp=cod_etp)
-        wb = Workbook()
-        ws = wb.active
+        wb = xlwt.Workbook()
+        ws = wb.add_sheet('etudiant')
         queryset = step.wish_set.filter(annee__cod_anu=2014).order_by('individu__last_name')
-        ws.cell(row=1, column=1).value = "nom"
-        ws.cell(row=1, column=2).value = "prenom"
-        ws.cell(row=1, column=3).value = "code_dossier"
-        ws.cell(row=1, column=4).value = "email"
-        ws.cell(row=1, column=5).value = "moyenne generale"
-        ws.cell(row=1, column=6).value = "note memoire"
-        ws.cell(row=1, column=7).value = "note stage"
+        ws.write(1, 0, "code etudiant")
+        ws.write(1, 1, "nom")
+        ws.write(1, 2, "prenom")
+        ws.write(1, 3, "code_dossier")
+        ws.write(1, 4, "email")
+        ws.write(1, 5, "moyenne generale")
+        ws.write(1, 6, "note memoire")
+        ws.write(1, 7, "note stage")
         for row, wish in enumerate(queryset):
-            ws.cell(row=row + 2, column=1).value = wish.individu.last_name
-            ws.cell(row=row + 2, column=2).value = wish.individu.first_name1
-            ws.cell(row=row + 2, column=3).value = wish.code_dossier
-            ws.cell(row=row + 2, column=4).value = wish.individu.personal_email
+            ws.write(row+2, 0, wish.individu.student_code)
+            ws.write(row + 2, 1, wish.individu.last_name)
+            ws.write(row + 2, 2, wish.individu.first_name1)
+            ws.write(row + 2, 3, wish.code_dossier)
+            ws.write(row + 2, 4, wish.individu.personal_email)
             try:
-                ws.cell(row=row + 2, column=5).value = wish.notemastermodel.moyenne_general
-                ws.cell(row=row + 2, column=6).value = wish.notemastermodel.note_memoire
-                ws.cell(row=row + 2, column=7).value = wish.notemastermodel.note_stage
+                ws.write(row + 2, 5, wish.notemastermodel.moyenne_general)
+                ws.write(row + 2, 6, wish.notemastermodel.note_memoire)
+                ws.write(row + 2, 7, wish.notemastermodel.note_stage)
             except NoteMasterModel.DoesNotExist:
                 pass
 
-        response = HttpResponse(save_virtual_workbook(wb), mimetype='application/vnd.ms-excel')
+        response = HttpResponse(mimetype='application/vnd.ms-excel')
         date = datetime.datetime.today().strftime('%d-%m-%Y')
         response['Content-Disposition'] = 'attachment; filename=%s_%s.xls' % ('extraction', date)
+        wb.save(response)
         return response
 
 xadmin.site.register_view(r'^extraction_note_view/(?P<step>\w+)/$', ExtrationPalView, 'extraction_note')
@@ -345,12 +348,12 @@ class ExtrationStatistique(BaseAdminView):
                                                                wish__etape__cod_etp=kwargs['step'])
 
             for row, x in enumerate(queryset):
-                ws.cell(row=row + 1, column=1).value = 'couou'
+                ws.cell(row + 1, 1).value = 'couou'
 
         else:
             queryset = Wish.objects.filter(state=kwargs['etat'], etape__cod_etp=kwargs['step'])
             for row, x in enumerate(queryset):
-                ws.cell(row=row + 1, column=1).value = 'couou'
+                ws.cell(row + 1, 1).value = 'couou'
 
         response = HttpResponse(save_virtual_workbook(wb), mimetype='application/vnd.ms-excel')
         date = datetime.datetime.today().strftime('%d-%m-%Y')
