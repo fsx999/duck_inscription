@@ -137,7 +137,7 @@ class ExtrationPalView(BaseAdminView):
         step = SettingsEtape.objects.get(cod_etp=cod_etp)
         wb = xlwt.Workbook()
         ws = wb.add_sheet('etudiant')
-        queryset = step.wish_set.filter(annee__cod_anu=2014).order_by('individu__last_name')
+        queryset = step.wish_set.filter(annee__cod_anu=2014, is_reins=False).order_by('individu__last_name')
         ws.write(1, 0, "code etudiant")
         ws.write(1, 1, "nom")
         ws.write(1, 2, "prenom")
