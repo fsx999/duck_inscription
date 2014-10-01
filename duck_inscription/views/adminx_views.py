@@ -84,6 +84,7 @@ class ImprimerDecisionsEquivalenceEnMasseView(FormView):
         big_pdf.join(response)
         return response
 
+
 class DecisionEquivalencePdfAdminView(TemplateView):
     etape = "equivalence"
 

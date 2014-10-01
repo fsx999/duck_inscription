@@ -132,6 +132,7 @@ xadmin.site.register_view(r'^extraction/$', ExtractionPiel, 'extraction')
 
 
 class ExtrationPalView(BaseAdminView):
+
     def get(self, request, *args, **kwargs):
         cod_etp = kwargs.get('step', '')
         step = SettingsEtape.objects.get(cod_etp=cod_etp)
