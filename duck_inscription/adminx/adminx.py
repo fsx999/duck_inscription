@@ -20,7 +20,7 @@ from xadmin.layout import Main, Fieldset, Container, Side, Row
 from xadmin import views
 import xadmin
 from duck_inscription.models import Individu, SettingsEtape, WishWorkflow, SettingAnneeUni, WishParcourTransitionLog, \
-    NoteMasterModel
+    NoteMasterModel, WishTransitionLog
 from duck_inscription.models import Wish, SuiviDossierWorkflow, IndividuWorkflow, SettingsUser, CursusEtape
 from xadmin.util import User
 from xadmin.views import filter_hook, CommAdminView, BaseAdminView
@@ -383,7 +383,7 @@ class OpiView(object):
     list_display = ('__str__', 'opi_url')
 
     def opi_url(self, obj):
-        if obj.state.is_inscription:
+        if obj.state.is_inscription and len(WishTransitionLog.objects.filter(wish=obj, to_state='inscription_reception')):
             return '<a class="btn btn-primary" href="?opi={}">Remontée Opi</a>'.format(obj.code_dossier)
         else:
             return ''
@@ -414,7 +414,8 @@ class OpiView(object):
         opi = self.request.GET.get('opi', None)
         if opi:
             wish = Wish.objects.get(code_dossier=opi)
-            wish.individu.save_opi()
+            wish.save_opi()
+            wish.inscription_traite()
             self.message_user('Etudiant {} remontee'.format(wish.individu.code_opi), 'success')
 
         return response or TemplateResponse(request, self.object_list_template or
