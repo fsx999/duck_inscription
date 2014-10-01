@@ -371,6 +371,7 @@ class ExtrationStatistique(BaseAdminView):
 xadmin.site.register_view(r'^extraction/(?P<type_stat>\w+)/(?P<etat>\w+)/(?P<step>\w+)/$', ExtrationStatistique,
                           'extraction_stat')
 
+
 class OpiView(object):
     model = Wish
     show_bookmarks = False
@@ -413,7 +414,7 @@ class OpiView(object):
         opi = self.request.GET.get('opi', None)
         if opi:
             wish = Wish.objects.get(code_dossier=opi)
-            wish.save_opi()
+            wish.individu.save_opi()
             self.message_user('Etudiant {} remontee'.format(wish.individu.code_opi), 'success')
 
         return response or TemplateResponse(request, self.object_list_template or

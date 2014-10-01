@@ -183,6 +183,125 @@ class EquivalenceView(views.FormAdminView):
         mail.send()
 
 
+class EquivalenceView(views.FormAdminView):
+    title = 'Dossier équivalence'
+    form = EquivalenceForm
+
+    def get_form_datas(self, **kwargs):
+        data = super(EquivalenceView, self).get_form_datas(**kwargs)
+        queryset = getattr(self.request.user.setting_user, 'etapes', SettingsEtape.objects).all()
+
+        data.update({'queryset': queryset})
+        return data
+
+    def post(self, request, *args, **kwargs):
+        self.instance_forms()
+        self.setup_forms()
+
+        if self.valid_forms():
+            code_dossier = self.form_obj.cleaned_data['code_dossier']
+            choix = self.form_obj.cleaned_data['choix']
+            etape = self.form_obj.cleaned_data['etapes']
+            self.motif = self.form_obj.cleaned_data['motif']
+
+            try:
+                wish = Wish.objects.get(code_dossier=code_dossier)
+                if wish.etape not in self.request.user.setting_user.etapes.all():
+                    raise PermissionDenied
+                if wish.suivi_dossier.is_equivalence_traite or wish.suivi_dossier.is_equivalence_refuse:
+                    msg = 'Dossier déjà traité'
+                    self.message_user(msg, 'warning')
+                elif not wish.state.is_equivalence:
+                    msg = 'Dossier n\'est pas en equivalence'
+                    self.message_user(msg, 'warning')
+                elif choix == 'complet':
+                    try:
+                        wish.equivalence_complet()
+                        template = Mail.objects.get(name='email_equivalence_complet')
+                        self._envoi_email(wish, template)
+                        self.message_user('Dossier traité', 'success')
+                    except InvalidTransitionError as e:
+                        if wish.suivi_dossier.is_equivalence_complet:
+                            msg = 'Dossier déjà traité'
+                            self.message_user(msg, 'warning')
+                        elif wish.suivi_dossier.is_inactif:
+                            wish.equivalence_receptionner()
+                            wish.equivalence_complet()
+                            self.message_user('Dossier traité', 'success')
+                        else:
+                            raise e
+
+                elif choix == 'incomplet':
+                    try:
+
+                        wish.equivalence_incomplet()
+                    except InvalidTransitionError as e:
+                        if wish.suivi_dossier.is_inactif:
+                            wish.equivalence_receptionner()
+                            wish.equivalence_incomplet()
+
+                        else:
+                            raise e
+                    self.message_user('Dossier traité', 'success')
+                    self._envoi_email(wish, Mail.objects.get(name='email_equivalence_incomplet'))
+
+                elif choix == 'accepte':
+                    mail = 'email_equivalence_accepte' if wish.etape == etape else 'email_equivalence_reoriente'
+
+                    try:
+                        wish.equivalence_traite()
+                    except (InvalidTransitionError, ForbiddenTransition) as e:
+                        if wish.suivi_dossier.is_inactif:
+                            wish.equivalence_receptionner()
+                            wish.equivalence_complet()
+                            wish.equivalence_traite()
+                        elif wish.suivi_dossier.is_equivalence_reception:
+                            wish.equivalence_complet()
+                            wish.equivalence_traite()
+                        elif wish.suivi_dossier.is_equivalence_incomplet:
+                            wish.equivalence_complet()
+                            wish.equivalence_traite()
+                        else:
+                            raise e
+                    wish.etape = etape
+                    wish.save()
+                    wish.ouverture_candidature()
+
+                    self._envoi_email(wish, Mail.objects.get(name=mail))
+                    self.message_user('Dossier traité', 'success')
+                elif choix == 'refuse':
+                    try:
+                        wish.equivalece_refuse()
+                        self._envoi_email(wish, Mail.objects.get(name='email_equivalence_refuse'))
+                        self.message_user('Dossier traité', 'success')
+                    except InvalidTransitionError as e:
+                        raise e
+
+                # on clean le form
+                self.form_obj.data = self.form_obj.data.copy()
+                self.form_obj.data['code_dossier'] = None
+
+            except Wish.DoesNotExist:
+                msg = 'Le dossier n\'existe pas'
+                self.message_user(msg, 'error')
+            except PermissionDenied:
+                msg = 'Vous n\'avez pas la permission de traité ce dossier'
+                self.message_user(msg, 'error')
+            except InvalidTransitionError as e:
+                self.message_user(e, 'error')
+
+        return self.get_response()
+
+    def get_redirect_url(self):
+        return self.get_admin_url('dossier_equivalence')
+
+    def _envoi_email(self, wish, template):
+        context = {'site': Site.objects.get(id=preins_settings.SITE_ID), 'wish': wish, 'motif': self.motif}
+        email = wish.individu.user.email if not settings.DEBUG else 'paul.guichon@iedparis8.net'
+        mail = template.make_message(context=context, recipients=[email])
+        mail.send()
+
+
 class DossierInscriptionView(views.FormAdminView):
     form = InscriptionForm
     title = 'Dossier Inscription'
