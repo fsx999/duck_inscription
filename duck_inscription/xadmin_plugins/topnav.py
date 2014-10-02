@@ -21,7 +21,7 @@ class IEDPlugin(BaseAdminPlugin):
     # Block Views
     def block_top_navbar(self, context, nodes):
         urls = self.urls
-        if self.request.user.is_superuser:
+        if self.request.user.is_superuser and len(urls) == 2:
             urls.append({'name': 'Admin', 'url':'/admin'})
         nodes.append(
             loader.render_to_string('xadmin_plugins/comm.top.lien.html', {'urls': urls}))
