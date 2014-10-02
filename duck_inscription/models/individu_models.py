@@ -13,6 +13,7 @@ from django_apogee.models import Departement, Pays, SitFam, SitMil, TypHandicap,
 from django_xworkflows import models as xwf_models
 from django.conf import settings
 
+
 class IndividuWorkflow(xwf_models.Workflow):
     log_model = 'duck_inscription.IndividuTransitionLog'
     states = (

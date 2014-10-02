@@ -26,8 +26,6 @@ ROOT_URLCONF = 'test_duck_inscription.urls'
 
 WSGI_APPLICATION = 'test_duck_inscription.wsgi.application'
 
-
-
 LOGIN_URL = 'auth_login'
 
 from django.conf import settings

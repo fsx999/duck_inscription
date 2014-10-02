@@ -1,204 +1,20 @@
 # coding=utf-8
 from __future__ import unicode_literals
-import datetime
+
 from django.contrib.auth.admin import csrf_protect_m
 from django.template.response import TemplateResponse
-from django.views.decorators.cache import never_cache
-
-from openpyxl.writer.excel import save_virtual_workbook
+from xadmin.views import filter_hook, CommAdminView
 from duck_inscription.xadmin_plugins.topnav import IEDPlugin
-
 from crispy_forms.bootstrap import TabHolder, Tab
-
 from django.core.urlresolvers import reverse
-from django.http import HttpResponseRedirect, HttpResponse
 from mailrobot.models import Mail, MailBody, Address, Signature
-from django.conf import settings
 from xadmin.plugins.auth import UserAdmin
-
-from xadmin.layout import Main, Fieldset, Container, Side, Row
-from xadmin import views
+from xadmin.layout import Main, Fieldset, Side
 import xadmin
-from duck_inscription.models import Individu, SettingsEtape, WishWorkflow, SettingAnneeUni, WishParcourTransitionLog, \
-    NoteMasterModel, WishTransitionLog
+from duck_inscription.models import Individu, SettingsEtape, WishWorkflow, SettingAnneeUni,  WishTransitionLog
 from duck_inscription.models import Wish, SuiviDossierWorkflow, IndividuWorkflow, SettingsUser, CursusEtape
 from xadmin.util import User
-from xadmin.views import filter_hook, CommAdminView, BaseAdminView
-from openpyxl import Workbook
-import xlwt
-
-
-class IncriptionDashBoard(views.website.IndexView):
-    widgets = [[{"type": "qbutton", "title": "Gestion dossier",
-                 "btns": [{'title': 'Reception', 'url': '/dossier_receptionner'},
-                          {'title': 'Gestion Equivalence', 'url': '/dossier_equivalence'},
-                          {'title': 'Gestion Candidature', 'url': '/dossier_candidature'},
-                          {'title': 'Gestion Dossier inscription', 'url': '/traitement_inscription'},
-                          {'title': 'Remontee opi', 'model': Wish},
-                          ]},
-                {"type": "qbutton", "title": "Consultation des dossiers",
-                "btns": [{'title': 'Consultation dossier inscription', 'model': Individu}, ]}
-               ]]
-    site_title = 'Backoffice'
-    title = 'Accueil'
-    widget_customiz = False
-
-
-xadmin.site.register_view(r'^inscription/$', IncriptionDashBoard, 'inscription')
-
-
-class StatistiqueDashBoard(views.website.IndexView):
-    widgets = [[{"type": "qbutton", "title": "Inscription",
-                 "btns": [{'title': 'Statistique Pal (équivalence, candidature)', 'url': '/stats_pal'},
-                          {'title': 'Statistique Piel (préinscription)', 'url': '/stats_piel'}, ]}, ]]
-    site_title = 'Backoffice'
-    title = 'Accueil'
-    widget_customiz = False
-
-
-xadmin.site.register_view(r'^statistiques/$', StatistiqueDashBoard, 'statistiques')
-
-
-class StatistiquePal(views.Dashboard):
-    base_template = 'statistique/stats_pal.html'
-    widget_customiz = False
-
-    def get_context(self):
-        context = super(StatistiquePal, self).get_context()
-        context['etapes'] = SettingsEtape.objects.filter(is_inscription_ouverte=True).order_by('diplome')
-        return context
-
-    @filter_hook
-    def get_breadcrumb(self):
-        return [{'url': self.get_admin_url('index'), 'title': 'Accueil'},
-                {'url': self.get_admin_url('statistiques'), 'title': 'Statistique'},
-                {'url': self.get_admin_url('stats_pal'), 'title': 'Statistique PAL'}]
-
-    @never_cache
-    def get(self, request, *args, **kwargs):
-        self.widgets = self.get_widgets()
-        return self.template_response(self.base_template, self.get_context())
-
-
-xadmin.site.register_view(r'^stats_pal/$', StatistiquePal, 'stats_pal')
-
-
-class StatistiquePiel(views.Dashboard):
-    base_template = 'statistique/stats_piel.html'
-    widget_customiz = False
-
-    @filter_hook
-    def get_context(self):
-        context = super(StatistiquePiel, self).get_context()
-        context['etapes'] = SettingsEtape.objects.filter(is_inscription_ouverte=True).order_by('diplome')
-        return context
-
-    @never_cache
-    def get(self, request, *args, **kwargs):
-        self.widgets = self.get_widgets()
-        return self.template_response(self.base_template, self.get_context())
-
-    @filter_hook
-    def get_breadcrumb(self):
-        return [{'url': self.get_admin_url('index'), 'title': 'Accueil'},
-                {'url': self.get_admin_url('statistiques'), 'title': 'Statistique'},
-                {'url': self.get_admin_url('stats_piel'), 'title': 'Statistique PIEL'}]
-
-
-xadmin.site.register_view(r'^stats_piel/$', StatistiquePiel, 'stats_piel')
-
-
-class ExtractionPiel(views.Dashboard):
-    base_template = 'extraction/extraction_pal.html'
-    widget_customiz = False
-
-    @filter_hook
-    def get_context(self):
-        context = super(ExtractionPiel, self).get_context()
-        context['etapes'] = SettingsEtape.objects.filter(is_inscription_ouverte=True).order_by('diplome')
-        return context
-
-    @never_cache
-    def get(self, request, *args, **kwargs):
-        self.widgets = self.get_widgets()
-        return self.template_response(self.base_template, self.get_context())
-
-    @filter_hook
-    def get_breadcrumb(self):
-        return [{'url': self.get_admin_url('index'), 'title': 'Accueil'},
-                {'url': self.get_admin_url('statistiques'), 'title': 'Statistique'},
-                {'url': self.get_admin_url('stats_piel'), 'title': 'Statistique PIEL'}]
-
-
-xadmin.site.register_view(r'^extraction/$', ExtractionPiel, 'extraction')
-
-
-class ExtrationPalView(BaseAdminView):
-
-    def get(self, request, *args, **kwargs):
-        cod_etp = kwargs.get('step', '')
-        step = SettingsEtape.objects.get(cod_etp=cod_etp)
-        wb = xlwt.Workbook()
-        ws = wb.add_sheet('etudiant')
-        queryset = step.wish_set.filter(annee__cod_anu=2014, is_reins=False).order_by('individu__last_name')
-        ws.write(1, 0, "code etudiant")
-        ws.write(1, 1, "nom")
-        ws.write(1, 2, "prenom")
-        ws.write(1, 3, "code_dossier")
-        ws.write(1, 4, "email")
-        ws.write(1, 5, "moyenne generale")
-        ws.write(1, 6, "note memoire")
-        ws.write(1, 7, "note stage")
-        for row, wish in enumerate(queryset):
-            ws.write(row+2, 0, wish.individu.student_code)
-            ws.write(row + 2, 1, wish.individu.last_name)
-            ws.write(row + 2, 2, wish.individu.first_name1)
-            ws.write(row + 2, 3, wish.code_dossier)
-            ws.write(row + 2, 4, wish.individu.personal_email)
-            try:
-                ws.write(row + 2, 5, wish.notemastermodel.moyenne_general)
-                ws.write(row + 2, 6, wish.notemastermodel.note_memoire)
-                ws.write(row + 2, 7, wish.notemastermodel.note_stage)
-            except NoteMasterModel.DoesNotExist:
-                pass
-
-        response = HttpResponse(mimetype='application/vnd.ms-excel')
-        date = datetime.datetime.today().strftime('%d-%m-%Y')
-        response['Content-Disposition'] = 'attachment; filename=%s_%s.xls' % ('extraction', date)
-        wb.save(response)
-        return response
-
-xadmin.site.register_view(r'^extraction_note_view/(?P<step>\w+)/$', ExtrationPalView, 'extraction_note')
-
-
-class MainDashboard(object):
-    widgets = [[{"type": "qbutton", "title": "Scolarité", "btns": [
-
-        {'title': "Pré-Inscription", 'url': 'inscription'}, {'title': "Statistique", 'url': 'statistiques'},
-        {'title': 'Extraction', 'url': 'extraction'}]}, ]]
-    site_title = 'Backoffice'
-    title = 'Accueil'
-    widget_customiz = False
-
-
-xadmin.site.register(views.website.IndexView, MainDashboard)
-
-
-class BaseSetting(object):
-    use_bootswatch = True
-
-
-xadmin.site.register(views.BaseAdminView, BaseSetting)
-
-
-class GlobalSetting(object):
-    menu_style = 'accordion'
-    global_search_models = [Individu, Wish]
-    global_add_models = []
-
-
-xadmin.site.register(views.CommAdminView, GlobalSetting)
-
+from django.forms.models import inlineformset_factory
 
 class WishInline(object):
     def email(self, obj):
@@ -210,6 +26,10 @@ class WishInline(object):
         else:
             return 'non'
 
+    def label(self, obj):
+        return "{} {}".format(obj.code_dossier, obj.etape.label)
+
+
     reins.short_description = 'Réinscription'
 
     model = Wish
@@ -218,7 +38,7 @@ class WishInline(object):
     fields = ['email', 'annee']
     readonly_fields = ['code_dossier', 'diplome_acces', 'centre_gestion', 'reins', 'date_validation', 'valide',
                        'get_transition_log', 'get_suivi_dossier', 'print_dossier_equi']
-    exclude = ('annee', 'is_reins')
+    exclude = ['annee', 'is_reins']
     can_delete = True
     hidden_menu = True
 
@@ -227,7 +47,45 @@ class WishInline(object):
         if self.request.user.is_superuser:
             return self.readonly_fields
         else:
-            return self.readonly_fields + ['state', 'suivi_dossier']
+            return ['label', 'state', 'centre_gestion', 'reins', 'suivi_dossier',
+                    'get_transition_log', 'get_suivi_dossier', 'print_dossier_equi',
+                    'date_liste_inscription']
+
+    @property
+    def get_exclude(self):
+        if self.request.user.is_superuser:
+            return self.exclude
+        else:
+            return self.exclude + ['valide', 'diplome_acces', 'date_validation', 'etape', 'demi_annee', 'is_ok']
+
+    @filter_hook
+    def get_formset(self, **kwargs):
+        """Returns a BaseInlineFormSet class for use in admin add/change views."""
+        if self.get_exclude is None:
+            exclude = []
+        else:
+            exclude = list(self.get_exclude)
+        exclude.extend(self.get_readonly_fields())
+        if self.get_exclude is None and hasattr(self.form, '_meta') and self.form._meta.exclude:
+            # Take the custom ModelForm's Meta.exclude into account only if the
+            # InlineModelAdmin doesn't define its own.
+            exclude.extend(self.form._meta.exclude)
+        # if exclude is an empty list we use None, since that's the actual
+        # default
+        exclude = exclude or None
+        can_delete = self.can_delete and self.has_delete_permission()
+        defaults = {
+            "form": self.form,
+            "formset": self.formset,
+            "fk_name": self.fk_name,
+            "exclude": exclude,
+            "formfield_callback": self.formfield_for_dbfield,
+            "extra": self.extra,
+            "max_num": self.max_num,
+            "can_delete": can_delete,
+        }
+        defaults.update(kwargs)
+        return inlineformset_factory(self.parent_model, self.model, **defaults)
 
     def get_transition_log(self, obj):
         reponse = '<table>'
@@ -254,12 +112,18 @@ class WishInline(object):
     def print_dossier_equi(self, obj):
         url = reverse('impression_equivalence', kwargs={'pk': obj.pk})
         url2 = reverse('impression_decision_equivalence', kwargs={'pk': obj.pk})
-        reponse = '<a href="{}" class="btn btn-primary">Impression</a>'.format(url)
-        reponse += '<a href="{}" class="btn btn-primary">ImpressionDecision</a>'.format(url2)
+        reponse = ' '
+        if obj.etape.date_ouverture_equivalence:
+            reponse += '<a href="{}" class="btn btn-primary">Dossier Equivalence</a>'.format(url)
+            if obj.etape.grille_de_equivalence:
+                reponse += '<a href="{}" class="btn btn-primary">ImpressionDecision</a>'.format(url2)
         return reponse
 
     print_dossier_equi.allow_tags = True
-    print_dossier_equi.short_description = 'Impression dossier équivalence'
+    print_dossier_equi.short_description = 'Impression'
+    # def get_exclude(self):
+
+
 
 
 class IndividuXadmin(object):
@@ -289,6 +153,7 @@ class IndividuXadmin(object):
             return self.readonly_fields
         else:
             return self.readonly_fields + ('state', )
+
 
     def get_transition_log(self, obj):
         reponse = '<table>'
@@ -337,42 +202,6 @@ class UserSettingsInline(object):
 
 class CustomUserAdmin(UserAdmin):
     inlines = [UserSettingsInline]
-
-
-class ExtrationStatistique(BaseAdminView):
-    def get(self, request, *args, **kwargs):
-        type_stat = kwargs.get('type_stat', 'stat_parcours_dossier')
-
-        wb = Workbook()
-        ws = wb.active
-
-        if type_stat == 'parcours_dossier':
-            queryset = Wish.objects.filter(etape__cod_etp=kwargs['step'], parcours_dossier__to_state=kwargs['etat'])
-        elif type_stat == 'state':
-            queryset = Wish.objects.filter(state=kwargs['etat'], etape__cod_etp=kwargs['step'])
-        else:
-            queryset = Wish.objects.filter(etape_dossier__to_state=kwargs['etat'], etape__cod_etp=kwargs['step'])
-        ws.cell(row=1, column=1).value = 'Numero Etudiant:'
-        ws.cell(row=1, column=2).value = 'Nom patronimique:'
-        ws.cell(row=1, column=3).value = "Nom d'époux:"
-        ws.cell(row=1, column=4).value = "Prénom:"
-        ws.cell(row=1, column=5).value = "Deuxiéme prénom"
-        ws.cell(row=1, column=6).value = "Email:"
-        for row, wish in enumerate(queryset):
-            ws.cell(row=row + 2, column=1).value = wish.individu.student_code
-            ws.cell(row=row + 2, column=2).value = wish.individu.last_name
-            ws.cell(row=row + 2, column=3).value = wish.individu.common_name
-            ws.cell(row=row + 2, column=4).value = wish.individu.first_name1
-            ws.cell(row=row + 2, column=5).value = wish.individu.first_name2
-            ws.cell(row=row + 2, column=6).value = wish.individu.personal_email
-
-
-        response = HttpResponse(save_virtual_workbook(wb), mimetype='application/vnd.ms-excel')
-        date = datetime.datetime.today().strftime('%d-%m-%Y')
-        response['Content-Disposition'] = 'attachment; filename=%s_%s.xlsx' % ('extraction', date)
-        return response
-xadmin.site.register_view(r'^extraction/(?P<type_stat>\w+)/(?P<etat>\w+)/(?P<step>\w+)/$', ExtrationStatistique,
-                          'extraction_stat')
 
 
 class OpiView(object):
