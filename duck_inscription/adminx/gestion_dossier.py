@@ -187,12 +187,6 @@ class CandidatureView(views.FormAdminView):
     title = 'Dossier candidature'
     form = CandidatureForm
 
-    def get_form_datas(self, **kwargs):
-        data = super(CandidatureView, self).get_form_datas(**kwargs)
-        queryset = getattr(self.request.user.setting_user, 'etapes', SettingsEtape.objects).all()
-        data.update({'queryset': queryset})
-        return data
-
     def post(self, request, *args, **kwargs):
         self.instance_forms()
         self.setup_forms()
@@ -259,13 +253,13 @@ class CandidatureView(views.FormAdminView):
                             wish.candidature_traite()
                     wish.is_ok = True
                     wish.save()
-                    wish.ouverture_paiement()
+                    wish.ouverture_inscription()
 
                     self._envoi_email(wish, Mail.objects.get(name=mail))
                     self.message_user('Dossier traité', 'success')
                 elif choix == 'refuse':
                     try:
-                        wish.equivalece_refuse()
+                        wish.candidature_refuse()
                         self._envoi_email(wish, Mail.objects.get(name='email_candidature_refuse'))
                         self.message_user('Dossier traité', 'success')
                     except InvalidTransitionError as e:
@@ -414,5 +408,5 @@ class DossierInscriptionView(views.FormAdminView):
 
 xadmin.site.register_view(r'^dossier_receptionner/$', DossierReception, 'dossier_receptionner')
 xadmin.site.register_view(r'^dossier_equivalence/$', EquivalenceView, 'dossier_equivalence')
-xadmin.site.register_view(r'^dossier_equivalence/$', CandidatureView, 'dossier_candidature')
+xadmin.site.register_view(r'^dossier_candidature/$', CandidatureView, 'dossier_candidature')
 xadmin.site.register_view(r'^traitement_inscription/$', DossierInscriptionView, 'traitement_inscription')

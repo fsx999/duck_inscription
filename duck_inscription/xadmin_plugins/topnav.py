@@ -20,8 +20,9 @@ class IEDPlugin(BaseAdminPlugin):
 
     # Block Views
     def block_top_navbar(self, context, nodes):
+        urls = self.urls
         if self.request.user.is_superuser:
-            self.urls.append({'name': 'Admin', 'url':'/admin'})
+            urls.append({'name': 'Admin', 'url':'/admin'})
         nodes.append(
-            loader.render_to_string('xadmin_plugins/comm.top.lien.html', {'urls': self.urls}))
+            loader.render_to_string('xadmin_plugins/comm.top.lien.html', {'urls': urls}))
 

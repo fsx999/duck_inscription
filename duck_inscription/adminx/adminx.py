@@ -32,6 +32,7 @@ class IncriptionDashBoard(views.website.IndexView):
     widgets = [[{"type": "qbutton", "title": "Gestion dossier",
                  "btns": [{'title': 'Reception', 'url': '/dossier_receptionner'},
                           {'title': 'Gestion Equivalence', 'url': '/dossier_equivalence'},
+                          {'title': 'Gestion Candidature', 'url': '/dossier_candidature'},
                           {'title': 'Gestion Dossier inscription', 'url': '/traitement_inscription'},
                           {'title': 'Remontee opi', 'model': Wish},
                           ]},
