@@ -209,7 +209,7 @@ class CandidatureView(views.FormAdminView):
                 if wish.suivi_dossier.is_candidature_traite or wish.suivi_dossier.is_candidature_refuse:
                     msg = 'Dossier déjà traité'
                     self.message_user(msg, 'warning')
-                elif not wish.state.is_candidature:
+                elif not wish.state.is_candidature and not wish.state.is_liste_attente_candidature:
                     msg = 'Dossier n\'est pas en candidature'
                     self.message_user(msg, 'warning')
                 elif choix == 'complet':
@@ -219,60 +219,64 @@ class CandidatureView(views.FormAdminView):
                         self._envoi_email(wish, template)
                         self.message_user('Dossier traité', 'success')
                     except InvalidTransitionError as e:
-                        if wish.suivi_dossier.is_equivalence_complet:
+                        if wish.suivi_dossier.is_candidature_complet:
                             msg = 'Dossier déjà traité'
                             self.message_user(msg, 'warning')
                         elif wish.suivi_dossier.is_inactif:
-                            wish.equivalence_receptionner()
-                            wish.equivalence_complet()
+                            wish.candidature_reception()
+                            wish.candidature_complet()
                             self.message_user('Dossier traité', 'success')
                         else:
                             raise e
 
                 elif choix == 'incomplet':
                     try:
-
-                        wish.equivalence_incomplet()
+                        wish.candidature_incomplet()
                     except InvalidTransitionError as e:
                         if wish.suivi_dossier.is_inactif:
-                            wish.equivalence_receptionner()
-                            wish.equivalence_incomplet()
-
+                            wish.candidature_reception()
+                            wish.candidature_incomplet()
                         else:
                             raise e
                     self.message_user('Dossier traité', 'success')
-                    self._envoi_email(wish, Mail.objects.get(name='email_equivalence_incomplet'))
+                    self._envoi_email(wish, Mail.objects.get(name='email_candidature_incomplet'))
 
                 elif choix == 'accepte':
-                    mail = 'email_equivalence_accepte'
+                    mail = 'email_candidature_accepte'
 
                     try:
-                        wish.equivalence_traite()
+                        wish.candidature_traite()
                     except (InvalidTransitionError, ForbiddenTransition) as e:
                         if wish.suivi_dossier.is_inactif:
-                            wish.equivalence_receptionner()
-                            wish.equivalence_complet()
-                            wish.equivalence_traite()
-                        elif wish.suivi_dossier.is_equivalence_reception:
-                            wish.equivalence_complet()
-                            wish.equivalence_traite()
-                        elif wish.suivi_dossier.is_equivalence_incomplet:
-                            wish.equivalence_complet()
-                            wish.equivalence_traite()
-
+                            wish.candidature_reception()
+                            wish.candidature_complet()
+                            wish.candidature_traite()
+                        elif wish.suivi_dossier.is_candidature_reception:
+                            wish.candidature_complet()
+                            wish.candidature_traite()
+                        elif wish.suivi_dossier.is_candidature_incomplet:
+                            wish.candidature_complet()
+                            wish.candidature_traite()
+                    wish.is_ok = True
                     wish.save()
-                    wish.ouverture_candidature()
+                    wish.ouverture_paiement()
 
                     self._envoi_email(wish, Mail.objects.get(name=mail))
                     self.message_user('Dossier traité', 'success')
                 elif choix == 'refuse':
                     try:
                         wish.equivalece_refuse()
-                        self._envoi_email(wish, Mail.objects.get(name='email_equivalence_refuse'))
+                        self._envoi_email(wish, Mail.objects.get(name='email_candidature_refuse'))
                         self.message_user('Dossier traité', 'success')
                     except InvalidTransitionError as e:
                         raise e
-
+                elif choix == 'attente':
+                    self._envoi_email(wish, Mail.objects.get(name='email_candidature_attente'))
+                    self.message_user('Dossier traité', 'success')
+                elif choix == 'ouvert':
+                    wish.candidature()
+                    self._envoi_email(wish, Mail.objects.get(name='email_candidature_ouverte'))
+                    self.message_user('Dossier traité', 'success')
                 # on clean le form
                 self.form_obj.data = self.form_obj.data.copy()
                 self.form_obj.data['code_dossier'] = None
