@@ -367,9 +367,9 @@ class ExtrationStatistique(BaseAdminView):
             ws.cell(row=row + 2, column=6).value = wish.individu.personal_email
 
 
-        response = HttpResponse(save_virtual_workbook(wb), mimetype='application/vnd.ms-excel')
+        response = HttpResponse(save_virtual_workbook(wb), mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
         date = datetime.datetime.today().strftime('%d-%m-%Y')
-        response['Content-Disposition'] = 'attachment; filename=%s_%s.xls' % ('extraction', date)
+        response['Content-Disposition'] = 'attachment; filename=%s_%s.xlsx' % ('extraction', date)
         return response
 xadmin.site.register_view(r'^extraction/(?P<type_stat>\w+)/(?P<etat>\w+)/(?P<step>\w+)/$', ExtrationStatistique,
                           'extraction_stat')
