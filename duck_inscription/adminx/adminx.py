@@ -189,7 +189,7 @@ xadmin.site.register(views.BaseAdminView, BaseSetting)
 
 class GlobalSetting(object):
     menu_style = 'accordion'
-    global_search_models = [Individu]
+    global_search_models = [Individu, Wish]
     global_add_models = []
 
 
@@ -379,7 +379,7 @@ class OpiView(object):
     list_per_page = 10
     search_fields = ['code_dossier']
     # list_display_links_details = True
-    # hidden_menu = True
+    hidden_menu = True
     list_display = ('__str__', 'opi_url')
 
     def opi_url(self, obj):

@@ -15,7 +15,7 @@ from mailrobot.models import Mail, MailBody, Address, Signature
 from django.conf import settings
 from xadmin.plugins.auth import UserAdmin
 from xworkflows import InvalidTransitionError, ForbiddenTransition
-from duck_inscription.forms.adminx_forms import DossierReceptionForm, EquivalenceForm, InscriptionForm
+from duck_inscription.forms.adminx_forms import DossierReceptionForm, EquivalenceForm, InscriptionForm, CandidatureForm
 from xadmin.layout import Main, Fieldset, Container, Side, Row
 from xadmin import views
 import xadmin
@@ -89,7 +89,7 @@ class EquivalenceView(views.FormAdminView):
                 wish = Wish.objects.get(code_dossier=code_dossier)
                 if wish.etape not in self.request.user.setting_user.etapes.all():
                     raise PermissionDenied
-                if wish.suivi_dossier.is_equivalence_traite or wish.suivi_dossier.is_equivalence_refuse:
+                if wish.suivi_dossier.is_equivalence_traite:
                     msg = 'Dossier déjà traité'
                     self.message_user(msg, 'warning')
                 elif not wish.state.is_equivalence:
@@ -183,14 +183,13 @@ class EquivalenceView(views.FormAdminView):
         mail.send()
 
 
-class EquivalenceView(views.FormAdminView):
-    title = 'Dossier équivalence'
-    form = EquivalenceForm
+class CandidatureView(views.FormAdminView):
+    title = 'Dossier candidature'
+    form = CandidatureForm
 
     def get_form_datas(self, **kwargs):
-        data = super(EquivalenceView, self).get_form_datas(**kwargs)
+        data = super(CandidatureView, self).get_form_datas(**kwargs)
         queryset = getattr(self.request.user.setting_user, 'etapes', SettingsEtape.objects).all()
-
         data.update({'queryset': queryset})
         return data
 
@@ -201,18 +200,17 @@ class EquivalenceView(views.FormAdminView):
         if self.valid_forms():
             code_dossier = self.form_obj.cleaned_data['code_dossier']
             choix = self.form_obj.cleaned_data['choix']
-            etape = self.form_obj.cleaned_data['etapes']
             self.motif = self.form_obj.cleaned_data['motif']
 
             try:
                 wish = Wish.objects.get(code_dossier=code_dossier)
                 if wish.etape not in self.request.user.setting_user.etapes.all():
                     raise PermissionDenied
-                if wish.suivi_dossier.is_equivalence_traite or wish.suivi_dossier.is_equivalence_refuse:
+                if wish.suivi_dossier.is_candidature_traite or wish.suivi_dossier.is_candidature_refuse:
                     msg = 'Dossier déjà traité'
                     self.message_user(msg, 'warning')
-                elif not wish.state.is_equivalence:
-                    msg = 'Dossier n\'est pas en equivalence'
+                elif not wish.state.is_candidature:
+                    msg = 'Dossier n\'est pas en candidature'
                     self.message_user(msg, 'warning')
                 elif choix == 'complet':
                     try:
@@ -293,7 +291,7 @@ class EquivalenceView(views.FormAdminView):
         return self.get_response()
 
     def get_redirect_url(self):
-        return self.get_admin_url('dossier_equivalence')
+        return self.get_admin_url('dossier_candidature')
 
     def _envoi_email(self, wish, template):
         context = {'site': Site.objects.get(id=preins_settings.SITE_ID), 'wish': wish, 'motif': self.motif}
@@ -413,4 +411,5 @@ class DossierInscriptionView(views.FormAdminView):
 
 xadmin.site.register_view(r'^dossier_receptionner/$', DossierReception, 'dossier_receptionner')
 xadmin.site.register_view(r'^dossier_equivalence/$', EquivalenceView, 'dossier_equivalence')
+xadmin.site.register_view(r'^dossier_equivalence/$', CandidatureView, 'dossier_candidature')
 xadmin.site.register_view(r'^traitement_inscription/$', DossierInscriptionView, 'traitement_inscription')
