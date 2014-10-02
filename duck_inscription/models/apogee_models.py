@@ -93,6 +93,13 @@ class SettingsEtape(Etape):
         result.update({'inscription': Wish.objects.filter(etape=self,
                                                           annee=self.annee,
                                                           state='inscription', is_ok=True).count()})
+        if self.date_ouverture_equivalence:
+            result.update({'liste_attente_and_equi': Wish.objects.filter(etape=self,
+                                                                     annee=self.annee,
+                                                                     state='liste_attente_inscription',
+                                                                     etape_dossier__to_state='equivalence_traite').count()})
+        else:
+            result.update({'liste_attente_and_equi': ''})
         return result
 
     def stat_suivi_dossier(self):
