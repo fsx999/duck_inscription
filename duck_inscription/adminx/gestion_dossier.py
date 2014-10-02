@@ -207,11 +207,9 @@ class CandidatureView(views.FormAdminView):
                     msg = 'Dossier n\'est pas en candidature'
                     self.message_user(msg, 'warning')
                 elif choix == 'complet':
+                    template = Mail.objects.get(name='email_candidature_complet')
                     try:
                         wish.candidature_complet()
-                        template = Mail.objects.get(name='email_candidature_complet')
-                        self._envoi_email(wish, template)
-                        self.message_user('Dossier traité', 'success')
                     except InvalidTransitionError as e:
                         if wish.suivi_dossier.is_candidature_complet:
                             msg = 'Dossier déjà traité'
@@ -222,6 +220,8 @@ class CandidatureView(views.FormAdminView):
                             self.message_user('Dossier traité', 'success')
                         else:
                             raise e
+                    self._envoi_email(wish, template)
+                    self.message_user('Dossier traité', 'success')
 
                 elif choix == 'incomplet':
                     try:
