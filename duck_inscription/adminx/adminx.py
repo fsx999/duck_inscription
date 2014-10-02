@@ -106,6 +106,7 @@ class StatistiquePiel(views.Dashboard):
 
 xadmin.site.register_view(r'^stats_piel/$', StatistiquePiel, 'stats_piel')
 
+
 class ExtractionPiel(views.Dashboard):
     base_template = 'extraction/extraction_pal.html'
     widget_customiz = False
@@ -167,6 +168,7 @@ class ExtrationPalView(BaseAdminView):
         return response
 
 xadmin.site.register_view(r'^extraction_note_view/(?P<step>\w+)/$', ExtrationPalView, 'extraction_note')
+
 
 class MainDashboard(object):
     widgets = [[{"type": "qbutton", "title": "Scolarité", "btns": [

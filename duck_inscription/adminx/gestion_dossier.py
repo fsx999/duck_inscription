@@ -214,8 +214,8 @@ class CandidatureView(views.FormAdminView):
                     self.message_user(msg, 'warning')
                 elif choix == 'complet':
                     try:
-                        wish.equivalence_complet()
-                        template = Mail.objects.get(name='email_equivalence_complet')
+                        wish.candidature_complet()
+                        template = Mail.objects.get(name='email_candidature_complet')
                         self._envoi_email(wish, template)
                         self.message_user('Dossier traité', 'success')
                     except InvalidTransitionError as e:
@@ -244,7 +244,7 @@ class CandidatureView(views.FormAdminView):
                     self._envoi_email(wish, Mail.objects.get(name='email_equivalence_incomplet'))
 
                 elif choix == 'accepte':
-                    mail = 'email_equivalence_accepte' if wish.etape == etape else 'email_equivalence_reoriente'
+                    mail = 'email_equivalence_accepte'
 
                     try:
                         wish.equivalence_traite()
@@ -259,9 +259,7 @@ class CandidatureView(views.FormAdminView):
                         elif wish.suivi_dossier.is_equivalence_incomplet:
                             wish.equivalence_complet()
                             wish.equivalence_traite()
-                        else:
-                            raise e
-                    wish.etape = etape
+
                     wish.save()
                     wish.ouverture_candidature()
 
