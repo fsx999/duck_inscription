@@ -324,7 +324,7 @@ class DossierInscriptionView(views.FormAdminView):
                 if wish.suivi_dossier.is_inscription_traite or wish.suivi_dossier.is_inscription_refuse:
                     msg = 'Dossier déjà traité'
                     self.message_user(msg, 'warning')
-                elif not wish.state.is_inscription or not wish.state.is_liste_attente_inscription:
+                elif not wish.state.is_inscription and not wish.state.is_liste_attente_inscription:
                     msg = 'Dossier n\'est pas en inscription'
                     self.message_user(msg, 'warning')
                 elif choix == 'complet':
@@ -373,8 +373,9 @@ class DossierInscriptionView(views.FormAdminView):
                     self._envoi_email(wish, Mail.objects.get(name='email_inscription_incomplet_renvoi'))
                 elif choix == 'ouvert':
                     try:
-
+                        wish.is_ok = True
                         wish.inscription()
+                        wish.save()
                     except (InvalidTransitionError, ForbiddenTransition) as e:
                         raise e
                     self._envoi_email(wish, Mail.objects.get(name='email_inscription_ouverte'))
