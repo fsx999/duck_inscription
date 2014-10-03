@@ -1,6 +1,7 @@
 # coding=utf-8
 from django.conf.urls import patterns, url
 from django.contrib.auth.decorators import login_required
+from duck_inscription.views import InscriptionPdfView
 from duck_inscription.views.adminx_views import DossierReceptionView, EquivalencePdfAdminView, \
     DecisionEquivalencePdfAdminView, ImprimerTousDecisions, ImprimerDecisionsEquivalenceEnMasseView
 
@@ -14,4 +15,6 @@ urlpatterns = patterns('',
                        url(r'^impression_dossier_decisio_equivalence/(?P<pk>\d+)/$',
                            login_required(DecisionEquivalencePdfAdminView.as_view()),
                            name="impression_decision_equivalence"),
+                       url(r'^inscription_pdf/(?P<pk>\d+)/$', login_required(InscriptionPdfView.as_view()),
+                                                  name="inscription_pdf"),
                        )

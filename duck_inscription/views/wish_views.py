@@ -397,22 +397,6 @@ class InscriptionView(TemplateView):
 
     def get(self, request, *args, **kwargs):
         wish = request.user.individu.wishes.get(pk=self.kwargs['pk'])
-        #
-        # try:
-        #     if wish.individu.dossier_inscription.etape != 'recapitulatif':
-        #         wish.etape = wish.dispatch_etape = "ouverture_paiement"
-        #         wish.save()
-        #         return redirect(wish.get_absolute_url())
-        # except DossierInscription.DoesNotExist:
-        #     wish.etape = wish.dispatch_etape = "ouverture_paiement"
-        #     wish.save()
-        #     return redirect(wish.get_absolute_url())
-        #
-        # if \
-        #             wish.individu.dossier_inscription.dernier_etablissement == None:
-        #     wish.etape = wish.dispatch_etape = "ouverture_paiement"
-        #     wish.save()
-        #     return redirect(wish.get_absolute_url())
 
         if request.GET.get("valide", False):
             wish.valide_liste()
@@ -468,17 +452,17 @@ class InscriptionPdfView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(InscriptionPdfView, self).get_context_data(**kwargs)
-        context['individu'] = self.request.user.individu
-        try:
-            context['wish'] = context['voeu'] = self.request.user.individu.wishes.select_related().get(
-                pk=self.kwargs['pk'])
-        except Wish.DoesNotExist:
-            return redirect(reverse('accueil'))
-        # try:
-        #     context['paiement_droit'] = context['wish'].paiementallmodel
-        # except PaiementAllModel.DoesNotExist:
-        #     context['wish'].droit_universitaire()
-        #     return redirect(context['wish'].get_absolute_url())
+        if self.request.user.is_staff:
+            context['wish'] = context['voeu'] = Wish.objects.get(pk=self.kwargs['pk'])
+            context['individu'] = context['wish'].individu
+        else:
+            context['individu'] = self.request.user.individu
+            try:
+                context['wish'] = context['voeu'] = self.request.user.individu.wishes.select_related().get(
+                    pk=self.kwargs['pk'])
+            except Wish.DoesNotExist:
+                return redirect(reverse('accueil'))
+
         if not context['wish'].centre_gestion:
             context['wish'].centre_gestion = CentreGestionModel.objects.get(centre_gestion='ied')
             context['wish'].save()

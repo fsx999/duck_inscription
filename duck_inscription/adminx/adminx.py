@@ -105,11 +105,16 @@ class WishInline(object):
     def print_dossier_equi(self, obj):
         url = reverse('impression_equivalence', kwargs={'pk': obj.pk})
         url2 = reverse('impression_decision_equivalence', kwargs={'pk': obj.pk})
+        url_inscription = reverse('inscription_pdf', kwargs={'pk': obj.pk})
+
         reponse = ' '
         if obj.etape.date_ouverture_equivalence:
             reponse += '<a href="{}" class="btn btn-primary">Dossier Equivalence</a>'.format(url)
             if obj.etape.grille_de_equivalence:
-                reponse += '<a href="{}" class="btn btn-primary">ImpressionDecision</a>'.format(url2)
+                reponse += '<a href="{}" class="btn btn-primary">Decision Equivalence</a>'.format(url2)
+            reponse += '<hr>'
+        if obj.state in ['inscription', 'liste_attente_inscription']:
+            reponse += '<a href="{}" class="btn btn-primary">Dossier inscription</a>'.format(url_inscription)
         return reponse
 
     print_dossier_equi.allow_tags = True
