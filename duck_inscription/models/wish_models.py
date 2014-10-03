@@ -534,11 +534,11 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
         if self.individu.droit_univ():
             return self.etape.droit
         else:
-            return settings.TARIF_MEDICAL
+            return self.annee.tarif_medical
 
     def tarif_secu(self):
         if self.individu.need_secu():
-            return settings.TARIF_SECU
+            return self.annee.tarif_secu
         else:
             return 0
 
