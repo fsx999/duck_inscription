@@ -106,13 +106,17 @@ class WishInline(object):
         url = reverse('impression_equivalence', kwargs={'pk': obj.pk})
         url2 = reverse('impression_decision_equivalence', kwargs={'pk': obj.pk})
         url_inscription = reverse('inscription_pdf', kwargs={'pk': obj.pk})
+        url_candidature = reverse('candidature_pdf', kwargs={'pk': obj.pk})
 
         reponse = ' '
-        if obj.etape.date_ouverture_equivalence:
+
+        if obj.etape.date_ouverture_equivalence and not obj.is_reins:
             reponse += '<a href="{}" class="btn btn-primary">Dossier Equivalence</a>'.format(url)
             if obj.etape.grille_de_equivalence:
                 reponse += '<a href="{}" class="btn btn-primary">Decision Equivalence</a>'.format(url2)
             reponse += '<hr>'
+        if obj.etape.date_ouverture_candidature and not obj.is_reins:
+            reponse += '<a href="{}" class="btn btn-primary">Dossier Candidature</a><hr>'.format(url_candidature)
         if obj.state in ['inscription', 'liste_attente_inscription']:
             reponse += '<a href="{}" class="btn btn-primary">Dossier inscription</a>'.format(url_inscription)
         return reponse

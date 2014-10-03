@@ -176,8 +176,12 @@ class EquivalencePdfView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(EquivalencePdfView, self).get_context_data(**kwargs)
-        context['individu'] = self.request.user.individu
-        context['voeu'] = self.request.user.individu.wishes.get(pk=self.kwargs['pk'])
+        if self.request.user.is_staff:
+            context['voeu'] = Wish.objects.get(pk=self.kwargs['pk'])
+            context['individu'] = context['voeu'].individu
+        else:
+            context['individu'] = self.request.user.individu
+            context['voeu'] = self.request.user.individu.wishes.get(pk=self.kwargs['pk'])
         context['logo_p8'] = "file://" + settings.BASE_DIR + '/duck_theme_ied/static/images/logop8.jpg'
         context['url_font'] = settings.BASE_DIR + '/duck_theme_ied/static/font/ConnectCode39.ttf'
         context['url_static'] = settings.BASE_DIR + '/duck_theme_ied/static/images/'
@@ -196,7 +200,10 @@ class EquivalencePdfView(TemplateView):
         Il faut la surcharger pour les candidatures
         Doit retourner le l'url du doccument du doccument a fussionner
         """
-        step = self.request.user.individu.wishes.get(pk=self.kwargs['pk']).etape
+        if self.request.user.is_staff:
+            step = Wish.objects.get(pk=self.kwarg['pk']).etape
+        else:
+            step = self.request.user.individu.wishes.get(pk=self.kwargs['pk']).etape
 
         return step.document_equivalence
 
@@ -285,7 +292,10 @@ class CandidaturePdfView(EquivalencePdfView):
         Il faut la surcharger pour les candidatures
         Doit retourner le l'url du doccument du doccument a fussionner
         """
-        step = self.request.user.individu.wishes.get(pk=self.kwargs['pk']).etape
+        if self.request.user.is_staff:
+            step = Wish.objects.get(pk=self.kwargs['pk']).etape
+        else:
+            step = self.request.user.individu.wishes.get(pk=self.kwargs['pk']).etape
 
         return step.document_candidature
 
