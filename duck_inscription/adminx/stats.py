@@ -1,6 +1,6 @@
 # coding=utf-8
 from __future__ import unicode_literals
-from datetime import date, datetime
+from datetime import date
 from django.http import HttpResponse
 from django.views.decorators.cache import never_cache
 from openpyxl.workbook import Workbook
@@ -9,6 +9,7 @@ import xlwt
 from xadmin.views import filter_hook, BaseAdminView
 from xadmin import views
 import xadmin
+import datetime
 from duck_inscription.models import SettingsEtape, NoteMasterModel
 from duck_inscription.models import Wish
 

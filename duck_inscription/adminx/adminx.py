@@ -11,10 +11,11 @@ from mailrobot.models import Mail, MailBody, Address, Signature
 from xadmin.plugins.auth import UserAdmin
 from xadmin.layout import Main, Fieldset, Side
 import xadmin
-from duck_inscription.models import Individu, SettingsEtape, WishWorkflow, SettingAnneeUni,  WishTransitionLog
+from duck_inscription.models import Individu, SettingsEtape, WishWorkflow, SettingAnneeUni, WishTransitionLog
 from duck_inscription.models import Wish, SuiviDossierWorkflow, IndividuWorkflow, SettingsUser, CursusEtape
 from xadmin.util import User
 from django.forms.models import inlineformset_factory
+
 
 class WishInline(object):
     def email(self, obj):
@@ -47,9 +48,8 @@ class WishInline(object):
         if self.request.user.is_superuser:
             return self.readonly_fields
         else:
-            return ['label', 'state', 'centre_gestion', 'reins', 'suivi_dossier',
-                    'get_transition_log', 'get_suivi_dossier', 'print_dossier_equi',
-                    'date_liste_inscription']
+            return ['label', 'state', 'centre_gestion', 'reins', 'suivi_dossier', 'get_transition_log',
+                    'get_suivi_dossier', 'print_dossier_equi', 'date_liste_inscription']
 
     @property
     def get_exclude(self):
@@ -74,16 +74,9 @@ class WishInline(object):
         # default
         exclude = exclude or None
         can_delete = self.can_delete and self.has_delete_permission()
-        defaults = {
-            "form": self.form,
-            "formset": self.formset,
-            "fk_name": self.fk_name,
-            "exclude": exclude,
-            "formfield_callback": self.formfield_for_dbfield,
-            "extra": self.extra,
-            "max_num": self.max_num,
-            "can_delete": can_delete,
-        }
+        defaults = {"form": self.form, "formset": self.formset, "fk_name": self.fk_name, "exclude": exclude,
+                    "formfield_callback": self.formfield_for_dbfield, "extra": self.extra, "max_num": self.max_num,
+                    "can_delete": can_delete, }
         defaults.update(kwargs)
         return inlineformset_factory(self.parent_model, self.model, **defaults)
 
@@ -122,8 +115,6 @@ class WishInline(object):
     print_dossier_equi.allow_tags = True
     print_dossier_equi.short_description = 'Impression'
     # def get_exclude(self):
-
-
 
 
 class IndividuXadmin(object):
@@ -174,20 +165,19 @@ class SettingsEtapeXadmin(object):
     list_filter = ['cursus']
     quickfilter = ['cursus']
     form_layout = (
-        Main(Fieldset('Etape', 'cod_etp', 'diplome', 'cursus', 'label', 'label_formation'),
-             TabHolder(Tab('Equivalence',
-                                                                                                      Fieldset('',
-                                                                                                   'date_ouverture_equivalence',
-                                                                                                   'date_fermeture_equivalence',
-                                                                                                   'document_equivalence',
-                                                                                                   'path_template_equivalence',
-                                                                                                   'grille_de_equivalence')),
-                                                                                              Tab('Candidature',
-                                                                                                  Fieldset('',
-                                                                                                           'date_ouverture_candidature',
-                                                                                                           'date_fermeture_candidature',
-                                                                                                           'note_maste',
-                                                                                                           'document_candidature', )), )),
+        Main(Fieldset('Etape', 'cod_etp', 'diplome', 'cursus', 'label', 'label_formation'), TabHolder(Tab('Equivalence',
+                                                                                                          Fieldset('',
+                                                                                                                   'date_ouverture_equivalence',
+                                                                                                                   'date_fermeture_equivalence',
+                                                                                                                   'document_equivalence',
+                                                                                                                   'path_template_equivalence',
+                                                                                                                   'grille_de_equivalence')),
+                                                                                                      Tab('Candidature',
+                                                                                                          Fieldset('',
+                                                                                                                   'date_ouverture_candidature',
+                                                                                                                   'date_fermeture_candidature',
+                                                                                                                   'note_maste',
+                                                                                                                   'document_candidature', )), )),
         Side(Fieldset('Settings', 'required_equivalence', 'is_inscription_ouverte'))
     )
 
@@ -215,10 +205,12 @@ class OpiView(object):
     list_display = ('__str__', 'opi_url')
 
     def opi_url(self, obj):
-        if obj.state.is_inscription and len(WishTransitionLog.objects.filter(wish=obj, to_state='inscription_reception')):
+        if obj.state.is_inscription and len(
+                WishTransitionLog.objects.filter(wish=obj, to_state='inscription_reception')):
             return '<a class="btn btn-primary" href="?opi={}">Remontée Opi</a>'.format(obj.code_dossier)
         else:
             return ''
+
     opi_url.short_description = 'remontee opi'
     opi_url.allow_tags = True
     opi_url.is_column = True
@@ -250,8 +242,8 @@ class OpiView(object):
             wish.inscription_traite()
             self.message_user('Etudiant {} remontee'.format(wish.individu.code_opi), 'success')
 
-        return response or TemplateResponse(request, self.object_list_template or
-                                            self.get_template_list('views/model_list.html'), context, current_app=self.admin_site.name)
+        return response or TemplateResponse(request, self.object_list_template or self.get_template_list(
+            'views/model_list.html'), context, current_app=self.admin_site.name)
 
 
 xadmin.site.unregister(User)
