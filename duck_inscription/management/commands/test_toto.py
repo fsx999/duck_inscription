@@ -18,9 +18,14 @@ from duck_inscription.models import SettingAnneeUni, SettingsEtape, Wish, WishTr
 class Command(BaseCommand):
     def handle(self, *args, **options):
         # on récupére les personnes du jour (soit la date de création, de modif plus grand que la veille
-        mail = Mail.objects.get(name='email_inscription_ouverte')
-        site = Site.objects.get(domain='preins.iedparis8.net')
-        print WishTransitionLog.objects.filter(wish__etape__cod_etp='L3NEDU',
-                                               to_state='inscription_reception').count()
-        print Wish.objects.filter(etape__cod_etp='L3NEDU', etape_dossier__to_state='inscription_reception').count()
+        # mail = Mail.objects.get(name='email_inscription_ouverte')
+        # site = Site.objects.get(domain='preins.iedparis8.net')
+        # print WishTransitionLog.objects.filter(wish__etape__cod_etp='L3NEDU',
+                                               # to_state='inscription_reception').count()
+        etape = ['M2NPCL', 'M2NPST', 'M2NPEA']
+        for x in Wish.objects.filter(etape__cod_etp__in=etape, suivi_dossier='equivalence_reception'):
+            x.suivi_dossier = 'inactif'
+            x.candidature_reception()
+            x.etape_dossier.filter(to_state='equivalence_reception').delete()
+
 
