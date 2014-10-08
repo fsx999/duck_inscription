@@ -15,7 +15,7 @@ from duck_inscription.models import Individu, SettingsEtape, WishWorkflow, Setti
 from duck_inscription.models import Wish, SuiviDossierWorkflow, IndividuWorkflow, SettingsUser, CursusEtape
 from xadmin.util import User
 from django.forms.models import inlineformset_factory
-
+from duck_inscription.adminx.html_string.action_adminx import ACTION
 
 class WishInline(object):
     def email(self, obj):
@@ -30,7 +30,31 @@ class WishInline(object):
     def label(self, obj):
         return "{} {}".format(obj.code_dossier, obj.etape.label)
 
+    def actions(self, obj):
+        url = reverse('changement_centre', kwargs={'pk': obj.pk})
+        return ACTION.format(id=obj.pk, url=url)
+    actions.allow_tags = True
+    actions.short_description = 'action'
 
+    def description(self, obj):
+        test = """
+        <table>
+            <tr>
+                <td>centre gestion :</td>
+                <td>{}</td>
+            <tr>
+            <tr><td>reinscription :</td><td>{}</td></tr>
+            <tr>
+                <td>date liste inscription :</td>
+                <td>{}</td>
+            </tr>
+        </table>
+        """
+        centre_gestion = obj.centre_gestion or ''
+        reins = self.reins(obj)
+        date_liste_inscription = obj.date_liste_inscription or ''
+        return test.format(centre_gestion, reins, date_liste_inscription)
+    description.allow_tags = True
     reins.short_description = 'Réinscription'
 
     model = Wish
@@ -48,15 +72,16 @@ class WishInline(object):
         if self.request.user.is_superuser:
             return self.readonly_fields
         else:
-            return ['label', 'state', 'centre_gestion', 'reins', 'suivi_dossier', 'get_transition_log',
-                    'get_suivi_dossier', 'print_dossier_equi', 'date_liste_inscription']
+            return ['label', 'description', 'current_state', 'get_transition_log',
+                    'get_suivi_dossier', 'print_dossier_equi', 'actions']
 
     @property
     def get_exclude(self):
         if self.request.user.is_superuser:
             return self.exclude
         else:
-            return self.exclude + ['valide', 'diplome_acces', 'date_validation', 'etape', 'demi_annee', 'is_ok']
+            return self.exclude + ['valide', 'diplome_acces', 'date_validation', 'etape', 'demi_annee', 'is_ok',
+                                   'centre_gestion', 'date_liste_inscription', 'suivi_dossier', 'state']
 
     @filter_hook
     def get_formset(self, **kwargs):
@@ -101,6 +126,11 @@ class WishInline(object):
 
     get_suivi_dossier.short_description = 'suivi'
     get_suivi_dossier.allow_tags = True
+
+    def current_state(self, obj):
+        return WishWorkflow.states[obj.state].title
+    current_state.short_description = 'Etat du dossier'
+    current_state.allow_tags = True
 
     def print_dossier_equi(self, obj):
         url = reverse('impression_equivalence', kwargs={'pk': obj.pk})
@@ -208,15 +238,16 @@ class OpiView(object):
     show_bookmarks = False
     list_export = []
     list_per_page = 10
-    search_fields = ['code_dossier']
+    search_fields = ['code_dossier', 'individu__last_name', 'individu__first_name1']
     # list_display_links_details = True
     hidden_menu = True
     list_display = ('__str__', 'opi_url')
 
     def opi_url(self, obj):
+        url = reverse('remontee_opi')
         if obj.state.is_inscription and len(
                 WishTransitionLog.objects.filter(wish=obj, to_state='inscription_reception')):
-            return '<a class="btn btn-primary" href="?opi={}">Remontée Opi</a>'.format(obj.code_dossier)
+            return '<a class="btn btn-primary" href="{}?opi={}">Remontée Opi</a>'.format(url, obj.code_dossier)
         else:
             return ''
 
@@ -230,29 +261,32 @@ class OpiView(object):
     def has_add_permission(self):
         return False
 
-    @csrf_protect_m
-    @filter_hook
-    def get(self, request, *args, **kwargs):
-        """
-        The 'change list' admin view for this model.
-        """
-        response = self.get_result_list()
-        if response:
-            return response
-
-        context = self.get_context()
-        context.update(kwargs or {})
-
-        response = self.get_response(context, *args, **kwargs)
-        opi = self.request.GET.get('opi', None)
-        if opi:
-            wish = Wish.objects.get(code_dossier=opi)
-            wish.save_opi()
-            wish.inscription_traite()
-            self.message_user('Etudiant {} remontee'.format(wish.individu.code_opi), 'success')
-
-        return response or TemplateResponse(request, self.object_list_template or self.get_template_list(
-            'views/model_list.html'), context, current_app=self.admin_site.name)
+    # @csrf_protect_m
+    # @filter_hook
+    # def get(self, request, *args, **kwargs):
+    #     """
+    #     The 'change list' admin view for this model.
+    #     """
+    #     response = self.get_result_list()
+    #     if response:
+    #         return response
+    #
+    #     context = self.get_context()
+    #     context.update(kwargs or {})
+    #
+    #     response = self.get_response(context, *args, **kwargs)
+    #     opi = self.request.GET.get('opi', None)
+    #     if opi:
+    #         wish = Wish.objects.get(code_dossier=opi)
+    #         if wish.suivi_dossier.is_inscription_traite:
+    #             self.message_user('Le dossier a déjà été traité', 'error')
+    #         else:
+    #             wish.save_opi()
+    #             wish.inscription_traite()
+    #             self.message_user('Etudiant {} remontee'.format(wish.individu.code_opi), 'success')
+    #
+    #     return response or TemplateResponse(request, self.object_list_template or self.get_template_list(
+    #         'views/model_list.html'), context, current_app=self.admin_site.name)
 
 
 xadmin.site.unregister(User)

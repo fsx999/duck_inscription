@@ -3,7 +3,8 @@ from django.conf.urls import patterns, url
 from django.contrib.auth.decorators import login_required
 from duck_inscription.views import InscriptionPdfView, CandidaturePdfView
 from duck_inscription.views.adminx_views import DossierReceptionView, EquivalencePdfAdminView, \
-    DecisionEquivalencePdfAdminView, ImprimerTousDecisions, ImprimerDecisionsEquivalenceEnMasseView
+    DecisionEquivalencePdfAdminView, ImprimerTousDecisions, ImprimerDecisionsEquivalenceEnMasseView, \
+    ChangementCentreGestionView, OpiView
 
 urlpatterns = patterns('',
                        # url(r'dossier_receptionner/$', login_required(DossierReceptionView.as_view()),
@@ -19,4 +20,9 @@ urlpatterns = patterns('',
                                                   name="inscription_pdf"),
                        url(r'^candidature_pdf/(?P<pk>\d+)/$', login_required(CandidaturePdfView.as_view()),
                            name="candidature_pdf"),
+                       url(r'^changement_centre/(?P<pk>\d+)/$', login_required(ChangementCentreGestionView.as_view()),
+                           name="changement_centre"),
+                       url(r'^remontee_opi/$', login_required(OpiView.as_view()),
+                           name="remontee_opi"),
                        )
+

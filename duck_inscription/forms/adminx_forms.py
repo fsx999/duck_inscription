@@ -1,6 +1,7 @@
 # coding=utf-8
 from __future__ import unicode_literals
 import floppyforms as forms
+from django_apogee.models import CentreGestion
 from duck_inscription.models import SettingsEtape
 
 
@@ -73,3 +74,7 @@ class InscriptionForm(DossierReceptionForm):
 
     class Media:
         js = ('js/inscription.js',)
+
+
+class ChangementCentreGestionForm(forms.Form):
+    centre_gestion = forms.ModelChoiceField(queryset=CentreGestion.objects.all())
