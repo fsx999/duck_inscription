@@ -220,3 +220,14 @@ class ChangementCentreGestionView(FormView):
     form_class = ChangementCentreGestionForm
     template_name = 'duck_inscription/adminx/changement_centre_gestion.html'
 
+    def get_context_data(self, **kwargs):
+
+        context = super(ChangementCentreGestionView, self).get_context_data(**kwargs)
+        context['wish'] = Wish.objects.get(pk=self.kwargs['pk'])
+        return context
+
+    def get_success_url(self):
+
+        return redirect('xadmin:duck_inscription_change', 3 )
+
+

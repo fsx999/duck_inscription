@@ -2,7 +2,7 @@
 from __future__ import unicode_literals
 import floppyforms as forms
 from django_apogee.models import CentreGestion
-from duck_inscription.models import SettingsEtape
+from duck_inscription.models import SettingsEtape, CentreGestionModel, MoyenPaiementModel
 
 
 class DossierReceptionForm(forms.Form):
@@ -77,4 +77,8 @@ class InscriptionForm(DossierReceptionForm):
 
 
 class ChangementCentreGestionForm(forms.Form):
-    centre_gestion = forms.ModelChoiceField(queryset=CentreGestion.objects.all())
+    centre_gestion = forms.ModelChoiceField(queryset=CentreGestionModel.objects.all())
+    nombre_paiement = forms.ChoiceField(choices=(("1", '1'), ('2', '2'), ('3', '3')), required=False)
+    type_paiement = forms.ModelChoiceField(queryset=MoyenPaiementModel.objects.all(), required=False)
+
+

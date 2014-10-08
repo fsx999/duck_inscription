@@ -22,10 +22,10 @@ class Command(BaseCommand):
         # site = Site.objects.get(domain='preins.iedparis8.net')
         # print WishTransitionLog.objects.filter(wish__etape__cod_etp='L3NEDU',
                                                # to_state='inscription_reception').count()
-        etape = ['M1NEFI', 'M2NEFI']
-        for x in Wish.objects.filter(etape__cod_etp__in=etape, suivi_dossier='equivalence_reception', state='candidature'):
+        etape = ['L1NPSY']
+        for x in Wish.objects.filter(etape__cod_etp__in=etape, suivi_dossier='equivalence_reception', state='inscription'):
             x.suivi_dossier = 'inactif'
-            x.candidature_reception()
+            x.inscription_reception()
             x.etape_dossier.filter(to_state='equivalence_reception').delete()
 
 
