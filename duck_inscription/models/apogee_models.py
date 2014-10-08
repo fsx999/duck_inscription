@@ -6,7 +6,7 @@ from django_apogee.models import AnneeUni, Etape
 
 from django.db import models
 from duck_inscription.managers import SettingAnneeUniManager
-
+from collections import Counter
 
 @python_2_unicode_compatible
 class SettingAnneeUni(AnneeUni):
@@ -94,7 +94,7 @@ class SettingsEtape(Etape):
         ]).values_list('to_state').annotate(Count('to_state')))
         result.update({'inscription': Wish.objects.filter(etape=self,
                                                           annee=self.annee,
-                                                          state='inscription', is_ok=True).count()})
+                                                          state='inscription', valide=True).count()})
         if self.date_ouverture_equivalence:
             result.update({'liste_attente_and_equi': Wish.objects.filter(etape=self,
                                                                      annee=self.annee,

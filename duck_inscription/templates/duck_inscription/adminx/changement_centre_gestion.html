@@ -1,5 +1,5 @@
 {% load static floppyforms %}
-<div class="well">
+<div id="form_{{ wish.pk }}" class="well">
 
             {% csrf_token %}
 
@@ -7,7 +7,7 @@
 
             <div class="form-group">
                 <div class="col-sm-offset-3 col-sm-10">
-            <button type="submit" class="btn btn-success">Valider</button>
+            <button id="submit{{ wish.pk }}" type="submit" class="btn btn-success">Valider</button>
                     </div></div>
 {#        </form>#}
     </div>
@@ -18,3 +18,16 @@
 
         </section>
 
+<script>
+  ;(function($){
+      $(document).ready(function(){
+        $('#submit{{ wish.pk }}').click(function(event){
+            event.preventDefault();
+             var a = $('#form_{{ wish.pk }}');
+{#                     .replaceWith($('<form>'+$('#form_{{ wish.pk }}').innerHTML+'</form>'));#}
+        console.log(a.innerHTML);
+        });
+
+      });
+  })(jQuery);
+</script>
