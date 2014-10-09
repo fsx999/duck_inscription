@@ -1,0 +1,284 @@
+{% load lib_inscription %}
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<style type="text/css">
+
+@page {
+margin-left: 2cm;
+margin-right: 1cm;
+text-align: justify;
+}
+img{
+    zoom:60%;
+    }
+#logo_p8{
+    zoom:30%;
+    text-align: right;
+}
+#info tr{
+    padding-top:3pt;
+}
+
+body{
+    margin-bottom:0;
+    margin-left:0;
+    margin-right:0;
+    margin-top:0;
+    padding-bottom:0;
+    padding-left:0;
+    padding-right:0;
+    padding-top:0;
+    font-size: 12px;
+    text-align: justify;
+    
+    }
+h3{
+    padding-bottom:0;
+    padding-top:0;
+    }
+br{
+    padding-bottom:0;
+    padding-top:0;
+    }
+
+.titre_pdf{
+    text-align: center;
+
+    margin-bottom:0;
+    margin-left:0;
+    margin-right:0;
+    margin-top:0;
+    padding-bottom:0;
+    padding-left:0;
+    padding-right:0;
+    padding-top:0;
+    
+    }
+h2.titre_pdf{
+    text-align: center;
+
+    }
+h3.titre_pdf{
+    text-align: center;
+    }
+td.first{
+    padding-top:5px;
+    border-top-style:medium;
+    border-top-width:medium;
+    border-top-color:black;
+    border-top-width: 1px;
+
+    }
+td.last{
+    padding-bottom:5px;
+    border-bottom-style:medium;
+    border-bottom-width:medium;
+    border-bottom-color:black;
+    border-bottom-width: 1px;
+
+    }
+td.cadre{
+    padding-left:5px;
+    padding-right:5px;
+    border-left-style:medium;
+    border-left-width:medium;
+    border-left-color:black;
+    border-left-width: 1px;
+    border-right-style:medium;
+    border-right-width:medium;
+    border-right-color:black;
+    border-right-width: 1px;
+    
+}
+.addresse{
+	font-weight: lighter;
+	font-size: smaller;
+}
+.titre{
+    background: #CCCCCC;
+    padding-bottom:0;
+    padding-top:5px;
+    margin-top:0;
+    margin-bottom:0;
+    margin-left:0;
+    margin-right:0;
+    border-bottom-style:medium;
+    border-left-style:medium;
+    border-right-style:medium;
+    border-top-style:medium;
+    }
+table.address_ied{
+
+    }
+
+td.administration{
+	padding-top:5px;
+    padding-left:5px;
+    padding-right:5px;
+    border-left-style:medium;
+    border-left-width:medium;
+    border-left-color:black;
+    border-left-width: 1px;
+    border-top-style:medium;
+    border-top-width:medium;
+    border-top-color:black;
+    border-top-width: 1px;
+    border-bottom-style:medium;
+    border-bottom-width:medium;
+    border-bottom-color:black;
+    border-bottom-width: 1px;
+    border-right-style:medium;
+    border-right-width:medium;
+    border-right-color:black;
+    border-right-width: 1px;
+
+}
+#caption{
+	background: #CCCCCC;
+	text-align: center;
+	width: 100%;
+}
+.gris{
+	background: #CCCCCC;
+}
+   #codebar{
+    margin-bottom:10pt;
+    }
+</style>
+
+</head>
+
+
+
+
+<body>
+<table  id="codebar">
+    <tr>
+        <td><img id="logo_p8" src="{{ static }}/logop8.jpg" /></td>
+        <td class="barcode"><img id="logo_ied" src="{{ static }}/logo-ied.jpg"/></td>
+        <td id="oui">
+    <pdf:barcode  value="{{ voeu.code_dossier }}" type="code128"  align="baseline" humanreadable="1" barwidth="2" barheight="40" fontsize="16"/>
+</td>
+    </tr>
+</table>
+
+<table>
+	<tr>
+		<td class="addresse">UNIVERSITE PARIS 8<br />
+Institut d'Enseignement à Distance<br />
+Service de la Scolarité – Bâtiment D<br />
+2 rue de la Liberté – 93526 SAINT DENIS cedex<br />
+Tel. : 01 49 40 72 00 - Fax. : 01 49 40 72 04</td>
+	</tr>
+</table>
+
+<h3>DOSSIER D’INSCRIPTION EN AUDITEUR LIBRE A L'IED {% annee_en_cour %}<br />{{ wish.etape.label|upper }}</h3>
+
+
+
+<div class="titre"> 
+	ETAT CIVIL ET ADRESSE
+</div>
+
+<div class="info">
+<table id="info">
+    <tr class="fields">
+        <td><b>Nom : </b></td>
+        <td>{{ student.last_name|capfirst  }}</td>
+    </tr>
+    <tr class="fields">
+        <td><b>Nom d'épouse:</b> </td>
+        <td>{{ student.common_name|capfirst  }}</td>
+    </tr>
+    <tr class="fields">
+        <td><b>Prénom : </b></td>
+        <td>{{ student.first_name1|capfirst  }}</td>
+    </tr>
+    <tr class="fields">
+        <td><b>Date de naissance : </b></td>
+        <td>{{ student.birthday }}</td>
+    </tr>
+	<tr>
+		<td><b>Situation familiale : </b></td>
+		<td>{{ student.family_status }}</td>
+	</tr>
+    <tr class="fields">
+        <td><b>Nationalité : </b></td>
+        <td>{{ student.code_pays_nationality|capfirst   }}</td>
+    </tr>
+    {% for address in student.adresses.all %}
+    
+        {% if address.type == '1' %}
+        <tr class="fields">
+            <td valign="top"><b>Adresse:</b> </td>
+            <td valign="top">
+            {% if address.label_adr_1 %}
+            {{ address.label_adr_1  }}<br />
+            {% endif %}
+            {% if  address.label_adr_2 %}
+            {{ address.label_adr_2  }}<br />
+            {% endif %}
+            {% if  address.label_adr_3 %}
+            {{ address.label_adr_3  }}<br />
+            {% endif %}
+            {% if  address.label_adr_etr %}
+            {{ address.label_adr_etr  }}<br />
+            {% endif %}
+            {% if  address.com_bdi %}
+            {{ address.com_bdi.cod_bdi.cod_bdi  }}
+            {% endif %}
+            {% if  address.com_bdi %}
+            {{ address.com_bdi.lib_ach  }}
+            {% endif %}
+            {% if  address.code_pays %}
+            {{ address.code_pays  }}
+            {% endif %}
+            </td>
+        </tr>
+        <tr class="fields">
+            <td><b>Téléphone :</b></td>
+            <td>{{ address.listed_number }}</td>
+        </tr>
+        {% endif %}      
+    {% endfor %}
+
+    <tr class="fields">
+        <td><b>E-mail : </b></td>
+        <td>{{ user.email }}</td>
+    </tr>
+</table >
+<br />
+</div>
+<div class="titre">
+    STATUT DE L'AUDITEUR LIBRE
+</div>
+<p>
+L'auditeur libre souhaite obtenir un complément de formation sans l'intention d'obtenir un diplôme. Il peut suivre l'enseignement même
+s'il ne remplit pas les conditions d'accès à l'Université. Il ne bénéficie pas du statut d'étudiant.<br />
+- Vous ne pourrez participer ni aux examens ni aux travaux pratiques.<br />
+- Vous ne pourrez prétendre au régime de sécurité sociale étudiant.<br />
+- Aucune attestation d'unités d'enseignement, d'éléments constitutifs ou de diplôme ne vous sera délivrée (excepté une attestation d'assiduité délivrée par le service scolarité sur demande).<br />
+En revanche, vous bénéficierez des services de l'enseignement à distance :<br />
+- Accès à la plate-forme d'enseignement à distance et au cours de L1 de psychologie.<br />
+- Aux permanences téléphoniques des enseignants.<br />
+- Aux corrections personnalisées des devoirs et accès aux corrigés-types.<br />
+</p>
+<div class="titre">
+    COUT DE LA FORMATION
+</div>
+<p>
+Coût de la formation : 396.00 € (à régler en une seule fois, pas de paiement échelonné possible) correspondant aux frais propres à
+l’enseignement à distance. Veuillez adresser ce dossier accompagné du règlement de votre inscription :<br />
+-
+Un chèque bancaire (compensable en FRANCE METROPOLITAINE) de 396.00 €<br />
+-
+Le chèque doit être libellé en euros et à l’ordre de IED Université Paris 8.<br />
+-
+Notez au dos du chèque : Vos nom et prénom ainsi que la mention AUDITEUR LIBRE.<br />
+Veuillez nous envoyer le présent dossier complété, accompagné du chèque avant le 15 décembre, (Cachet de la poste faisant foi).<br />
+</p>
+
+<p><b>Date et signature : </b></p>
+</body>
+</html>

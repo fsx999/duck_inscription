@@ -2,7 +2,7 @@
 from io import StringIO
 from PyPDF2 import PdfFileReader, PdfFileWriter
 from django.contrib.contenttypes.models import ContentType
-from django.core.urlresolvers import reverse_lazy
+from django.core.urlresolvers import reverse_lazy, reverse
 from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.views.generic import FormView, TemplateView, View
@@ -221,13 +221,17 @@ class ChangementCentreGestionView(FormView):
     template_name = 'duck_inscription/adminx/changement_centre_gestion.html'
 
     def get_context_data(self, **kwargs):
-
         context = super(ChangementCentreGestionView, self).get_context_data(**kwargs)
         context['wish'] = Wish.objects.get(pk=self.kwargs['pk'])
         return context
 
-    def get_success_url(self):
+    def form_invalid(self, form):
+        return super(ChangementCentreGestionView, self).form_invalid(form)
 
-        return redirect('xadmin:duck_inscription_change', 3 )
+    def form_valid(self, form):
+        return super(ChangementCentreGestionView, self).form_valid(form)
+
+    def get_success_url(self):
+        return reverse('xadmin:duck_inscription_individu_change', args=(3,))
 
 
