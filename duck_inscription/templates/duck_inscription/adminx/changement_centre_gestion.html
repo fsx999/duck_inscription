@@ -31,11 +31,22 @@
                 type_paiement: $('#id_type_paiement').val()
             };
 
-            $.post("{% url 'changement_centre' wish.pk %}", data, function( ){ $('#myModal{{ wish.pk }}').modal('hide');
-            console.log('coucuo');});
+            $.ajax({
+                type: "POST",
+                url: "{% url 'changement_centre' wish.pk %}",
+                data: data,
+                success: function(msg){
+{#                    $('#myModal{{ wish.pk }}').modal('hide')#}
+                    $('#myModal{{ wish.pk }} .modal-body').html(msg);
+                },
+                error: function(XMLHttpRequest, testStatus, errorTrow) {
+                    console.log(XMLHttpRequest.responseText);
+                    $('#myModal{{ wish.pk }} .modal-body').html(XMLHttpRequest.responseText);
+                }
             });
 
-        });
 
+        });
+    });
 })(jQuery);
 </script>

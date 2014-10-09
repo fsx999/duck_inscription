@@ -31,8 +31,11 @@ class WishInline(object):
         return "{} {}".format(obj.code_dossier, obj.etape.label)
 
     def actions(self, obj):
-        url = reverse('changement_centre', kwargs={'pk': obj.pk})
-        return ACTION.format(id=obj.pk, url=url)
+        result = ''
+        if obj.state.is_inscription:
+            url = reverse('changement_centre', kwargs={'pk': obj.pk})
+            result += ACTION.format(id=obj.pk, url=url)
+        return result
     actions.allow_tags = True
     actions.short_description = 'action'
 

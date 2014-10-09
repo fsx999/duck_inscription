@@ -77,8 +77,21 @@ class InscriptionForm(DossierReceptionForm):
 
 
 class ChangementCentreGestionForm(forms.Form):
+
+    def __init__(self, wish, *args, **kwargs):
+        self.wish = wish
+        super(ChangementCentreGestionForm, self).__init__(*args, **kwargs)
+
     centre_gestion = forms.ModelChoiceField(queryset=CentreGestionModel.objects.all())
     nombre_paiement = forms.ChoiceField(choices=(("1", '1'), ('2', '2'), ('3', '3')), required=False)
     type_paiement = forms.ModelChoiceField(queryset=MoyenPaiementModel.objects.all(), required=False)
+
+    def clean(self):
+        if not self.wish.state.is_inscription:
+            raise forms.ValidationError('le voeux doit être en inscription')
+        return super(ChangementCentreGestionForm, self).clean()
+
+
+
 
 
