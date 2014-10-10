@@ -36,7 +36,6 @@
                 url: "{% url 'changement_centre' wish.pk %}",
                 data: data,
                 success: function(msg){
-{#                    $('#myModal{{ wish.pk }}').modal('hide')#}
                     $('#myModal{{ wish.pk }} .modal-body').html(msg);
                 },
                 error: function(XMLHttpRequest, testStatus, errorTrow) {
