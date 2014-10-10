@@ -57,8 +57,8 @@ INSTALLED_APPS = (
     'linaro_django_pagination',
     'djangobb_forum',
     'haystack',
-    'openpyxl'
-
+    'openpyxl',
+    'foad'
 )
 
 
