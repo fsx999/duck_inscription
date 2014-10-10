@@ -8,6 +8,7 @@ from django.db import models
 from duck_inscription.managers import SettingAnneeUniManager
 from collections import Counter
 
+
 @python_2_unicode_compatible
 class SettingAnneeUni(AnneeUni):
     inscription = models.BooleanField(default=False)
