@@ -566,7 +566,10 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
         return self.etape.can_demi_annee(self.is_reins_formation())
 
     def name_url(self):
-        name_url = u"{}  Code dossier : {}".format(self.etape.label, self.code_dossier)
+        if self.is_auditeur:
+            name_url = u"{} Auditeur libre".format(self.code_dossier)
+        else:
+            name_url = u"{}  Code dossier : {}".format(self.etape.label, self.code_dossier)
         return name_url
 
     @models.permalink
@@ -574,6 +577,8 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
         return self.state.name, [str(self.pk)]
 
     def __unicode__(self):
+        if self.is_auditeur:
+            return u"%s %s" % (self.code_dossier, 'auditeur libre')
         return u"%s %s %s" % (self.individu, self.code_dossier, self.etape)
 
     def save_opi(self):
