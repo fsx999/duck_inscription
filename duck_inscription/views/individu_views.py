@@ -27,7 +27,7 @@ class AccueilView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super(AccueilView, self).get_context_data(**kwargs)
         context['wishes'] = self.request.user.individu.wishes.all()
-        # context['auditeur'] = self.request.user.individu.wishes.filter(is_auditeur=True).count()
+        context['auditeur'] = self.request.user.individu.wishes.filter(is_auditeur=True).count()
         return context
 
 
