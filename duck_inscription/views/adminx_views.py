@@ -250,6 +250,11 @@ class ChangementCentreGestionView(FormView):
             paiement.save()
         elif getattr(self.wish, 'paiementallmodel', None):
             self.wish.paiementallmodel.delete()
+        if clean_data.get('demi_annee', None):
+            self.wish.demi_annee = clean_data['demi_annee']
+        if clean_data.get('situation_sociale', None):
+            self.wish.individu.dossier_inscription.situation_sociale = clean_data['situation_sociale']
+            self.wish.individu.dossier_inscription.save()
         self.wish.save()
         return HttpResponse('<div class="alert alert-success" role="alert">Le dossier a bien été modifié</div>')
 
