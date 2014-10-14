@@ -240,6 +240,7 @@ class ChangementCentreGestionView(FormView):
 
     def form_valid(self, form):
         clean_data = form.cleaned_data
+        print clean_data
         self.wish.centre_gestion = clean_data['centre_gestion']
         if self.wish.centre_gestion.centre_gestion == 'ied':
             try:
@@ -248,11 +249,15 @@ class ChangementCentreGestionView(FormView):
                 paiement = PaiementAllModel(wish=self.wish)
             paiement.nb_paiement_frais, paiement.moyen_paiement = clean_data['nombre_paiement'], clean_data['type_paiement']
             paiement.save()
-        elif getattr(self.wish, 'paiementallmodel', None):
-            self.wish.paiementallmodel.delete()
+        else:
+            try:
+                self.wish.paiementallmodel.delete()
+            except PaiementAllModel.DoesNotExist:
+                pass
         if clean_data.get('demi_annee', None):
             self.wish.demi_annee = clean_data['demi_annee']
         if clean_data.get('situation_sociale', None):
+            print "coucou"
             self.wish.individu.dossier_inscription.situation_sociale = clean_data['situation_sociale']
             self.wish.individu.dossier_inscription.save()
         self.wish.save()

@@ -81,8 +81,8 @@ class ChangementCentreGestionForm(forms.Form):
     def __init__(self, wish, *args, **kwargs):
         self.wish = wish
         super(ChangementCentreGestionForm, self).__init__(*args, **kwargs)
-        if wish.etape.semestre:
-            self.fields['demi_annee'] = forms.BooleanField(required=False)
+        # if wish.etape.semestre:
+        #     self.fields['demi_annee'] = forms.BooleanField(required=False)
 
     centre_gestion = forms.ModelChoiceField(queryset=CentreGestionModel.objects.all())
     nombre_paiement = forms.ChoiceField(choices=(("1", '1'), ('2', '2'), ('3', '3')), required=False)

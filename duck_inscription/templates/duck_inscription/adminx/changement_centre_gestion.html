@@ -1,51 +1,63 @@
 {% load static floppyforms %}
+<div class="modal fade" id="myModal{{ wish.pk }}" tabindex="-1" role="dialog"
+     aria-labelledby="myModalLabel{{ wish.pk }}"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span
+                        class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="myModalLabel{{ wish.pk }}">Changement du centre de gestion</h4>
+            </div>
+            <div class="modal-body">
+                <div id="form_{{ wish.pk }}" class="well">
+                    {% csrf_token %}
+                    {% form form %}
+                    <div class="form-group">
+                        <div class="col-sm-offset-3 col-sm-10">
+                            <button id="submit{{ wish.pk }}" type="submit" class="btn btn-success">Valider</button>
+                        </div>
+                    </div>
 
-<div id="form_{{ wish.pk }}" class="well">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Fermer</button>
+            </div>
 
-            {% csrf_token %}
+        </div>
 
-                {% form form %}
-
-            <div class="form-group">
-                <div class="col-sm-offset-3 col-sm-10">
-            <button id="submit{{ wish.pk }}" type="submit" class="btn btn-success">Valider</button>
-                    </div></div>
-{#        </form>#}
     </div>
-        <section class="well">
-
-                {{ message|safe}}
-
-
-        </section>
-
+</div>
 <script>
-;(function($){
-    $(document).ready(function(){
-        $('#submit{{ wish.pk }}').click(function(event){
-            event.preventDefault();
-            var data = {
-                csrfmiddlewaretoken : $('#form_{{ wish.pk }}').find('input[name="csrfmiddlewaretoken"]').val(),
-                centre_gestion: $('#id_centre_gestion').val(),
-                nombre_paiement: $('#id_nombre_paiement').val(),
-                type_paiement: $('#id_type_paiement').val()
-            };
+    ;
+    (function ($) {
+        $(document).ready(function () {
+            $('#submit{{ wish.pk }}').click(function (event) {
+                event.preventDefault();
+                var data = {};
+                $('#form_{{ wish.pk }} :input').each(function () {
+                    var name = $(this).attr('name')
+                    if (name) {
+                        data[name] = $(this).val();
+                    }
+                });
 
-            $.ajax({
-                type: "POST",
-                url: "{% url 'changement_centre' wish.pk %}",
-                data: data,
-                success: function(msg){
-                    $('#myModal{{ wish.pk }} .modal-body').html(msg);
-                },
-                error: function(XMLHttpRequest, testStatus, errorTrow) {
-                    console.log(XMLHttpRequest.responseText);
-                    $('#myModal{{ wish.pk }} .modal-body').html(XMLHttpRequest.responseText);
-                }
+                $.ajax({
+                    type: "POST",
+                    url: "{% url 'changement_centre' wish.pk %}",
+                    data: data,
+                    success: function (msg) {
+                        $('#myModal{{ wish.pk }} .modal-body').html(msg);
+                    },
+                    error: function (XMLHttpRequest, testStatus, errorTrow) {
+                        console.log(XMLHttpRequest.responseText);
+                        $('#myModal{{ wish.pk }} .modal-body').html(XMLHttpRequest.responseText);
+                    }
+                });
+
+
             });
-
-
         });
-    });
-})(jQuery);
+    })(jQuery);
 </script>
