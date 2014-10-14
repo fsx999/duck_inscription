@@ -40,7 +40,8 @@ class WishWorkflow(xwf_models.Workflow):
         ('choix_ied_fp', 'Choix centre gestion'),
         ('droit_univ', 'Droit universitaire'),
         ('inscription', 'Dossier en inscription'),
-        ('liste_attente_inscription', 'Liste attente inscription')
+        ('liste_attente_inscription', 'Liste attente inscription'),
+        ('auditeur', 'Dossier Auditeur')
     )
 
     transitions = (
@@ -60,7 +61,8 @@ class WishWorkflow(xwf_models.Workflow):
         ('choix_ied_fp', 'dossier_inscription', 'choix_ied_fp'),
         ('droit_universitaire', 'choix_ied_fp', 'droit_univ'),
         ('inscription', ('droit_univ', 'choix_ied_fp', 'liste_attente_inscription'), 'inscription'),
-        ('liste_attente_inscription', 'inscription', 'liste_attente_inscription')
+        ('liste_attente_inscription', 'inscription', 'liste_attente_inscription'),
+        ('auditeur', 'creation', 'auditeur')
     )
 
     initial_state = 'creation'
@@ -323,6 +325,7 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
     annee = models.ForeignKey(SettingAnneeUni, default=2014, db_column='annee')
     centre_gestion = models.ForeignKey(CentreGestionModel, null=True, blank=True)
     is_reins = models.NullBooleanField(default=None, blank=True)
+    is_auditeur = models.BooleanField(default=False)
 
     date_validation = models.DateTimeField(null=True, blank=True)
     state = xwf_models.StateField(WishWorkflow)

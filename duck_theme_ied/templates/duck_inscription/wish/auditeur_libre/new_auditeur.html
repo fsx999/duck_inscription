@@ -1,0 +1,36 @@
+{% extends "duck_inscription/wish/base_wish.html" %}
+{% load lib_inscription floppyforms %}
+
+
+
+
+
+
+{% block content %}
+    <form class="form-horizontal well" method="post">
+    {% csrf_token %}
+    <h2>Auditeur libre en psychologie</h2>
+    <p>
+        L'auditeur libre souhaite obtenir un complément de formation sans intention d'obtenir un diplôme. Il peut suivre l'enseignement même
+        s'il ne remplit pas les conditions d'accès à l'Université. Il ne bénéficie pas du statut d'étudiant.<br />
+        - Vous ne pourrez participer ni aux examens ni aux travaux pratiques.<br />
+        - Vous ne pourrez prétendre au régime de sécurité sociale étudiant.<br />
+        - Aucune attestation d'unités d'enseignement, d'éléments constitutifs ou de diplôme ne vous sera délivrée (excepté une attestation d'assiduité délivrée par le service scolarité sur demande).<br />
+        En revanche, vous bénéficierez des services de l'enseignement à distance :<br />
+        - Accès à la plate-forme d'enseignement à distance et au cours de L1 de psychologie.<br />
+        - Aux permanences téléphoniques des enseignants.<br />
+        - Aux corrections personnalisées des devoirs et accès aux corrigés-types.<br />
+        - Aux 4 tomes du Nouveau Cours de Psychologie, édités par les Presses Universitaires de France.<br />
+    </p>
+
+
+        {% form form %}
+        <div class="form-actions" >
+            <a id="id_reset" class="btn btn-primary" href="{% url 'accueil' %}">Revenir</a>
+            <input id="submit-id-verifier" class="btn btn-primary btn btn-primary" type="submit" value="Suite" name="Verifier">
+        </div>
+
+    </form>
+
+
+{% endblock %}

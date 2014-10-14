@@ -34,10 +34,10 @@
 <a class="btn btn-primary" href="{% url 'new_wish' %}">Ajouter un vœu</a>
 </div>
     {% endif %}
-{#    {% if not auditeur %}#}
-{#<div class="well">#}
-{#<a class="btn btn-primary" href="{% url 'new_auditeur' %}">Auditeur libre</a>#}
-{#</div>#}
-{#    {% endif %}#}
+    {% if not auditeur %}
+<div class="well">
+<a class="btn btn-primary" href="{% url 'new_auditeur' %}">Auditeur libre</a>
+</div>
+    {% endif %}
 
 {% endblock %}

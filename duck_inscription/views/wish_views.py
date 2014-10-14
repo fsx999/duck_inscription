@@ -17,9 +17,10 @@ from floppyforms import ModelChoiceField
 from wkhtmltopdf.views import PDFTemplateResponse, PDFTemplateView
 import xworkflows
 import json
+from django_apogee.models import Etape
 from duck_inscription.forms import WishGradeForm, ListeDiplomeAccesForm, DemandeEquivalenceForm, \
     ListeAttenteEquivalenceForm, NoteMasterForm, ListeAttenteCandidatureForm, ChoixPaiementDroitForm, DemiAnneeForm, \
-    NbPaiementPedaForm, ValidationPaiementForm, ListeAttenteInscriptionForm
+    NbPaiementPedaForm, ValidationPaiementForm, ListeAttenteInscriptionForm, NewAuditeurForm
 from duck_inscription.models import Wish, SettingsEtape, NoteMasterModel, CentreGestionModel, PaiementAllModel, \
     DossierInscription
 from xhtml2pdf import pdf as pisapdf
@@ -539,74 +540,71 @@ class InscriptionPdfView(TemplateView):
         return response
 
 
-# class NewAuditeurView(FormView):
-#     form_class = NewAuditeurForm
-#     template_name = "auditeur_libre/new_auditeur.html"
-#
-#     def form_valid(self, form):
-#         if form.cleaned_data['auditeur'] is True:
-#             individu = self.request.user.individu
-#             wish = Wish.objects.create(
-#                 etape="auditeur",
-#                 dispatch_etape="auditeur",
-#                 individu=individu,
-#                 step=Step.objects.get(name="L1NPSY"),
-#                 is_reins=False,
-#                 code_dossier=individu.code_opi,
-#                 is_auditeur=True
-#             )
-#             return redirect(wish.get_absolute_url(), pk=wish.id)
-#
-#         return redirect('home')
-#
-#     def form_invalid(self, form):
-#         print "coucuo"
-#         return super(NewAuditeurView, self).form_invalid(form)
-#
-#
-# class AuditeurView(TemplateView):
-#     template_name = "auditeur_libre/auditeur.html"
-#
-#     def get_context_data(self, **kwargs):
-#         context = super(AuditeurView, self).get_context_data(**kwargs)
-#         context['wish'] = self.request.user.individu.wishes.get(pk=self.kwargs['pk'])
-#         return context
-#
-#     def get(self, request, *args, **kwargs):
-#         context = self.get_context_data(**kwargs)
-#         if request.GET.get("valide", False):
-#             context['wish'].valide = True
-#             context['wish'].save()
-#         return self.render_to_response(context)
-#
-#
-# class AuditeurPdfView(TemplateView):
-#     template_name = "auditeur_libre/pdf_auditeur.html"
-#     templates = {
-#         'dossier_inscription': "auditeur_libre/pdf_auditeur.html",
-#         'formulaire_paiement_droit': "auditeur_libre/formulaire_paiement_frais.html",
-#         'etiquette': 'wish/etiquette.html',
-#     }
-#
-#     def get_context_data(self, **kwargs):
-#         context = super(AuditeurPdfView, self).get_context_data(**kwargs)
-#         context['student'] = context['individu'] = self.request.user.individu
-#
-#         context['wish'] = context['voeu'] = self.request.user.individu.wishes.select_related().get(pk=self.kwargs['pk'])
-#         context['static'] = PROJECT_DIR + '/documents/static/images/'
-#         context['annee_univ'] = '%s-%s' % (ANNEE_UNIV, ANNEE_UNIV + 1)
-#
-#         return context
-#
-#     def render_to_response(self, context, **response_kwargs):
-#         response = HttpResponse(mimetype='application/pdf')
-#         response['Content-Disposition'] = 'attachment; filename=auditeur_libre.pdf'
-#         pdf = pisapdf.pisaPDF()
-#         pdf.addDocument(pisa.CreatePDF(
-#             render_to_string(self.templates['etiquette'], context, context_instance=RequestContext(self.request))))
-#         pdf.addDocument(pisa.CreatePDF(render_to_string(self.templates['dossier_inscription'], context,
-#                                                         context_instance=RequestContext(self.request))))
-#         pdf.addDocument(pisa.CreatePDF(render_to_string(self.templates['formulaire_paiement_droit'], context,
-#                                                         context_instance=RequestContext(self.request))))
-#         pdf.join(response)
-#         return response
+class NewAuditeurView(FormView):
+    form_class = NewAuditeurForm
+    template_name = "duck_inscription/wish/auditeur_libre/new_auditeur.html"
+
+    def form_valid(self, form):
+        if form.cleaned_data['auditeur'] is True:
+            individu = self.request.user.individu
+            wish = Wish.objects.get_or_create(
+                individu=individu,
+                etape=SettingsEtape.objects.get(cod_etp="L1NPSY"),
+                is_reins=False,
+                code_dossier=individu.code_opi,
+                is_auditeur=True
+            )[0]
+            wish.auditeur()
+            return redirect(wish.get_absolute_url())
+
+        return redirect('home')
+
+    def form_invalid(self, form):
+        return super(NewAuditeurView, self).form_invalid(form)
+
+
+class AuditeurView(TemplateView):
+    template_name = "duck_inscription/wish/auditeur_libre/auditeur.html"
+
+    def get_context_data(self, **kwargs):
+        context = super(AuditeurView, self).get_context_data(**kwargs)
+        context['wish'] = self.request.user.individu.wishes.get(pk=self.kwargs['pk'])
+        return context
+
+    def get(self, request, *args, **kwargs):
+        context = self.get_context_data(**kwargs)
+        if request.GET.get("valide", False):
+            context['wish'].valide = True
+            context['wish'].save()
+        return self.render_to_response(context)
+
+
+class AuditeurPdfView(TemplateView):
+    template_name = "duck_inscription/wish/auditeur_libre/pdf_auditeur.html"
+    templates = {
+        'dossier_inscription': "duck_inscription/wish/auditeur_libre/pdf_auditeur.html",
+        'formulaire_paiement_droit': "duck_inscription/wish/auditeur_libre/formulaire_paiement_frais.html",
+        'etiquette': 'duck_inscription/wish/etiquette.html',
+    }
+
+    def get_context_data(self, **kwargs):
+        context = super(AuditeurPdfView, self).get_context_data(**kwargs)
+        context['student'] = context['individu'] = self.request.user.individu
+
+        context['wish'] = context['voeu'] = self.request.user.individu.wishes.select_related().get(pk=self.kwargs['pk'])
+        context['static'] = settings.BASE_DIR + '/duck_theme_ied/static/images/'
+
+        return context
+
+    def render_to_response(self, context, **response_kwargs):
+        response = HttpResponse(mimetype='application/pdf')
+        response['Content-Disposition'] = 'attachment; filename=auditeur_libre.pdf'
+        pdf = pisapdf.pisaPDF()
+        pdf.addDocument(pisa.CreatePDF(
+            render_to_string(self.templates['etiquette'], context, context_instance=RequestContext(self.request))))
+        pdf.addDocument(pisa.CreatePDF(render_to_string(self.templates['dossier_inscription'], context,
+                                                        context_instance=RequestContext(self.request))))
+        pdf.addDocument(pisa.CreatePDF(render_to_string(self.templates['formulaire_paiement_droit'], context,
+                                                        context_instance=RequestContext(self.request))))
+        pdf.join(response)
+        return response
