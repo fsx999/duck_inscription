@@ -19,28 +19,23 @@ from django.utils.timezone import now
 from django.conf import settings
 from xhtml2pdf import pdf as pisapdf
 from xhtml2pdf import pisa
+
 __author__ = 'paul'
 
 
 class WishWorkflow(xwf_models.Workflow):
     log_model = 'duck_inscription.WishParcourTransitionLog'
     states = (
-        ('creation', 'Création'),
-        ('ouverture_equivalence', 'Ouverture equivalence'),
-        ('liste_diplome', 'Liste Diplome équivalent'),
-        ('demande_equivalence', 'Demande desir équivalence'),
+        ('creation', 'Création'), ('ouverture_equivalence', 'Ouverture equivalence'),
+        ('liste_diplome', 'Liste Diplome équivalent'), ('demande_equivalence', 'Demande desir équivalence'),
         ('equivalence', 'Dossier en équivalence'),
         ('liste_attente_equivalence', 'Dossier en liste attente équivalence'),
-        ('ouverture_candidature', 'Ouverture candidature'),
-        ('note_master', 'Note master'),
+        ('ouverture_candidature', 'Ouverture candidature'), ('note_master', 'Note master'),
         ('candidature', 'Dossier en candidature'),
         ('liste_attente_candidature', 'Dossier en liste attente candidature'),
-        ('ouverture_inscription', 'Ouverture inscription'),
-        ('dossier_inscription', 'Dossier inscription'),
-        ('choix_ied_fp', 'Choix centre gestion'),
-        ('droit_univ', 'Droit universitaire'),
-        ('inscription', 'Dossier en inscription'),
-        ('liste_attente_inscription', 'Liste attente inscription'),
+        ('ouverture_inscription', 'Ouverture inscription'), ('dossier_inscription', 'Dossier inscription'),
+        ('choix_ied_fp', 'Choix centre gestion'), ('droit_univ', 'Droit universitaire'),
+        ('inscription', 'Dossier en inscription'), ('liste_attente_inscription', 'Liste attente inscription'),
         ('auditeur', 'Dossier Auditeur')
     )
 
@@ -48,21 +43,20 @@ class WishWorkflow(xwf_models.Workflow):
         ('ouverture_equivalence', 'creation', 'ouverture_equivalence'),
         ('liste_diplome', 'ouverture_equivalence', 'liste_diplome'),
         ('demande_equivalence', ('creation', 'liste_diplome'), 'demande_equivalence'),
-        ('equivalence', ('creation', 'liste_diplome', 'demande_equivalence'), 'equivalence'),
-        ('liste_attente_equivalence', ('ouverture_equivalence', 'demande_equivalence', 'liste_diplome'), 'liste_attente_equivalence'),
-        ('ouverture_candidature', ('creation', 'ouverture_equivalence', 'equivalence', 'demande_equivalence'),
-         'ouverture_candidature'),
-        ('note_master', 'ouverture_candidature', 'note_master'),
+        ('equivalence', ('creation', 'liste_diplome', 'demande_equivalence'), 'equivalence'), (
+        'liste_attente_equivalence', ('ouverture_equivalence', 'demande_equivalence', 'liste_diplome'),
+        'liste_attente_equivalence'), (
+        'ouverture_candidature', ('creation', 'ouverture_equivalence', 'equivalence', 'demande_equivalence'),
+        'ouverture_candidature'), ('note_master', 'ouverture_candidature', 'note_master'),
         ('candidature', ('note_master', 'ouverture_candidature', 'liste_attente_candidature'), 'candidature'),
-        ('liste_attente_candidature', ('ouverture_candidature',), 'liste_attente_candidature'),
-        ('ouverture_inscription', ('creation', 'ouverture_equivalence', 'ouverture_candidature', 'equivalence',
-         'candidature', 'dossier_inscription'), 'ouverture_inscription'),
+        ('liste_attente_candidature', ('ouverture_candidature',), 'liste_attente_candidature'), (
+        'ouverture_inscription', (
+        'creation', 'ouverture_equivalence', 'ouverture_candidature', 'equivalence', 'candidature',
+        'dossier_inscription'), 'ouverture_inscription'),
         ('dossier_inscription', ('ouverture_inscription',), 'dossier_inscription'),
-        ('choix_ied_fp', 'dossier_inscription', 'choix_ied_fp'),
-        ('droit_universitaire', 'choix_ied_fp', 'droit_univ'),
+        ('choix_ied_fp', 'dossier_inscription', 'choix_ied_fp'), ('droit_universitaire', 'choix_ied_fp', 'droit_univ'),
         ('inscription', ('droit_univ', 'choix_ied_fp', 'liste_attente_inscription'), 'inscription'),
-        ('liste_attente_inscription', 'inscription', 'liste_attente_inscription'),
-        ('auditeur', 'creation', 'auditeur')
+        ('liste_attente_inscription', 'inscription', 'liste_attente_inscription'), ('auditeur', 'creation', 'auditeur')
     )
 
     initial_state = 'creation'
@@ -72,23 +66,19 @@ class SuiviDossierWorkflow(xwf_models.Workflow):
     log_model = 'duck_inscription.WishTransitionLog'
 
     states = (
-        ('inactif', 'Inactif'),
-        ('equivalence_reception', 'Dossier Equivalence receptionné'),
+        ('inactif', 'Inactif'), ('equivalence_reception', 'Dossier Equivalence receptionné'),
         ('equivalence_complet', 'Dossier Equivalence complet'),
         ('equivalence_incomplet', 'Dossier Equivalence incomplet'),
-        ('equivalence_traite', 'Dossier Equivalence traite'),
-        ('equivalence_refuse', 'Dossier Equivalence refuse'),
+        ('equivalence_traite', 'Dossier Equivalence traite'), ('equivalence_refuse', 'Dossier Equivalence refuse'),
         ('candidature_reception', 'Dossier Candidature receptionné'),
         ('candidature_complet', 'Dossier Candidature complet'),
         ('candidature_incomplet', 'Dossier Candidature incomplet'),
-        ('candidature_traite', 'Dossier Candidature traite'),
-        ('candidature_refuse', 'Dossier Candidature refuse'),
+        ('candidature_traite', 'Dossier Candidature traite'), ('candidature_refuse', 'Dossier Candidature refuse'),
         ('inscription_reception', 'Dossier inscription receptionné'),
         ('inscription_complet', 'Dossier inscription complet'),
         ('inscription_incomplet', 'Dossier inscription incomplet'),
         ('inscription_incom_r', 'Dossier inscription incomplet avec renvoi'),
-        ('inscription_traite', 'Dossier inscription traite'),
-        ('inscription_refuse', 'Dossier inscription refusé'),
+        ('inscription_traite', 'Dossier inscription traite'), ('inscription_refuse', 'Dossier inscription refusé'),
     )
 
     initial_state = 'inactif'
@@ -96,29 +86,26 @@ class SuiviDossierWorkflow(xwf_models.Workflow):
         ('equivalence_receptionner', ('inactif', 'equivalence_incomplet'), 'equivalence_reception'),
         ('equivalence_incomplet', 'equivalence_reception', 'equivalence_incomplet'),
         ('equivalence_complet', ('equivalence_reception', 'equivalence_incomplet'), 'equivalence_complet'),
-        ('equivalence_traite', 'equivalence_complet', 'equivalence_traite'),
-        ('equivalece_refuse', ('equivalence_reception',
-                               'equivalence_incomplet',
-                               'equivalence_complet'), 'equivalence_refuse'),
+        ('equivalence_traite', 'equivalence_complet', 'equivalence_traite'), (
+        'equivalece_refuse', ('equivalence_reception', 'equivalence_incomplet', 'equivalence_complet'),
+        'equivalence_refuse'),
 
         ('candidature_reception', ('inactif', 'equivalence_traite', 'candidature_incomplet'), 'candidature_reception'),
         ('candidature_complet', ('candidature_reception', 'candidature_incomplet'), 'candidature_complet'),
         ('candidature_incomplet', 'candidature_reception', 'candidature_incomplet'),
-        ('candidature_traite', 'candidature_complet', 'candidature_traite'),
-        ('candidature_refuse', ('candidature_reception',
-                                'candidature_incomplet',
-                                'candidature_complet'), 'candidature_refuse'),
+        ('candidature_traite', 'candidature_complet', 'candidature_traite'), (
+        'candidature_refuse', ('candidature_reception', 'candidature_incomplet', 'candidature_complet'),
+        'candidature_refuse'),
 
-        ('inscription_reception', ('inactif', 'equivalence_traite', 'candidature_complet', 'candidature_traite',
-                                   'inscription_incomplet'),
-         'inscription_reception'),
-        ('inscription_incomplet', ('inscription_reception',), 'inscription_incomplet'),
+        ('inscription_reception',
+         ('inactif', 'equivalence_traite', 'candidature_complet', 'candidature_traite', 'inscription_incomplet'),
+         'inscription_reception'), ('inscription_incomplet', ('inscription_reception',), 'inscription_incomplet'),
         ('inscription_incomplet_renvoi', ('inscription_reception',), 'inscription_incom_r'),
-        ('inscription_complet', ('inscription_reception', 'inscription_incomplet'), 'inscription_complet'),
-        ('inscription_traite', ('inscription_reception', 'inscription_complet', 'inscription_incomplet'),
-         'inscription_traite',),
-        ('inscription_refuse', ('inscription_reception', 'inscription_complet', 'inscription_incomplet', 'inactif'),
-         'inscription_refuse',),
+        ('inscription_complet', ('inscription_reception', 'inscription_incomplet'), 'inscription_complet'), (
+        'inscription_traite', ('inscription_reception', 'inscription_complet', 'inscription_incomplet'),
+        'inscription_traite',), (
+        'inscription_refuse', ('inscription_reception', 'inscription_complet', 'inscription_incomplet', 'inactif'),
+        'inscription_refuse',),
     )
 
 
@@ -137,8 +124,9 @@ class WishParcourTransitionLog(django_xworkflows.models.BaseTransitionLog):
     class Meta:
         app_label = 'duck_inscription'
 
+
 # class Step(models.Model):
-#     """
+# """
 #     le modéle des étapes
 #     """
 #     name = models.CharField(u"Code de l'étape", max_length=15, help_text="le code de l'étape", unique=True)
@@ -405,7 +393,8 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
         # if self.is_reins is None:
         diplomes = self.etape.cursus.settingsetape_set.all().values_list('pk', flat=True)
         if self.individu.student_code:
-            self.is_reins = InsAdmEtp.objects.filter(cod_ind__cod_etu=self.individu.student_code, cod_etp__in=diplomes).count() != 0
+            self.is_reins = InsAdmEtp.objects.filter(cod_ind__cod_etu=self.individu.student_code,
+                                                     cod_etp__in=diplomes).count() != 0
         else:
             self.is_reins = False
         self.save()
@@ -428,10 +417,7 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
         else:
             email_destination = (self.individu.personal_email,)
 
-        mail = template.make_message(
-            context={'site': site, 'etape': etape},
-            recipients=email_destination
-        )
+        mail = template.make_message(context={'site': site, 'etape': etape}, recipients=email_destination)
         mail.send()
 
     @property
@@ -440,8 +426,7 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
 
     def valide_liste(self):
         self.date_validation = datetime.datetime.today()
-        if self.place_dispo() or not self.etape.limite_etu or self.is_reins_formation() or self.is_ok or\
-                        self.centre_gestion.centre_gestion == 'fp':
+        if self.place_dispo() or not self.etape.limite_etu or self.is_reins_formation() or self.is_ok or self.centre_gestion.centre_gestion == 'fp':
             self.is_ok = True
             self.valide = True
         self.save()
@@ -453,12 +438,14 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
 
     def place_dispo(self):
         if self.etape.limite_etu:
-            nb = self.etape.limite_etu-self.etape.wish_set.filter(date_validation__isnull=False, annee=self.annee).count()
+            nb = self.etape.limite_etu - self.etape.wish_set.filter(date_validation__isnull=False,
+                                                                    annee=self.annee).count()
             if nb < 0:
                 nb = 0
         else:
             nb = 0
         return nb
+
     # def rang(self):
     #     rang = self.etape.wish_set.filter(date_validation__lt=self.date_validation,
     #                               etape='liste_attente_inscription',
@@ -482,8 +469,8 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
     def do_pdf_equi(self, flux, templates, request, context):
         pdf = pisapdf.pisaPDF()
         for template in templates:
-            pdf.addDocument(pisa.CreatePDF(render_to_string(template, context, context_instance=RequestContext(
-                request))))  # on construit le pdf
+            pdf.addDocument(pisa.CreatePDF(
+                render_to_string(template, context, context_instance=RequestContext(request))))  # on construit le pdf
             #il faut fusionner la suite
 
         pdf.addFromString(self.do_pdf(context['url_doc']).getvalue())
@@ -500,16 +487,15 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
     def add_decision_equi_pdf(self, pdf, request, context):
         if self.etape.path_template_equivalence and self.etape.grille_de_equivalence:
             template = "duck_inscription/wish/{}".format(self.etape.path_template_equivalence)
-            pdf.addFromString(PDFTemplateResponse(request=request,
-                                                  context=context,
-                                                  template=[template, ]).rendered_content)
+            pdf.addFromString(
+                PDFTemplateResponse(request=request, context=context, template=[template, ]).rendered_content)
             pdf.addFromFileName(self.etape.grille_de_equivalence.file.file.name)
 
     def do_pdf_candi(self, flux, templates, request, context):
         pdf = pisapdf.pisaPDF()
         for template in templates:
-            pdf.addDocument(pisa.CreatePDF(render_to_string(template, context, context_instance=RequestContext(
-                request))))  # on construit le pdf
+            pdf.addDocument(pisa.CreatePDF(
+                render_to_string(template, context, context_instance=RequestContext(request))))  # on construit le pdf
             #il faut fusionner la suite
 
         pdf.addFromString(self.do_pdf(context['url_doc']).getvalue())
@@ -528,6 +514,7 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
         output.write(result)
 
         return result
+
     #
     # def save_auditeur(self):
     #     if self.is_auditeur:
@@ -589,37 +576,35 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
         verbose_name_plural = "Voeux"
         app_label = "duck_inscription"
 
-    # def get_etapes_dossier(self):
-    #     response = '<div class="well">'
-    #     for etape in self.etapedossier_set.all():
-    #         response += etape.__unicode__() + '<br/>'
-    #     response += '</div>'
-    #     return '%s' % (response,)
+        # def get_etapes_dossier(self):
+        #     response = '<div class="well">'
+        #     for etape in self.etapedossier_set.all():
+        #         response += etape.__unicode__() + '<br/>'
+        #     response += '</div>'
+        #     return '%s' % (response,)
 
-    # get_etapes_dossier.short_description = 'Etapes du dossier'
-    # get_etapes_dossier.allow_tags = True
+        # get_etapes_dossier.short_description = 'Etapes du dossier'
+        # get_etapes_dossier.allow_tags = True
 
-    # def get_pdf(self):
-    #     response = ''
-    #     if not self.is_reins_formation() and not self.step.no_equivalence:
-    #         url = reverse('impression_equivalence', kwargs={'pk': self.id})
-    #         response += '<p><a href="' + url + '" class="btn btn-primary">Imprimer le dossier d\'equivalence</a></p>'
-    #     if not self.is_reins_formation() and self.step.candidature:
-    #         url = reverse('impression_candidature', kwargs={'pk': self.id})
-    #         response += '<p><a href="' + url + '" class="btn btn-primary">Imprimer le dossier de candidature</a></p>'
-    #     try:
-    #         if self.paiementallmodel:
-    #
-    #             url = reverse('impression_inscription', kwargs={'pk': self.id})
-    #             response += '<p><a href="' + url + '" class="btn btn-primary">Imprimer le dossier d\'inscription</a></p>'
-    #     except PaiementAllModel.DoesNotExist:
-    #         pass
-    #     return response
+        # def get_pdf(self):
+        #     response = ''
+        #     if not self.is_reins_formation() and not self.step.no_equivalence:
+        #         url = reverse('impression_equivalence', kwargs={'pk': self.id})
+        #         response += '<p><a href="' + url + '" class="btn btn-primary">Imprimer le dossier d\'equivalence</a></p>'
+        #     if not self.is_reins_formation() and self.step.candidature:
+        #         url = reverse('impression_candidature', kwargs={'pk': self.id})
+        #         response += '<p><a href="' + url + '" class="btn btn-primary">Imprimer le dossier de candidature</a></p>'
+        #     try:
+        #         if self.paiementallmodel:
+        #
+        #             url = reverse('impression_inscription', kwargs={'pk': self.id})
+        #             response += '<p><a href="' + url + '" class="btn btn-primary">Imprimer le dossier d\'inscription</a></p>'
+        #     except PaiementAllModel.DoesNotExist:
+        #         pass
+        #     return response
 
-    # get_pdf.short_description = u'Impression des dossiers'
-    # get_pdf.allow_tags = True
-
-
+        # get_pdf.short_description = u'Impression des dossiers'
+        # get_pdf.allow_tags = True
 
 
 class NoteMasterModel(models.Model):
@@ -644,6 +629,8 @@ class ListeDiplomeAces(models.Model):
         verbose_name = u"Liste des diplômes d'accès direct"
         verbose_name_plural = u"Liste des diplômes d'accès direct"
         app_label = "duck_inscription"
+
+
 #
 #
 # class StudentApogeeValid(models.Model):
@@ -689,23 +676,18 @@ class TypePaiementModel(models.Model):
     def __unicode__(self):
         return unicode(self.label)
 
+
 PRECEDENT = 0
 TITLE = 1
 NEXT = 2
 
 
 class PaiementAllModel(models.Model):
-    moment_paiement = [
-        u"Au moment de l'inscription",
-        u'01/01/15',
-        u'15/02/15'
-    ]
-    liste_etapes = {
-        'droit_univ': [None, u'Droit universitaire', 'choix_demi_annee'],
-        'choix_demi_annee': ['droit_univ', u'Inscription aux semestres', 'nb_paiement'],
-        'nb_paiement': ['choix_demi_annee', u"Choisir le nombre de paiements", 'recapitulatif'],
-        'recapitulatif': ['nb_paiement', u"Récapitulatif", None],
-    }
+    moment_paiement = [u"Au moment de l'inscription", u'01/01/15', u'15/02/15']
+    liste_etapes = {'droit_univ': [None, u'Droit universitaire', 'choix_demi_annee'],
+                    'choix_demi_annee': ['droit_univ', u'Inscription aux semestres', 'nb_paiement'],
+                    'nb_paiement': ['choix_demi_annee', u"Choisir le nombre de paiements", 'recapitulatif'],
+                    'recapitulatif': ['nb_paiement', u"Récapitulatif", None], }
     wish = models.OneToOneField(Wish)
     moyen_paiement = models.ForeignKey(MoyenPaiementModel, verbose_name=u'Votre moyen de paiement :',
                                        help_text=u"Veuillez choisir un moyen de paiement", null=True)
@@ -716,16 +698,14 @@ class PaiementAllModel(models.Model):
     def liste_motif(self):
         a = []
         for x in range(self.nb_paiement_frais):
-            chaine = u'IED  %s %s %s %s' % (self.wish.etape.cod_etp,
-                                                    self.wish.individu.code_opi,
-                                                    self.wish.individu.last_name,
-                                                    str(x+1))
+            chaine = u'IED  %s %s %s %s' % (
+            self.wish.etape.cod_etp, self.wish.individu.code_opi, self.wish.individu.last_name, str(x + 1))
             a.append(chaine)
         return a
 
     def range(self):
         a = []
-        for x in  range(self.nb_paiement_frais):
+        for x in range(self.nb_paiement_frais):
             a.append((x, self.moment_paiement[x]))
         return a
 

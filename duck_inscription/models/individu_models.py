@@ -333,28 +333,30 @@ class Individu(xwf_models.WorkflowEnabled, models.Model):
             if adresse.com_bdi:
                 cod_bdi = adresse.com_bdi.cod_bdi
                 cod_com = adresse.com_bdi.cod_com
-            AdresseOpi.objects.using(db).get_or_create(
+            ad = AdresseOpi.objects.using(db).get_or_create(
                 cod_ind_opi=self.code_opi,
                 cod_typ_adr_opi=adresse.type,
-                cod_pay=adresse.code_pays_id,
-                cod_bdi=cod_bdi,
-                cod_com=cod_com,
-                lib_ad1=adresse.label_adr_1,
-                lib_ad2=adresse.label_adr_2,
-                lib_ad3=adresse.label_adr_3,
-                lib_ade=adresse.label_adr_etr,
-            )
-            AdresseOpi.objects.using(db).get_or_create(
+            )[0]
+            ad.cod_pay = adresse.code_pays_id
+            ad.cod_bdi = cod_bdi
+            ad.cod_com = cod_com
+            ad.lib_ad1 = adresse.label_adr_1
+            ad.lib_ad2 = adresse.label_adr_2
+            ad.lib_ad3 = adresse.label_adr_3
+            ad.lib_ade = adresse.label_adr_etr
+            ad.save(using=db)
+            ad = AdresseOpi.objects.using(db).get_or_create(
                 cod_ind_opi=self.code_opi,
                 cod_typ_adr_opi=2,
-                cod_pay=adresse.code_pays_id,
-                cod_bdi=cod_bdi,
-                cod_com=cod_com,
-                lib_ad1=adresse.label_adr_1,
-                lib_ad2=adresse.label_adr_2,
-                lib_ad3=adresse.label_adr_3,
-                lib_ade=adresse.label_adr_etr,
-            )
+            )[0]
+            ad.cod_pay = adresse.code_pays_id
+            ad.cod_bdi = cod_bdi
+            ad.cod_com = cod_com
+            ad.lib_ad1 = adresse.label_adr_1
+            ad.lib_ad2 = adresse.label_adr_2
+            ad.lib_ad3 = adresse.label_adr_3
+            ad.lib_ade = adresse.label_adr_etr
+            ad.save(using=db)
         else:
             for adresse in self.adresses.all():
                 cod_bdi = ""
@@ -363,17 +365,18 @@ class Individu(xwf_models.WorkflowEnabled, models.Model):
                     cod_bdi = adresse.com_bdi.cod_bdi
                     cod_com = adresse.com_bdi.cod_com
 
-                AdresseOpi.objects.using(db).get_or_create(
+                ad = AdresseOpi.objects.using(db).get_or_create(
                     cod_ind_opi=self.code_opi,
                     cod_typ_adr_opi=2 if adresse.type == 1 else 1,  # bug
-                    cod_pay=adresse.code_pays_id,
-                    cod_bdi=cod_bdi,
-                    cod_com=cod_com,
-                    lib_ad1=adresse.label_adr_1,
-                    lib_ad2=adresse.label_adr_2,
-                    lib_ad3=adresse.label_adr_3,
-                    lib_ade=adresse.label_adr_etr,
-                )
+                )[0]
+                ad.cod_pay = adresse.code_pays_id
+                ad.cod_bdi = cod_bdi
+                ad.cod_com = cod_com
+                ad.lib_ad1 = adresse.label_adr_1
+                ad.lib_ad2 = adresse.label_adr_2
+                ad.lib_ad3 = adresse.label_adr_3
+                ad.lib_ade = adresse.label_adr_etr
+                ad.save(using=db)
 
 
 class AdresseIndividu(models.Model):
