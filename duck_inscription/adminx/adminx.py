@@ -1,8 +1,5 @@
 # coding=utf-8
 from __future__ import unicode_literals
-
-from django.contrib.auth.admin import csrf_protect_m
-from django.template.response import TemplateResponse
 from xadmin.views import filter_hook, CommAdminView
 from duck_inscription.xadmin_plugins.topnav import IEDPlugin
 from crispy_forms.bootstrap import TabHolder, Tab
@@ -16,6 +13,7 @@ from duck_inscription.models import Wish, SuiviDossierWorkflow, IndividuWorkflow
 from xadmin.util import User
 from django.forms.models import inlineformset_factory
 from duck_inscription.adminx.html_string.action_adminx import ACTION
+
 
 class WishInline(object):
     def email(self, obj):

@@ -58,7 +58,8 @@ INSTALLED_APPS = (
     'djangobb_forum',
     'haystack',
     'openpyxl',
-    'foad'
+    'foad',
+    "django_mptt_admin",
 )
 
 
