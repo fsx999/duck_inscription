@@ -6,6 +6,7 @@ from django.views.decorators.cache import never_cache
 from openpyxl.workbook import Workbook
 from openpyxl.writer.excel import save_virtual_workbook
 import xlwt
+from django_apogee.models import InsAdmEtp
 from xadmin.views import filter_hook, BaseAdminView
 from xadmin import views
 import xadmin
@@ -59,6 +60,29 @@ class StatistiquePiel(views.Dashboard):
 xadmin.site.register_view(r'^stats_piel/$', StatistiquePiel, 'stats_piel')
 
 
+class StatistiqueApogee(views.Dashboard):
+    base_template = 'statistique/stats_apogee.html'
+    widget_customiz = False
+
+    @filter_hook
+    def get_context(self):
+        context = super(StatistiqueApogee, self).get_context()
+        context['etapes'] = SettingsEtape.objects.filter(is_inscription_ouverte=True).order_by('diplome')
+        return context
+
+    @never_cache
+    def get(self, request, *args, **kwargs):
+        self.widgets = self.get_widgets()
+        return self.template_response(self.base_template, self.get_context())
+
+    @filter_hook
+    def get_breadcrumb(self):
+        return [{'url': self.get_admin_url('index'), 'title': 'Accueil'},
+                {'url': self.get_admin_url('statistiques'), 'title': 'Statistique'},
+                {'url': self.get_admin_url('stats_apogee'), 'title': 'Statistique Apogee'}]
+xadmin.site.register_view(r'^stats_apogee/$', StatistiqueApogee, 'stats_apogee')
+
+
 class ExtrationStatistique(BaseAdminView):
     def get(self, request, *args, **kwargs):
         type_stat = kwargs.get('type_stat', 'stat_parcours_dossier')
@@ -93,6 +117,41 @@ class ExtrationStatistique(BaseAdminView):
         return response
 xadmin.site.register_view(r'^extraction/(?P<type_stat>\w+)/(?P<etat>\w+)/(?P<step>\w+)/$', ExtrationStatistique,
                           'extraction_stat')
+
+
+class ExtractionStatApogee(BaseAdminView):
+    def get(self, request, *args, **kwargs):
+        cod_etp, annee = kwargs['step'], kwargs['annee']
+        print annee, cod_etp
+        queryset = InsAdmEtp.inscrits.filter(cod_anu=annee, cod_etp=cod_etp)
+        wb = Workbook()
+        ws = wb.active
+        ws.cell(row=1, column=1).value = 'Numero Etudiant:'
+        ws.cell(row=1, column=2).value = 'Nom patronimique:'
+        ws.cell(row=1, column=3).value = "Nom d'époux:"
+        ws.cell(row=1, column=4).value = "Prénom:"
+        ws.cell(row=1, column=5).value = "Deuxiéme prénom"
+        ws.cell(row=1, column=6).value = "Email Perso:"
+        ws.cell(row=1, column=7).value = "Email Foad"
+        for row, etp in enumerate(queryset):
+            ind = etp.cod_ind
+            ws.cell(row=row + 2, column=1).value = ind.cod_etu
+            ws.cell(row=row + 2, column=2).value = ind.lib_nom_pat_ind
+            ws.cell(row=row + 2, column=3).value = ind.lib_nom_usu_ind
+            ws.cell(row=row + 2, column=4).value = ind.lib_pr1_ind
+            ws.cell(row=row + 2, column=5).value = ind.lib_pr2_ind
+            ws.cell(row=row + 2, column=6).value = str(ind.get_email(annee))
+            ws.cell(row=row + 2, column=7).value = str(ind.cod_etu) + '@foad.iedparis8.net'
+
+
+
+        response = HttpResponse(save_virtual_workbook(wb), mimetype='application/vnd.ms-excel')
+        date = datetime.datetime.today().strftime('%d-%m-%Y')
+        response['Content-Disposition'] = 'attachment; filename=%s_%s_%s.xlsx' % ('extraction_apogee', cod_etp, date)
+        return response
+
+xadmin.site.register_view(r'^extraction_apogee/(?P<annee>\w+)/(?P<step>\w+)/$', ExtractionStatApogee,
+                          'extraction_apogee')
 
 
 class ExtractionPiel(views.Dashboard):
