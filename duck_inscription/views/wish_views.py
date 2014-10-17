@@ -547,6 +547,8 @@ class NewAuditeurView(FormView):
     def form_valid(self, form):
         if form.cleaned_data['auditeur'] is True:
             individu = self.request.user.individu
+            if Wish.objects.filter(is_auditeur=True).count() > 200:
+                return redirect('home')
             wish = Wish.objects.get_or_create(
                 individu=individu,
                 etape=SettingsEtape.objects.get(cod_etp="L1NPSY"),
@@ -572,10 +574,7 @@ class AuditeurView(TemplateView):
         return context
 
     def get(self, request, *args, **kwargs):
-        count_auditeur = Wish.objects.filter(is_auditeur=True).count()
-        if count_auditeur > 200:
-            #Paul ici j'ai mit un compteur et un plus en bas
-            return
+
         context = self.get_context_data(**kwargs)
         if request.GET.get("valide", False):
             context['wish'].valide = True
@@ -602,9 +601,6 @@ class AuditeurPdfView(TemplateView):
 
     def render_to_response(self, context, **response_kwargs):
         count_auditeur = Wish.objects.filter(is_auditeur=True).count()
-        if count_auditeur > 200:
-            #Paul ici j'ai mit un compteur
-            return
         response = HttpResponse(mimetype='application/pdf')
         response['Content-Disposition'] = 'attachment; filename=auditeur_libre.pdf'
         pdf = pisapdf.pisaPDF()
