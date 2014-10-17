@@ -205,13 +205,13 @@ class OpiView(View):
         if opi:
 
             wish = Wish.objects.get(code_dossier=opi)
-            if wish.suivi_dossier.is_inscription_traite:
-                messages.error(request, u'Le dossier a déjà été traité')
-
-            else:
-                wish.save_opi()
-                wish.inscription_traite()
-                messages.success(request, 'Etudiant {} remontee'.format(wish.individu.code_opi))
+            # if wish.suivi_dossier.is_inscription_traite:
+            #     messages.error(request, u'Le dossier a déjà été traité')
+            #
+            # else:
+            wish.save_opi()
+            wish.inscription_traite()
+            messages.success(request, 'Etudiant {} remontee'.format(wish.individu.code_opi))
                 # self.message_user('Etudiant {} remontee'.format(wish.individu.code_opi), 'success')
         return redirect('/duck_inscription/wish/')
 
