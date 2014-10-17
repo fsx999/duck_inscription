@@ -244,7 +244,6 @@ class ChangementCentreGestionView(FormView):
 
     def form_valid(self, form):
         clean_data = form.cleaned_data
-        print clean_data
         self.wish.centre_gestion = clean_data['centre_gestion']
         if self.wish.centre_gestion.centre_gestion == 'ied':
             try:

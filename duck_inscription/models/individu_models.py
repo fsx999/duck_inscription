@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 from datetime import date, datetime
 from django.contrib.auth.models import User
 from django.utils.encoding import python_2_unicode_compatible
-from django.db import models
+from django.db import models, IntegrityError
 import unicodedata
 import django_xworkflows
 from django_xworkflows.xworkflow_log.models import TransitionLog
@@ -344,10 +344,12 @@ class Individu(xwf_models.WorkflowEnabled, models.Model):
         try:
             ad = AdresseOpi.objects.using(db).get(
                 cod_ind_opi=self.code_opi,
-                cod_typ_adr_opi=type,)
+                cod_typ_adr_opi=type)
         except AdresseOpi.DoesNotExist:
             ad = AdresseOpi(cod_ind_opi=self.code_opi,
                 cod_typ_adr_opi=type)
+        except IntegrityError:
+            return
         ad.cod_pay = adresse.code_pays_id
         ad.cod_bdi = cod_bdi
         ad.cod_com = cod_com
