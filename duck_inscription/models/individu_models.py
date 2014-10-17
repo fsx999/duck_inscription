@@ -344,8 +344,7 @@ class Individu(xwf_models.WorkflowEnabled, models.Model):
         try:
             ad = AdresseOpi.objects.using(db).get(
                 cod_ind_opi=self.code_opi,
-                cod_typ_adr_opi=type,
-            )[0]
+                cod_typ_adr_opi=type,)
         except AdresseOpi.DoesNotExist:
             ad = AdresseOpi(cod_ind_opi=self.code_opi,
                 cod_typ_adr_opi=type)
