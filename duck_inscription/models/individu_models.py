@@ -328,55 +328,35 @@ class Individu(xwf_models.WorkflowEnabled, models.Model):
 
         if self.adresses.count() != 2:
             adresse = self.adresses.all()[0]
-            cod_bdi = ""
-            cod_com = ""
-            if adresse.com_bdi:
-                cod_bdi = adresse.com_bdi.cod_bdi
-                cod_com = adresse.com_bdi.cod_com
-            ad = AdresseOpi.objects.using(db).get_or_create(
-                cod_ind_opi=self.code_opi,
-                cod_typ_adr_opi=adresse.type,
-            )[0]
-            ad.cod_pay = adresse.code_pays_id
-            ad.cod_bdi = cod_bdi
-            ad.cod_com = cod_com
-            ad.lib_ad1 = adresse.label_adr_1
-            ad.lib_ad2 = adresse.label_adr_2
-            ad.lib_ad3 = adresse.label_adr_3
-            ad.lib_ade = adresse.label_adr_etr
-            ad.save(using=db)
-            ad = AdresseOpi.objects.using(db).get_or_create(
-                cod_ind_opi=self.code_opi,
-                cod_typ_adr_opi=2,
-            )[0]
-            ad.cod_pay = adresse.code_pays_id
-            ad.cod_bdi = cod_bdi
-            ad.cod_com = cod_com
-            ad.lib_ad1 = adresse.label_adr_1
-            ad.lib_ad2 = adresse.label_adr_2
-            ad.lib_ad3 = adresse.label_adr_3
-            ad.lib_ade = adresse.label_adr_etr
-            ad.save(using=db)
+            self._save(adresse, adresse.type, db)
+            self._save(adresse, 2, db)
         else:
             for adresse in self.adresses.all():
-                cod_bdi = ""
-                cod_com = ""
-                if adresse.com_bdi:
-                    cod_bdi = adresse.com_bdi.cod_bdi
-                    cod_com = adresse.com_bdi.cod_com
+                type = 2 if adresse.type == 1 else 1
+                self._save(adresse, type, db)
 
-                ad = AdresseOpi.objects.using(db).get_or_create(
-                    cod_ind_opi=self.code_opi,
-                    cod_typ_adr_opi=2 if adresse.type == 1 else 1,  # bug
-                )[0]
-                ad.cod_pay = adresse.code_pays_id
-                ad.cod_bdi = cod_bdi
-                ad.cod_com = cod_com
-                ad.lib_ad1 = adresse.label_adr_1
-                ad.lib_ad2 = adresse.label_adr_2
-                ad.lib_ad3 = adresse.label_adr_3
-                ad.lib_ade = adresse.label_adr_etr
-                ad.save(using=db)
+    def _save(self, adresse, type, db):
+        cod_bdi = ""
+        cod_com = ""
+        if adresse.com_bdi:
+            cod_bdi = adresse.com_bdi.cod_bdi
+            cod_com = adresse.com_bdi.cod_com
+        try:
+            ad = AdresseOpi.objects.using(db).get(
+                cod_ind_opi=self.code_opi,
+                cod_typ_adr_opi=type,
+            )[0]
+        except AdresseOpi.DoesNotExist:
+            ad = AdresseOpi(cod_ind_opi=self.code_opi,
+                cod_typ_adr_opi=type)
+        ad.cod_pay = adresse.code_pays_id
+        ad.cod_bdi = cod_bdi
+        ad.cod_com = cod_com
+        ad.lib_ad1 = adresse.label_adr_1
+        ad.lib_ad2 = adresse.label_adr_2
+        ad.lib_ad3 = adresse.label_adr_3
+        ad.lib_ade = adresse.label_adr_etr
+        ad.save(using=db)
 
 
 class AdresseIndividu(models.Model):
