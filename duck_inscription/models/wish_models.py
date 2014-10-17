@@ -403,6 +403,7 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
         return self.is_reins
 
     def envoi_email_reception(self):
+        print self.state.name
         if self.state.name == "equivalence":
             etape = u"d'équivalence"
 
@@ -410,12 +411,14 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
             etape = u"de candidature"
         elif self.state.name == u"inscription":
             etape = u"d'inscripiton"
+        elif self.state.name == u"auditeur":
+            etape = u"d'auditeur"
         else:
             raise Exception(u"Etape inconnu")
         site = settings.INSCRIPTION_URL
         template = Mail.objects.get(name='email_reception')
         if settings.DEBUG:
-            email_destination = ("paul.guichon@iedparis8.net",)
+            email_destination = ("paul.guichon@iedparis8.net", "stefan.ciobotaru@iedparis8.net")
         else:
             email_destination = (self.individu.personal_email,)
 
