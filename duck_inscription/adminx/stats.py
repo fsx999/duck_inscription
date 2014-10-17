@@ -122,7 +122,6 @@ xadmin.site.register_view(r'^extraction/(?P<type_stat>\w+)/(?P<etat>\w+)/(?P<ste
 class ExtractionStatApogee(BaseAdminView):
     def get(self, request, *args, **kwargs):
         cod_etp, annee = kwargs['step'], kwargs['annee']
-        print annee, cod_etp
         queryset = InsAdmEtp.inscrits.filter(cod_anu=annee, cod_etp=cod_etp)
         wb = Workbook()
         ws = wb.active

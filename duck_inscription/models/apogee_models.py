@@ -110,6 +110,9 @@ class SettingsEtape(Etape):
         return dict(WishTransitionLog.objects.filter(
             wish__etape=self).values_list('to_state').annotate(Count('to_state')))
 
+    def stat_etat_dossier(self):
+        return dict(self.wish_set.all().values_list('suivi_dossier').annotate(Count('suivi_dossier')))
+
     def stat_apogee(self):
         from django_apogee.models import InsAdmEtp
         return {'nb_inscrit': InsAdmEtp.inscrits.filter(cod_anu=self.annee.cod_anu, cod_etp=self.cod_etp).count()}

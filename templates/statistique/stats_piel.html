@@ -20,14 +20,14 @@
         </thead>
         <tbody>
         {% for etape in etapes %}
-        {% with stat=etape.stat_parcours_dossier stat_suivi=etape.stat_suivi_dossier %}
+        {% with stat=etape.stat_parcours_dossier stat_suivi=etape.stat_suivi_dossier  etats=etape.stat_etat_dossier%}
         <tr>
             <td>{{ etape.label }}</td>
             <td><a href=" {% url 'xadmin:extraction_stat' 'parcours_dossier' 'inscription' etape.cod_etp %}"> {{ stat.inscription }}</a></td>
             <td><a href=" {% url 'xadmin:extraction_stat' 'etat' 'inscription_reception' etape.cod_etp %}"> {{ stat_suivi.inscription_reception }}</a></td>
-            <td><a href=" {% url 'xadmin:extraction_stat' 'etat' 'inscription_incomplet' etape.cod_etp %}">{{ stat_suivi.inscription_incomplet }}</a> {{ stat_suivi.inscription_incomplet_renvoi }}</td>
+            <td><a href=" {% url 'xadmin:extraction_stat' 'etat' 'inscription_incomplet' etape.cod_etp %}">{{ stat_suivi.inscription_incomplet }}</a> {{ stat_suivi.inscription_incom_r }}</td>
             <td><a href=" {% url 'xadmin:extraction_stat' 'etat' 'inscription_complet' etape.cod_etp %}">{{ stat_suivi.inscription_complet }}</a></td>
-            <td><a href=" {% url 'xadmin:extraction_stat' 'etat' 'inscription_traite' etape.cod_etp %}">{{ stat_suivi.inscription_traite }}</a></td>
+            <td><a href=" {% url 'xadmin:extraction_stat' 'etat' 'inscription_traite' etape.cod_etp %}">{{ etats.inscription_traite }}</a></td>
             <td><a href=" {% url 'xadmin:extraction_stat' 'parcours_dossier' 'liste_attente_inscription' etape.cod_etp %}">{{ stat.liste_attente_inscription }}</a></td>
             <td>{{ stat.liste_attente_and_equi }}</td>
         </tr>
