@@ -60,6 +60,7 @@ INSTALLED_APPS = (
     'openpyxl',
     'foad',
     "django_mptt_admin",
+    "duck_svi"
 )
 
 
