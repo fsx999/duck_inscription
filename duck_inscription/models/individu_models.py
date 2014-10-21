@@ -261,6 +261,7 @@ class Individu(xwf_models.WorkflowEnabled, models.Model):
             individu.cod_etu_opi = self.student_code
             individu.lib_vil_nai_etu_opi = self.town_birth
             individu.cod_opi_int_epo = self.code_opi
+
             individu.cod_fam = self.family_status_id
             individu.cod_pcs = self.dossier_inscription.cat_soc_etu_id
             individu.cod_dep_pay_nai = lieu_naiss[0]
@@ -299,8 +300,8 @@ class Individu(xwf_models.WorkflowEnabled, models.Model):
             opi_bac.save(using=db)
 
         elif self.student_code:
-
-            cod_ind = IndividuApogee.objects.get(cod_etu=self.student_code).cod_ind
+            individu_apogee = IndividuApogee.objects.using(db).get(cod_etu=self.student_code)
+            cod_ind = individu_apogee.cod_ind
             individu = IndOpi.objects.using(db).get_or_create(
                 cod_ind_opi=self.code_opi,
                 date_nai_ind_opi=self.birthday,
@@ -309,8 +310,14 @@ class Individu(xwf_models.WorkflowEnabled, models.Model):
                 cod_opi_int_epo=self.code_opi,)[0]
 
             individu.cod_ind_opi = self.code_opi
+            individu.cod_sim = individu_apogee.cod_sim
+            individu.cod_pay_nat = individu_apogee.cod_pay_nat
+            individu.cod_etb = individu_apogee.cod_etb
             individu.cod_ind = cod_ind
             individu.date_nai_ind_opi = self.birthday
+            individu.daa_ens_sup_opi = individu_apogee.daa_ens_sup
+            individu.daa_etb_opi = individu_apogee.daa_etb
+
             individu.lib_nom_pat_ind_opi = self.last_name
             individu.lib_nom_usu_ind_opi = self.common_name
             individu.lib_pr1_ind_opi = self.first_name1
