@@ -205,13 +205,17 @@ class OpiView(View):
         if opi:
 
             wish = Wish.objects.get(code_dossier=opi)
-            if wish.suivi_dossier.is_inscription_traite:
-                messages.error(request, u'Le dossier a déjà été traité')
-
-            else:
-                wish.save_opi()
+            # if wish.suivi_dossier.is_inscription_traite:
+            #     messages.error(request, u'Le dossier a déjà été traité')
+            #
+            # else:
+            wish.save_opi()
+            try:
                 wish.inscription_traite()
                 messages.success(request, 'Etudiant {} remontee'.format(wish.individu.code_opi))
+            except InvalidTransitionError:
+                messages.error(request, 'Dossier déjà traité')
+
                 # self.message_user('Etudiant {} remontee'.format(wish.individu.code_opi), 'success')
         return redirect('/duck_inscription/wish/')
 
@@ -240,7 +244,6 @@ class ChangementCentreGestionView(FormView):
 
     def form_valid(self, form):
         clean_data = form.cleaned_data
-        print clean_data
         self.wish.centre_gestion = clean_data['centre_gestion']
         if self.wish.centre_gestion.centre_gestion == 'ied':
             try:

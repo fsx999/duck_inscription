@@ -246,8 +246,7 @@ class OpiView(object):
 
     def opi_url(self, obj):
         url = reverse('remontee_opi')
-        if obj.state.is_inscription and len(
-                WishTransitionLog.objects.filter(wish=obj, to_state='inscription_reception')):
+        if obj.state.is_inscription:
             return '<a class="btn btn-primary" href="{}?opi={}">Remontée Opi</a>'.format(url, obj.code_dossier)
         else:
             return ''

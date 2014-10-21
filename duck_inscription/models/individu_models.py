@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 from datetime import date, datetime
 from django.contrib.auth.models import User
 from django.utils.encoding import python_2_unicode_compatible
-from django.db import models
+from django.db import models, IntegrityError
 import unicodedata
 import django_xworkflows
 from django_xworkflows.xworkflow_log.models import TransitionLog
@@ -336,20 +336,24 @@ class Individu(xwf_models.WorkflowEnabled, models.Model):
                 self._save(adresse, type, db)
 
     def _save(self, adresse, type, db):
-        cod_bdi = ""
-        cod_com = ""
+        cod_bdi = None
+        cod_com = None
         if adresse.com_bdi:
             cod_bdi = adresse.com_bdi.cod_bdi
             cod_com = adresse.com_bdi.cod_com
-        try:
-            ad = AdresseOpi.objects.using(db).get(
-                cod_ind_opi=self.code_opi,
-                cod_typ_adr_opi=type,
-            )[0]
-        except AdresseOpi.DoesNotExist:
+        res = AdresseOpi.objects.using(db).filter(cod_ind_opi=self.code_opi)
+        if len(res):
+            a = res.filter(cod_typ_adr_opi=type)
+            if len(a):
+                ad = a.first()
+            else:
+                ad = AdresseOpi(cod_ind_opi=self.code_opi,
+                            cod_typ_adr_opi=type,
+                            )
+        else:
             ad = AdresseOpi(cod_ind_opi=self.code_opi,
-                cod_typ_adr_opi=type)
-        ad.cod_pay = adresse.code_pays_id
+                            cod_typ_adr_opi=type)
+        ad.cod_pay = adresse.code_pays.cod_pay
         ad.cod_bdi = cod_bdi
         ad.cod_com = cod_com
         ad.lib_ad1 = adresse.label_adr_1
