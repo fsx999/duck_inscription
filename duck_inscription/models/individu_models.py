@@ -246,7 +246,7 @@ class Individu(xwf_models.WorkflowEnabled, models.Model):
                 cod_opi_int_epo=self.code_opi,)[0]
 
             individu.cod_ind_opi = self.code_opi
-            individu.cod_sim = self.situation_militaire_id
+            individu.cod_sim = self.situation_militaire_id or 8
             individu.cod_pay_nat = self.code_pays_nationality_id
             individu.cod_etb = premier_universite_fr_id
             individu.cod_nne_ind_opi = ine
@@ -332,12 +332,12 @@ class Individu(xwf_models.WorkflowEnabled, models.Model):
             individu.num_tel_por_opi = self.get_tel()
             individu.cod_pcs_ap = self.dossier_inscription.cat_soc_autre_parent_id
             individu.save(using=db)
-
         if self.adresses.count() != 2:
             adresse = self.adresses.all()[0]
-            self._save(adresse, adresse.type, db)
+            self._save(adresse, 1, db)
             self._save(adresse, 2, db)
         else:
+
             for adresse in self.adresses.all():
                 type = 2 if adresse.type == 1 else 1
                 self._save(adresse, type, db)
@@ -348,26 +348,28 @@ class Individu(xwf_models.WorkflowEnabled, models.Model):
         if adresse.com_bdi:
             cod_bdi = adresse.com_bdi.cod_bdi
             cod_com = adresse.com_bdi.cod_com
-        res = AdresseOpi.objects.using(db).filter(cod_ind_opi=self.code_opi)
+        res = AdresseOpi.objects.using(db).filter(cod_ind_opi=self.code_opi, cod_typ_adr_opi=type)
         if len(res):
-            a = res.filter(cod_typ_adr_opi=type)
-            if len(a):
-                ad = a.first()
-            else:
-                ad = AdresseOpi(cod_ind_opi=self.code_opi,
-                            cod_typ_adr_opi=type,
-                            )
+            ad = res.first()
         else:
-            ad = AdresseOpi(cod_ind_opi=self.code_opi,
-                            cod_typ_adr_opi=type)
-        ad.cod_pay = adresse.code_pays.cod_pay
-        ad.cod_bdi = cod_bdi
-        ad.cod_com = cod_com
-        ad.lib_ad1 = adresse.label_adr_1
-        ad.lib_ad2 = adresse.label_adr_2
-        ad.lib_ad3 = adresse.label_adr_3
-        ad.lib_ade = adresse.label_adr_etr
-        ad.save(using=db)
+            ad = AdresseOpi.objects.using(db).create(
+                cod_ind_opi=self.code_opi,
+                 cod_typ_adr_opi=str(type),
+                 cod_pay = adresse.code_pays.cod_pay,
+                 cod_bdi = cod_bdi,
+                 cod_com = cod_com,
+                 lib_ad1 = adresse.label_adr_1,
+                 lib_ad2 = adresse.label_adr_2,
+                 lib_ad3 = adresse.label_adr_3,
+                 lib_ade = adresse.label_adr_etr)
+        # ad.cod_pay = adresse.code_pays.cod_pay
+        # ad.cod_bdi = cod_bdi
+        # ad.cod_com = cod_com
+        # ad.lib_ad1 = adresse.label_adr_1
+        # ad.lib_ad2 = adresse.label_adr_2
+        # ad.lib_ad3 = adresse.label_adr_3
+        # ad.lib_ade = adresse.label_adr_etr
+        # ad.save(using=db)
 
 
 class AdresseIndividu(models.Model):
