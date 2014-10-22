@@ -9,9 +9,10 @@ import django_xworkflows
 from django_xworkflows.xworkflow_log.models import TransitionLog
 from django_apogee.models import Departement, Pays, SitFam, SitMil, TypHandicap, TypHebergement, BacOuxEqu, AnneeUni, \
     ComBdi, Etablissement, MentionBac, CatSocPfl, TypeDiplomeExt, SituationSise, QuotiteTra, DomaineActPfl, SitSociale, \
-    RegimeParent, MtfNonAflSso, IndOpi, OpiBac, Individu as IndividuApogee, AdresseOpi
+    RegimeParent, MtfNonAflSso, IndOpi, OpiBac, Individu as IndividuApogee, AdresseOpi, IndBac, InsAdmAnu
 from django_xworkflows import models as xwf_models
 from django.conf import settings
+from duck_inscription.models import SettingAnneeUni
 
 
 class IndividuWorkflow(xwf_models.Workflow):
@@ -301,7 +302,8 @@ class Individu(xwf_models.WorkflowEnabled, models.Model):
 
         elif self.student_code:
             individu_apogee = IndividuApogee.objects.using(db).get(cod_etu=self.student_code)
-            cod_ind = individu_apogee.cod_ind
+            annee = SettingAnneeUni.objects.get(inscription=True)
+            ins_adm_anu = InsAdmAnu.objects.using(db).get(cod_ind=individu_apogee, cod_anu=annee.cod_anu)
             individu = IndOpi.objects.using(db).get_or_create(
                 cod_ind_opi=self.code_opi,
                 date_nai_ind_opi=self.birthday,
@@ -313,7 +315,7 @@ class Individu(xwf_models.WorkflowEnabled, models.Model):
             individu.cod_sim = individu_apogee.cod_sim
             individu.cod_pay_nat = individu_apogee.cod_pay_nat
             individu.cod_etb = individu_apogee.cod_etb
-            individu.cod_ind = cod_ind
+            individu.cod_ind = individu_apogee.cod_ind
             individu.date_nai_ind_opi = self.birthday
             individu.daa_ens_sup_opi = individu_apogee.daa_ens_sup
             individu.daa_etb_opi = individu_apogee.daa_etb
@@ -331,7 +333,20 @@ class Individu(xwf_models.WorkflowEnabled, models.Model):
             individu.adr_mail_opi = self.personal_email
             individu.num_tel_por_opi = self.get_tel()
             individu.cod_pcs_ap = self.dossier_inscription.cat_soc_autre_parent_id
+
             individu.save(using=db)
+            # copie du bac d'apogee
+            bac_apogee = IndBac.objects.using(db).filter(cod_ind=individu.cod_ind).first()
+
+            opi_bac = OpiBac.objects.using(db).get_or_create(cod_ind_opi=self.code_opi,
+                                                             cod_bac=bac_apogee.cod_bac)[0]
+
+            opi_bac.cod_etb = bac_apogee.cod_etb
+            opi_bac.cod_dep = bac_apogee.cod_dep
+            opi_bac.cod_mnb = bac_apogee.cod_mnb
+            opi_bac.daa_obt_bac_oba = bac_apogee.daa_obt_bac_oba
+            opi_bac.save(using=db)
+
         if self.adresses.count() != 2:
             adresse = self.adresses.all()[0]
             self._save(adresse, 1, db)
