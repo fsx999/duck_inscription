@@ -138,3 +138,4 @@ HAYSTACK_CONNECTIONS = {
     },
 }
 HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.RealtimeSignalProcessor'
+DATABASE_ROUTERS = ['duck_svi.routers.SviRouter',]
