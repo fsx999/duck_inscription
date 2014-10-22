@@ -303,6 +303,7 @@ class Individu(xwf_models.WorkflowEnabled, models.Model):
         elif self.student_code:
             individu_apogee = IndividuApogee.objects.using(db).get(cod_etu=self.student_code)
             # ins_adm_anu = InsAdmAnu.objects.using(db).filter(cod_ind=individu_apogee).order_by('cod_anu').last()
+
             individu = IndOpi.objects.using(db).get_or_create(
                 cod_ind_opi=self.code_opi,
                 date_nai_ind_opi=self.birthday,
