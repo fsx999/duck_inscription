@@ -256,17 +256,17 @@ class CandidatureView(views.FormAdminView):
                     wish.ouverture_inscription()
 
                     self._envoi_email(wish, Mail.objects.get(name=mail))
-                    self.message_user('Dossier traité', 'success')
+                    self.message_user('Dossier accepté', 'success')
                 elif choix == 'refuse':
                     try:
                         wish.candidature_refuse()
                         self._envoi_email(wish, Mail.objects.get(name='email_candidature_refuse'))
-                        self.message_user('Dossier traité', 'success')
+                        self.message_user('Dossier refusé', 'success')
                     except InvalidTransitionError as e:
                         raise e
                 elif choix == 'attente':
                     self._envoi_email(wish, Mail.objects.get(name='email_candidature_attente'))
-                    self.message_user('Dossier traité', 'success')
+                    self.message_user('Dossier mis en attente', 'success')
                 elif choix == 'ouvert':
                     wish.candidature()
                     self._envoi_email(wish, Mail.objects.get(name='email_candidature_ouverte'))
