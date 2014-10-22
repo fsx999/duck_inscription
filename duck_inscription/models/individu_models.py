@@ -354,22 +354,15 @@ class Individu(xwf_models.WorkflowEnabled, models.Model):
         else:
             ad = AdresseOpi.objects.using(db).create(
                 cod_ind_opi=self.code_opi,
-                 cod_typ_adr_opi=str(type),
-                 cod_pay = adresse.code_pays.cod_pay,
-                 cod_bdi = cod_bdi,
-                 cod_com = cod_com,
-                 lib_ad1 = adresse.label_adr_1,
-                 lib_ad2 = adresse.label_adr_2,
-                 lib_ad3 = adresse.label_adr_3,
-                 lib_ade = adresse.label_adr_etr)
-        # ad.cod_pay = adresse.code_pays.cod_pay
-        # ad.cod_bdi = cod_bdi
-        # ad.cod_com = cod_com
-        # ad.lib_ad1 = adresse.label_adr_1
-        # ad.lib_ad2 = adresse.label_adr_2
-        # ad.lib_ad3 = adresse.label_adr_3
-        # ad.lib_ade = adresse.label_adr_etr
-        # ad.save(using=db)
+                cod_typ_adr_opi=str(type),
+                cod_pay=adresse.code_pays.cod_pay,
+                cod_bdi=cod_bdi,
+                cod_com=cod_com,
+                lib_ad1=adresse.label_adr_1,
+                lib_ad2=adresse.label_adr_2,
+                lib_ad3=adresse.label_adr_3,
+                lib_ade=adresse.label_adr_etr)
+
 
 
 class AdresseIndividu(models.Model):
