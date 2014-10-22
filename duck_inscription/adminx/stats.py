@@ -132,6 +132,7 @@ class ExtractionStatApogee(BaseAdminView):
         ws.cell(row=1, column=5).value = "Deuxiéme prénom"
         ws.cell(row=1, column=6).value = "Email Perso:"
         ws.cell(row=1, column=7).value = "Email Foad"
+        ws.cell(row=1, column=8).value = "Reinscription:"
         for row, etp in enumerate(queryset):
             ind = etp.cod_ind
             ws.cell(row=row + 2, column=1).value = ind.cod_etu
@@ -141,6 +142,7 @@ class ExtractionStatApogee(BaseAdminView):
             ws.cell(row=row + 2, column=5).value = ind.lib_pr2_ind
             ws.cell(row=row + 2, column=6).value = str(ind.get_email(annee))
             ws.cell(row=row + 2, column=7).value = str(ind.cod_etu) + '@foad.iedparis8.net'
+            ws.cell(row=row + 2, column=8).value = "toto"
 
 
 
