@@ -287,9 +287,11 @@ class Individu(xwf_models.WorkflowEnabled, models.Model):
             #COD_ETB_DER_DIP=self.dossier_inscription.etablissement_dernier_diplome_id,
             individu.daa_etb_der_dip = self.dossier_inscription.annee_dernier_diplome
             individu.cod_etb_ann_crt = self.dossier_inscription.autre_etablissement_id
+            individu.daa_etb_der_dip = self.dossier_inscription.annee_dernier_diplome
+            individu.daa_etb_der_dip = self.dossier_inscription.annee_dernier_diplome
             #COD_TDE_DER_DIP=self.dossier_inscription.type_dernier_diplome_id,
             individu.cod_pcs_ap = self.dossier_inscription.cat_soc_autre_parent_id
-
+            individu.cod_dep_pay_der_dip = self.dossier_inscription.etablissement_dernier_diplome.get_pays_dep(),
             individu.save(using=db)
             opi_bac = OpiBac.objects.using(db).get_or_create(cod_ind_opi=self.code_opi,
                                                                    cod_bac=self.dossier_inscription.bac.cod_bac)[0]
