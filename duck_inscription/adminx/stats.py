@@ -142,7 +142,7 @@ class ExtractionStatApogee(BaseAdminView):
             ws.cell(row=row + 2, column=5).value = ind.lib_pr2_ind
             ws.cell(row=row + 2, column=6).value = str(ind.get_email(annee))
             ws.cell(row=row + 2, column=7).value = str(ind.cod_etu) + '@foad.iedparis8.net'
-            ws.cell(row=row + 2, column=8).value = "toto"
+            ws.cell(row=row + 2, column=8).value = "Oui" if etp.is_reins else "Non"
 
 
 
