@@ -379,7 +379,6 @@ class Individu(xwf_models.WorkflowEnabled, models.Model):
                 lib_ade=adresse.label_adr_etr)
 
 
-
 class AdresseIndividu(models.Model):
     """c'est l'addresse de l'étudiant
     aussi bien l'adresse étrangère que française
