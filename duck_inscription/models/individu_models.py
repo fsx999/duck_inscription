@@ -282,7 +282,6 @@ class Individu(xwf_models.WorkflowEnabled, models.Model):
             individu.cod_sis_ann_pre_opi = self.dossier_inscription.sise_annee_precedente_id
             individu.cod_etb_ann_pre_opi = self.dossier_inscription.etablissement_annee_precedente_id
             individu.cod_tds_opi = self.dossier_inscription.sise_annee_precedente_id
-            #COD_DEP_PAY_DER_DIP=self.dossier_inscription.etablissement_dernier_diplome.get_pays_dep(),
             #COD_TYP_DEP_PAY_DER_DIP=self.dossier_inscription.etablissement_dernier_diplome.get_type(),
             #COD_ETB_DER_DIP=self.dossier_inscription.etablissement_dernier_diplome_id,
             individu.daa_etb_der_dip = self.dossier_inscription.annee_dernier_diplome
@@ -291,7 +290,7 @@ class Individu(xwf_models.WorkflowEnabled, models.Model):
             individu.daa_etb_der_dip = self.dossier_inscription.annee_dernier_diplome
             #COD_TDE_DER_DIP=self.dossier_inscription.type_dernier_diplome_id,
             individu.cod_pcs_ap = self.dossier_inscription.cat_soc_autre_parent_id
-            individu.cod_dep_pay_der_dip = self.dossier_inscription.etablissement_dernier_diplome.get_pays_dep(),
+            individu.cod_dep_pay_der_dip = self.dossier_inscription.etablissement_dernier_diplome.get_pays_dep()
             individu.save(using=db)
             opi_bac = OpiBac.objects.using(db).get_or_create(cod_ind_opi=self.code_opi,
                                                                    cod_bac=self.dossier_inscription.bac.cod_bac)[0]
