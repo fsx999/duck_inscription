@@ -1,6 +1,7 @@
 # coding=utf-8
 from __future__ import unicode_literals
 from datetime import date
+from django.db import DatabaseError
 from django.http import HttpResponse
 from django.views.decorators.cache import never_cache
 from openpyxl.workbook import Workbook
@@ -142,7 +143,12 @@ class ExtractionStatApogee(BaseAdminView):
             ws.cell(row=row + 2, column=5).value = ind.lib_pr2_ind
             ws.cell(row=row + 2, column=6).value = str(ind.get_email(annee))
             ws.cell(row=row + 2, column=7).value = str(ind.cod_etu) + '@foad.iedparis8.net'
-            ws.cell(row=row + 2, column=8).value = "toto"
+            try:
+                ws.cell(row=row + 2, column=8).value = "Oui" if etp.is_reins else "Non"
+            except DatabaseError:
+                ws.cell(row=row + 2, column=8).value = "Error"
+
+
 
 
 
