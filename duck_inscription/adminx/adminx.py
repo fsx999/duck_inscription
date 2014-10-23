@@ -254,7 +254,7 @@ class OpiView(object):
     def info_manquante(self, obj):
         dossier_inscription = obj.individu.dossier_inscription
         reponse = ""
-        reponse += "annee dernier diplome" +unicode(dossier_inscription.annee_dernier_diplome) + "<br>"
+        reponse += "annee dernier diplome" + unicode(dossier_inscription.annee_dernier_diplome) + "<br>"
         return reponse
     info_manquante.allow_tags = True
     info_manquante.short_description = 'info manquante'
