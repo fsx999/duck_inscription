@@ -242,7 +242,7 @@ class OpiView(object):
     search_fields = ['code_dossier', 'individu__last_name', 'individu__first_name1']
     # list_display_links_details = True
     hidden_menu = True
-    list_display = ('__str__', 'opi_url')
+    list_display = ('__str__', 'info_manquante', 'opi_url')
 
     def opi_url(self, obj):
         url = reverse('remontee_opi')
@@ -250,6 +250,14 @@ class OpiView(object):
             return '<a class="btn btn-primary" href="{}?opi={}">Remontée Opi</a>'.format(url, obj.code_dossier)
         else:
             return ''
+
+    def info_manquante(self, obj):
+        dossier_inscription = obj.individu.dossier_inscription
+        reponse = ""
+        reponse += "annee dernier diplome" + unicode(dossier_inscription.annee_dernier_diplome) + "<br>"
+        return reponse
+    info_manquante.allow_tags = True
+    info_manquante.short_description = 'info manquante'
 
     opi_url.short_description = 'remontee opi'
     opi_url.allow_tags = True

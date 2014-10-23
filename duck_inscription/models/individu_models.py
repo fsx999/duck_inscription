@@ -282,14 +282,15 @@ class Individu(xwf_models.WorkflowEnabled, models.Model):
             individu.cod_sis_ann_pre_opi = self.dossier_inscription.sise_annee_precedente_id
             individu.cod_etb_ann_pre_opi = self.dossier_inscription.etablissement_annee_precedente_id
             individu.cod_tds_opi = self.dossier_inscription.sise_annee_precedente_id
-            #COD_DEP_PAY_DER_DIP=self.dossier_inscription.etablissement_dernier_diplome.get_pays_dep(),
             #COD_TYP_DEP_PAY_DER_DIP=self.dossier_inscription.etablissement_dernier_diplome.get_type(),
             #COD_ETB_DER_DIP=self.dossier_inscription.etablissement_dernier_diplome_id,
             individu.daa_etb_der_dip = self.dossier_inscription.annee_dernier_diplome
             individu.cod_etb_ann_crt = self.dossier_inscription.autre_etablissement_id
+            individu.daa_etb_der_dip = self.dossier_inscription.annee_dernier_diplome
+            individu.daa_etb_der_dip = self.dossier_inscription.annee_dernier_diplome
             #COD_TDE_DER_DIP=self.dossier_inscription.type_dernier_diplome_id,
             individu.cod_pcs_ap = self.dossier_inscription.cat_soc_autre_parent_id
-
+            individu.cod_dep_pay_der_dip = self.dossier_inscription.etablissement_dernier_diplome.get_pays_dep()
             individu.save(using=db)
             opi_bac = OpiBac.objects.using(db).get_or_create(cod_ind_opi=self.code_opi,
                                                                    cod_bac=self.dossier_inscription.bac.cod_bac)[0]
@@ -302,7 +303,8 @@ class Individu(xwf_models.WorkflowEnabled, models.Model):
 
         elif self.student_code:
             individu_apogee = IndividuApogee.objects.using(db).get(cod_etu=self.student_code)
-            ins_adm_anu = InsAdmAnu.objects.using(db).filter(cod_ind=individu_apogee).order_by('cod_anu').last()
+            # ins_adm_anu = InsAdmAnu.objects.using(db).filter(cod_ind=individu_apogee).order_by('cod_anu').last()
+
             individu = IndOpi.objects.using(db).get_or_create(
                 cod_ind_opi=self.code_opi,
                 date_nai_ind_opi=self.birthday,
@@ -335,16 +337,16 @@ class Individu(xwf_models.WorkflowEnabled, models.Model):
 
             individu.save(using=db)
             # copie du bac d'apogee
-            bac_apogee = IndBac.objects.using(db).filter(cod_ind=individu.cod_ind).first()
-
-            opi_bac = OpiBac.objects.using(db).get_or_create(cod_ind_opi=self.code_opi,
-                                                             cod_bac=bac_apogee.cod_bac)[0]
-
-            opi_bac.cod_etb = bac_apogee.cod_etb
-            opi_bac.cod_dep = bac_apogee.cod_dep
-            opi_bac.cod_mnb = bac_apogee.cod_mnb
-            opi_bac.daa_obt_bac_oba = bac_apogee.daa_obt_bac_oba
-            opi_bac.save(using=db)
+            # bac_apogee = IndBac.objects.using(db).filter(cod_ind=individu.cod_ind).first()
+            #
+            # opi_bac = OpiBac.objects.using(db).get_or_create(cod_ind_opi=self.code_opi,
+            #                                                  cod_bac=bac_apogee.cod_bac)[0]
+            #
+            # opi_bac.cod_etb = bac_apogee.cod_etb
+            # opi_bac.cod_dep = bac_apogee.cod_dep
+            # opi_bac.cod_mnb = bac_apogee.cod_mnb
+            # opi_bac.daa_obt_bac_oba = bac_apogee.daa_obt_bac_oba
+            # opi_bac.save(using=db)
 
         if self.adresses.count() != 2:
             adresse = self.adresses.all()[0]
@@ -376,7 +378,6 @@ class Individu(xwf_models.WorkflowEnabled, models.Model):
                 lib_ad2=adresse.label_adr_2,
                 lib_ad3=adresse.label_adr_3,
                 lib_ade=adresse.label_adr_etr)
-
 
 
 class AdresseIndividu(models.Model):
