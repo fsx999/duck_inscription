@@ -13,6 +13,7 @@ from duck_inscription.models import SettingsEtape
 from duck_inscription.models import Wish
 
 
+
 class DossierReception(views.FormAdminView):
     form = DossierReceptionForm
     title = 'Dossier Reception'
