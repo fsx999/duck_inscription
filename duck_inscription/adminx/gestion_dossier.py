@@ -377,8 +377,6 @@ class DossierInscriptionView(views.FormAdminView):
                         wish.inscription_annule()
                         self._envoi_email(wish, Mail.objects.get(name='dossier_annule_inscription'))
                         self.message_user('Hocus pocus! ...bam=> Dossier annulé!', 'success')
-                        msg_urs = "Mail envoyé a {}".format(wish.individu.personal_email)
-                        self.message_user(msg_urs, 'succes')
                     except InvalidTransitionError as e:
                         raise e
 

@@ -111,7 +111,7 @@ class SuiviDossierWorkflow(xwf_models.Workflow):
         'inscription_refuse',),
         ('inscription_annule', ('inscription_annule', 'inscription_refuse', 'inscription_reception',
                                 'inscription_complet',
-                                'inscription_incomplet', 'inactif'),
+                                'inscription_incomplet', 'inactif', 'inscription_incom_r'),
          'inscription_annule')
     )
 

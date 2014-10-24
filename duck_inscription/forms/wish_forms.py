@@ -70,7 +70,6 @@ class DemiAnneeForm(forms.ModelForm):
                                                                  ('0', "Je m'inscris à une année entière")),),
                                     required=False)
 
-
     class Meta:
         model = PaiementAllModel
         fields = ('demi_annee',)
@@ -109,4 +108,3 @@ class NewAuditeurForm(forms.Form):
         if self.cleaned_data.get('auditeur', None) is None:
             raise forms.ValidationError(u'Vous devez choisir')
         return self.cleaned_data.get('auditeur', None)
-
