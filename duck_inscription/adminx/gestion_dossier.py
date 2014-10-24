@@ -1,29 +1,17 @@
 # coding=utf-8
 from __future__ import unicode_literals
-import datetime
-from django.views.decorators.cache import never_cache
-from django.views.generic import TemplateView, View
-from openpyxl.writer.excel import save_virtual_workbook
-from duck_inscription.xadmin_plugins.topnav import IEDPlugin
-import test_duck_inscription.settings as preins_settings
-from crispy_forms.bootstrap import TabHolder, Tab
 from django.contrib.sites.models import Site
 from django.core.exceptions import PermissionDenied
-from django.core.urlresolvers import reverse
-from django.http import HttpResponseRedirect, HttpResponse
-from mailrobot.models import Mail, MailBody, Address, Signature
+from django.http import HttpResponseRedirect
+from mailrobot.models import Mail
 from django.conf import settings
-from xadmin.plugins.auth import UserAdmin
 from xworkflows import InvalidTransitionError, ForbiddenTransition
 from duck_inscription.forms.adminx_forms import DossierReceptionForm, EquivalenceForm, InscriptionForm, CandidatureForm
-from xadmin.layout import Main, Fieldset, Container, Side, Row
 from xadmin import views
 import xadmin
-from duck_inscription.models import Individu, SettingsEtape, WishWorkflow, SettingAnneeUni, WishParcourTransitionLog
-from duck_inscription.models import Wish, SuiviDossierWorkflow, IndividuWorkflow, SettingsUser, CursusEtape
-from xadmin.util import User
-from xadmin.views import filter_hook, CommAdminView, BaseAdminView
-from openpyxl import Workbook
+from duck_inscription.models import SettingsEtape
+from duck_inscription.models import Wish
+
 
 class DossierReception(views.FormAdminView):
     form = DossierReceptionForm
@@ -177,7 +165,7 @@ class EquivalenceView(views.FormAdminView):
         return self.get_admin_url('dossier_equivalence')
 
     def _envoi_email(self, wish, template):
-        context = {'site': Site.objects.get(id=preins_settings.SITE_ID), 'wish': wish, 'motif': self.motif}
+        context = {'site': Site.objects.get(id=settings.SITE_ID_IED), 'wish': wish, 'motif': self.motif}
         email = wish.individu.user.email if not settings.DEBUG else 'paul.guichon@iedparis8.net'
         mail = template.make_message(context=context, recipients=[email])
         mail.send()
@@ -290,7 +278,7 @@ class CandidatureView(views.FormAdminView):
         return self.get_admin_url('dossier_candidature')
 
     def _envoi_email(self, wish, template):
-        context = {'site': Site.objects.get(id=preins_settings.SITE_ID), 'wish': wish, 'motif': self.motif}
+        context = {'site': Site.objects.get(id=settings.SITE_ID_IED), 'wish': wish, 'motif': self.motif}
         email = wish.individu.user.email if not settings.DEBUG else 'paul.guichon@iedparis8.net'
         mail = template.make_message(context=context, recipients=[email])
         mail.send()
@@ -400,7 +388,7 @@ class DossierInscriptionView(views.FormAdminView):
         return self.get_response()
 
     def _envoi_email(self, wish, template):
-        context = {'site': Site.objects.get(id=preins_settings.SITE_ID), 'wish': wish, 'motif': self.motif}
+        context = {'site': Site.objects.get(id=settings.SITE_ID_IED), 'wish': wish, 'motif': self.motif}
         email = wish.individu.user.email if not settings.DEBUG else 'paul.guichon@iedparis8.net'
         mail = template.make_message(context=context, recipients=[email])
         mail.send()

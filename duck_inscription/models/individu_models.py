@@ -346,7 +346,6 @@ class Individu(xwf_models.WorkflowEnabled, models.Model):
 
             opi_bac = OpiBac.objects.using(db).get_or_create(cod_ind_opi=self.code_opi,
                                                              cod_bac=bac_apogee.cod_bac)[0]
-
             opi_bac.cod_etb = bac_apogee.cod_etb
             opi_bac.cod_dep = bac_apogee.cod_dep
             opi_bac.cod_mnb = bac_apogee.cod_mnb
