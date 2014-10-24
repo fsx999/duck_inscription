@@ -77,6 +77,7 @@ class InscriptionForm(DossierReceptionForm):
         js = ('js/inscription.js',)
 
 
+
 class ChangementCentreGestionForm(forms.Form):
 
     def __init__(self, wish, *args, **kwargs):
