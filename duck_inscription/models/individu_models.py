@@ -275,12 +275,13 @@ class Individu(xwf_models.WorkflowEnabled, models.Model):
             individu.adr_mail_opi = self.personal_email
             individu.num_tel_por_opi = self.get_tel()
             individu.cod_tpe_ant_iaa = self.dossier_inscription.dernier_etablissement.cod_tpe_id
-            individu.cod_etb_ant_iaa = self.dossier_inscription.dernier_etablissement_id
+            # individu.cod_etb_ant_iaa = self.dossier_inscription.dernier_etablissement_id
             individu.cod_dep_pay_ant_iaa_opi = self.dossier_inscription.dernier_etablissement.get_pays_dep()
             individu.cod_typ_dep_pay_ant_iaa_opi = self.dossier_inscription.dernier_etablissement.get_type()
             individu.daa_etb_ant_iaa_opi = self.dossier_inscription.annee_dernier_etablissement
             individu.cod_sis_ann_pre_opi = self.dossier_inscription.sise_annee_precedente_id
-            individu.cod_etb_ann_pre_opi = self.dossier_inscription.etablissement_annee_precedente_id
+            individu.cod_dep_pay_ann_pre_opi = self.dossier_inscription.etablissement_annee_precedente.get_pays_dep()
+            # individu.cod_etb_ann_pre_opi = self.dossier_inscription.etablissement_annee_precedente_id
             individu.cod_tds_opi = self.dossier_inscription.sise_annee_precedente_id
             #COD_TYP_DEP_PAY_DER_DIP=self.dossier_inscription.etablissement_dernier_diplome.get_type(),
             #COD_ETB_DER_DIP=self.dossier_inscription.etablissement_dernier_diplome_id,
