@@ -283,13 +283,13 @@ class Individu(xwf_models.WorkflowEnabled, models.Model):
             individu.cod_dep_pay_ann_pre_opi = self.dossier_inscription.etablissement_annee_precedente.get_pays_dep()
             individu.cod_etb_ann_pre_opi = None
             individu.cod_tds_opi = self.dossier_inscription.sise_annee_precedente_id
-            #COD_TYP_DEP_PAY_DER_DIP=self.dossier_inscription.etablissement_dernier_diplome.get_type(),
-            #COD_ETB_DER_DIP=self.dossier_inscription.etablissement_dernier_diplome_id,
+            # COD_TYP_DEP_PAY_DER_DIP=self.dossier_inscription.etablissement_dernier_diplome.get_type(),
+            # COD_ETB_DER_DIP=self.dossier_inscription.etablissement_dernier_diplome_id,
             individu.daa_etb_der_dip = self.dossier_inscription.annee_dernier_diplome
             individu.cod_etb_ann_crt = self.dossier_inscription.autre_etablissement_id
             individu.daa_etb_der_dip = self.dossier_inscription.annee_dernier_diplome
             individu.daa_etb_der_dip = self.dossier_inscription.annee_dernier_diplome
-            #COD_TDE_DER_DIP=self.dossier_inscription.type_dernier_diplome_id,
+            # COD_TDE_DER_DIP=self.dossier_inscription.type_dernier_diplome_id,
             individu.cod_pcs_ap = self.dossier_inscription.cat_soc_autre_parent_id
             individu.cod_dep_pay_der_dip = self.dossier_inscription.etablissement_dernier_diplome.get_pays_dep()
             individu.cod_rgi = '1'
