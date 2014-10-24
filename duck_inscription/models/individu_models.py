@@ -268,7 +268,8 @@ class Individu(xwf_models.WorkflowEnabled, models.Model):
             individu.cod_dep_pay_nai = lieu_naiss[0]
             individu.cod_typ_dep_pay_nai = lieu_naiss[1]
             individu.daa_ens_sup_opi = self.dossier_inscription.annee_premiere_inscription_enseignement_sup_fr
-            individu.daa_etb_opi = self.dossier_inscription.annee_premiere_inscription_p8
+            individu.daa_etb_opi = self.dossier_inscription.annee_premiere_inscription_p8 if\
+                self.dossier_inscription.annee_premiere_inscription_p8 != '2013' else '2014'
             individu.cod_sex_etu_opi = self.sex
             individu.cod_thp_opi = self.type_handicap_id
             individu.cod_thb_opi = self.type_hebergement_annuel_id
