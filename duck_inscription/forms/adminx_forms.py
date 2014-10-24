@@ -68,6 +68,7 @@ class InscriptionForm(DossierReceptionForm):
             ('incomplet', u'Incomplet sans renvoi'),
             ('incomplet_renvoi', u'Incomplet avec renvoi'),
             ('refuse', u'Refusé'),
+            ('annule', u'Annulé'),
             ('ouvert', 'Autorisé à s\'inscrire')),
         widget=forms.RadioSelect(), required=True)
     motif = forms.CharField(widget=forms.Textarea, required=False)

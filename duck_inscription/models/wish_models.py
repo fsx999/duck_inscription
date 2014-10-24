@@ -79,6 +79,7 @@ class SuiviDossierWorkflow(xwf_models.Workflow):
         ('inscription_incomplet', 'Dossier inscription incomplet'),
         ('inscription_incom_r', 'Dossier inscription incomplet avec renvoi'),
         ('inscription_traite', 'Dossier inscription traite'), ('inscription_refuse', 'Dossier inscription refusé'),
+        ('inscription_annule', 'Dossier inscription annulé'),
     )
 
     initial_state = 'inactif'
@@ -108,6 +109,10 @@ class SuiviDossierWorkflow(xwf_models.Workflow):
         'inscription_traite',), (
         'inscription_refuse', ('inscription_reception', 'inscription_complet', 'inscription_incomplet', 'inactif'),
         'inscription_refuse',),
+        ('inscription_annule', ('inscription_annule', 'inscription_refuse', 'inscription_reception',
+                                'inscription_complet',
+                                'inscription_incomplet', 'inactif'),
+         'inscription_annule')
     )
 
 
