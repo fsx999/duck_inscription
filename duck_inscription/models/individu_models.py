@@ -268,32 +268,37 @@ class Individu(xwf_models.WorkflowEnabled, models.Model):
             individu.cod_dep_pay_nai = lieu_naiss[0]
             individu.cod_typ_dep_pay_nai = lieu_naiss[1]
             individu.daa_ens_sup_opi = self.dossier_inscription.annee_premiere_inscription_enseignement_sup_fr
-            individu.daa_etb_opi = self.dossier_inscription.annee_premiere_inscription_p8
+            individu.daa_etb_opi = self.dossier_inscription.annee_premiere_inscription_p8 if\
+                self.dossier_inscription.annee_premiere_inscription_p8 != '2013' else '2014'
             individu.cod_sex_etu_opi = self.sex
             individu.cod_thp_opi = self.type_handicap_id
             individu.cod_thb_opi = self.type_hebergement_annuel_id
             individu.adr_mail_opi = self.personal_email
             individu.num_tel_por_opi = self.get_tel()
             individu.cod_tpe_ant_iaa = self.dossier_inscription.dernier_etablissement.cod_tpe_id
-            individu.cod_etb_ant_iaa = self.dossier_inscription.dernier_etablissement_id
+            individu.cod_etb_ant_iaa = None
             individu.cod_dep_pay_ant_iaa_opi = self.dossier_inscription.dernier_etablissement.get_pays_dep()
             individu.cod_typ_dep_pay_ant_iaa_opi = self.dossier_inscription.dernier_etablissement.get_type()
             individu.daa_etb_ant_iaa_opi = self.dossier_inscription.annee_dernier_etablissement
             individu.cod_sis_ann_pre_opi = self.dossier_inscription.sise_annee_precedente_id
-            individu.cod_etb_ann_pre_opi = self.dossier_inscription.etablissement_annee_precedente_id
+            individu.cod_dep_pay_ann_pre_opi = self.dossier_inscription.etablissement_annee_precedente.get_pays_dep()
+            individu.cod_typ_dep_pay_ann_pre_opi = self.dossier_inscription.etablissement_annee_precedente.get_type()
+            individu.cod_etb_ann_pre_opi = None
             individu.cod_tds_opi = self.dossier_inscription.sise_annee_precedente_id
-            #COD_TYP_DEP_PAY_DER_DIP=self.dossier_inscription.etablissement_dernier_diplome.get_type(),
-            #COD_ETB_DER_DIP=self.dossier_inscription.etablissement_dernier_diplome_id,
+            # COD_TYP_DEP_PAY_DER_DIP=self.dossier_inscription.etablissement_dernier_diplome.get_type(),
+            # COD_ETB_DER_DIP=self.dossier_inscription.etablissement_dernier_diplome_id,
             individu.daa_etb_der_dip = self.dossier_inscription.annee_dernier_diplome
             individu.cod_etb_ann_crt = self.dossier_inscription.autre_etablissement_id
             individu.daa_etb_der_dip = self.dossier_inscription.annee_dernier_diplome
             individu.daa_etb_der_dip = self.dossier_inscription.annee_dernier_diplome
-            #COD_TDE_DER_DIP=self.dossier_inscription.type_dernier_diplome_id,
+            # COD_TDE_DER_DIP=self.dossier_inscription.type_dernier_diplome_id,
             individu.cod_pcs_ap = self.dossier_inscription.cat_soc_autre_parent_id
             individu.cod_dep_pay_der_dip = self.dossier_inscription.etablissement_dernier_diplome.get_pays_dep()
+            individu.cod_rgi = '1'
+            individu.cod_stu = '01'
             individu.save(using=db)
             opi_bac = OpiBac.objects.using(db).get_or_create(cod_ind_opi=self.code_opi,
-                                                                   cod_bac=self.dossier_inscription.bac.cod_bac)[0]
+                                                             cod_bac=self.dossier_inscription.bac.cod_bac)[0]
 
             opi_bac.cod_etb = self.dossier_inscription.etablissement_bac_id
             opi_bac.cod_dep = self.dossier_inscription.etablissement_bac.cod_dep.cod_dep
@@ -333,19 +338,19 @@ class Individu(xwf_models.WorkflowEnabled, models.Model):
             individu.adr_mail_opi = self.personal_email
             individu.num_tel_por_opi = self.get_tel()
             individu.cod_pcs_ap = self.dossier_inscription.cat_soc_autre_parent_id
-
+            individu.cod_rgi = '1'
+            individu.cod_stu = '01'
             individu.save(using=db)
             # copie du bac d'apogee
-            # bac_apogee = IndBac.objects.using(db).filter(cod_ind=individu.cod_ind).first()
-            #
-            # opi_bac = OpiBac.objects.using(db).get_or_create(cod_ind_opi=self.code_opi,
-            #                                                  cod_bac=bac_apogee.cod_bac)[0]
-            #
-            # opi_bac.cod_etb = bac_apogee.cod_etb
-            # opi_bac.cod_dep = bac_apogee.cod_dep
-            # opi_bac.cod_mnb = bac_apogee.cod_mnb
-            # opi_bac.daa_obt_bac_oba = bac_apogee.daa_obt_bac_oba
-            # opi_bac.save(using=db)
+            bac_apogee = IndBac.objects.using(db).filter(cod_ind=individu.cod_ind).first()
+
+            opi_bac = OpiBac.objects.using(db).get_or_create(cod_ind_opi=self.code_opi,
+                                                             cod_bac=bac_apogee.cod_bac)[0]
+            opi_bac.cod_etb = bac_apogee.cod_etb
+            opi_bac.cod_dep = bac_apogee.cod_dep
+            opi_bac.cod_mnb = bac_apogee.cod_mnb
+            opi_bac.daa_obt_bac_oba = bac_apogee.daa_obt_bac_iba
+            opi_bac.save(using=db)
 
         if self.adresses.count() != 2:
             adresse = self.adresses.all()[0]
