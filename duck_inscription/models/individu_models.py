@@ -350,7 +350,7 @@ class Individu(xwf_models.WorkflowEnabled, models.Model):
             opi_bac.cod_etb = bac_apogee.cod_etb
             opi_bac.cod_dep = bac_apogee.cod_dep
             opi_bac.cod_mnb = bac_apogee.cod_mnb
-            opi_bac.daa_obt_bac_oba = bac_apogee.daa_obt_bac_oba
+            opi_bac.daa_obt_bac_oba = bac_apogee.daa_obt_bac_iba
             opi_bac.save(using=db)
 
         if self.adresses.count() != 2:
