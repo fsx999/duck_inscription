@@ -291,6 +291,8 @@ class Individu(xwf_models.WorkflowEnabled, models.Model):
             #COD_TDE_DER_DIP=self.dossier_inscription.type_dernier_diplome_id,
             individu.cod_pcs_ap = self.dossier_inscription.cat_soc_autre_parent_id
             individu.cod_dep_pay_der_dip = self.dossier_inscription.etablissement_dernier_diplome.get_pays_dep()
+            individu.cod_rgi = '1'
+            individu.cod_stu = '01'
             individu.save(using=db)
             opi_bac = OpiBac.objects.using(db).get_or_create(cod_ind_opi=self.code_opi,
                                                                    cod_bac=self.dossier_inscription.bac.cod_bac)[0]
@@ -333,7 +335,8 @@ class Individu(xwf_models.WorkflowEnabled, models.Model):
             individu.adr_mail_opi = self.personal_email
             individu.num_tel_por_opi = self.get_tel()
             individu.cod_pcs_ap = self.dossier_inscription.cat_soc_autre_parent_id
-
+            individu.cod_rgi = '1'
+            individu.cod_stu = '01'
             individu.save(using=db)
             # copie du bac d'apogee
             bac_apogee = IndBac.objects.using(db).filter(cod_ind=individu.cod_ind).first()
