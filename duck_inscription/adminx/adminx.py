@@ -82,7 +82,7 @@ class WishInline(object):
             return self.exclude
         else:
             return self.exclude + ['valide', 'diplome_acces', 'date_validation', 'etape', 'demi_annee', 'is_ok',
-                                   'centre_gestion', 'date_liste_inscription', 'suivi_dossier', 'state']
+                                   'centre_gestion', 'date_liste_inscription', 'suivi_dossier', 'state', 'is_auditeur']
 
     @filter_hook
     def get_formset(self, **kwargs):
