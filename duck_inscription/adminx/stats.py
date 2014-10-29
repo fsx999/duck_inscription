@@ -84,35 +84,51 @@ class StatistiqueApogee(views.Dashboard):
 xadmin.site.register_view(r'^stats_apogee/$', StatistiqueApogee, 'stats_apogee')
 
 
-class ExtrationStatistique(BaseAdminView):
-    def get(self, request, *args, **kwargs):
-        type_stat = kwargs.get('type_stat', 'stat_parcours_dossier')
+class ExtractionStatistiqueBase(BaseAdminView):
+    model_extration = Wish
+    attrs_queryset = ['step', 'etat', 'type_stat']
+    structure_excel = [['Numero Etudiant', 'individu.student_code'],
+                       ['Nom patronimique', 'individu.last_name'],
+                       ['Nom d\'époux', 'individu.common_name'],
+                       ["Prénom:", 'individu.first_name1'],
+                       ['Deuxiéme prénom', "individu.first_name2"],
+                       ["Email", 'individu.personal_email']]
 
+    def set_attr_queryset(self, **kwargs):
+        for attr in self.attrs_queryset:
+            setattr(self, attr, kwargs.get(attr, None))
+
+    @property
+    def get_structure_excel(self):
+        return self.structure_excel
+
+    @property
+    def filter_queryset(self):
+        return {
+            'parcours_dossier': {'etape__cod_etp': self.step, 'parcours_dossier__to_state': self.etat},
+            'state': {'state': self.etat, ' etape__cod_etp': self.step},
+            'etat': {'suivi_dossier': self.etat, 'etape__cod_etp': self.step},
+            'etat_suivi_dossier': {'etape_dossier__to_state': self.etat, 'etape__cod_etp': self.step}
+        }
+
+    def create_workbook(self):
         wb = Workbook()
         ws = wb.active
 
-        if type_stat == 'parcours_dossier':
-            queryset = Wish.objects.filter(etape__cod_etp=kwargs['step'], parcours_dossier__to_state=kwargs['etat'])
-        elif type_stat == 'state':
-            queryset = Wish.objects.filter(state=kwargs['etat'], etape__cod_etp=kwargs['step'])
-        else:
-            queryset = Wish.objects.filter(etape_dossier__to_state=kwargs['etat'], etape__cod_etp=kwargs['step'])
-        ws.cell(row=1, column=1).value = 'Numero Etudiant:'
-        ws.cell(row=1, column=2).value = 'Nom patronimique:'
-        ws.cell(row=1, column=3).value = "Nom d'époux:"
-        ws.cell(row=1, column=4).value = "Prénom:"
-        ws.cell(row=1, column=5).value = "Deuxiéme prénom"
-        ws.cell(row=1, column=6).value = "Email:"
-        for row, wish in enumerate(queryset):
-            ws.cell(row=row + 2, column=1).value = wish.individu.student_code
-            ws.cell(row=row + 2, column=2).value = wish.individu.last_name
-            ws.cell(row=row + 2, column=3).value = wish.individu.common_name
-            ws.cell(row=row + 2, column=4).value = wish.individu.first_name1
-            ws.cell(row=row + 2, column=5).value = wish.individu.first_name2
-            ws.cell(row=row + 2, column=6).value = wish.individu.personal_email
+        queryset = Wish.objects.filter(**self.filter_queryset[self.type_stat])
+        for collumn, cell in enumerate(self.get_structure_excel, start=1):
+            ws.cell(row=1, column=collumn).value = cell[0]
+
+        for row, wish in enumerate(queryset, start=2):
+            for collumn, cell in enumerate(self.get_structure_excel, start=1):
+                ws.cell(row=row, column=collumn).value = getattr(wish, cell[1])
+        return wb
 
 
-        response = HttpResponse(save_virtual_workbook(wb), mimetype='application/vnd.ms-excel')
+class ExtrationStatistique(ExtractionStatistiqueBase):
+    def get(self, request, *args, **kwargs):
+        self.set_attr_queryset(**kwargs)
+        response = HttpResponse(save_virtual_workbook(self.create_workbook()), mimetype='application/vnd.ms-excel')
         date = datetime.datetime.today().strftime('%d-%m-%Y')
         response['Content-Disposition'] = 'attachment; filename=%s_%s.xlsx' % ('extraction', date)
         return response

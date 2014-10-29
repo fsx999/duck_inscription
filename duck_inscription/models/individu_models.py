@@ -342,15 +342,17 @@ class Individu(xwf_models.WorkflowEnabled, models.Model):
             individu.cod_stu = '01'
             individu.save(using=db)
             # copie du bac d'apogee
+
             bac_apogee = IndBac.objects.using(db).filter(cod_ind=individu.cod_ind).first()
 
-            opi_bac = OpiBac.objects.using(db).get_or_create(cod_ind_opi=self.code_opi,
-                                                             cod_bac=bac_apogee.cod_bac)[0]
-            opi_bac.cod_etb = bac_apogee.cod_etb
-            opi_bac.cod_dep = bac_apogee.cod_dep
-            opi_bac.cod_mnb = bac_apogee.cod_mnb
-            opi_bac.daa_obt_bac_oba = bac_apogee.daa_obt_bac_iba
-            opi_bac.save(using=db)
+            if bac_apogee:
+                opi_bac = OpiBac.objects.using(db).get_or_create(cod_ind_opi=self.code_opi,
+                                                                 cod_bac=bac_apogee.cod_bac)[0]
+                opi_bac.cod_etb = bac_apogee.cod_etb
+                opi_bac.cod_dep = bac_apogee.cod_dep
+                opi_bac.cod_mnb = bac_apogee.cod_mnb
+                opi_bac.daa_obt_bac_oba = bac_apogee.daa_obt_bac_iba
+                opi_bac.save(using=db)
 
         if self.adresses.count() != 2:
             adresse = self.adresses.all()[0]
