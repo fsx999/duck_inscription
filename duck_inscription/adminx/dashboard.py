@@ -40,7 +40,8 @@ class IncriptionDashBoard(views.website.IndexView):
                           {'title': 'Remontee opi', 'model': Wish},
                           ]},
                 {"type": "qbutton", "title": "Consultation des dossiers",
-                "btns": [{'title': 'Consultation dossier inscription', 'model': Individu}, ]}
+                "btns": [{'title': 'Consultation dossier inscription', 'model': Individu},
+                         {'title': 'Consultation dossier inscription etudiant apogeé', 'url':'/django_apogee/individu'}]}
                ]]
     site_title = 'Backoffice'
     title = 'Accueil'

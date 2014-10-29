@@ -150,7 +150,7 @@ class Individu(xwf_models.WorkflowEnabled, models.Model):
         app_label = 'duck_inscription'
 
     def __str__(self):
-        return u"%s %s" % (self.last_name, self.first_name1)
+        return u"%s %s %s %s" % (self.last_name, self.common_name, self.first_name1, self.first_name2)
 
     def p28(self):
         e = (date.today() - self.birthday)
