@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import unicode_literals
 import datetime
 from StringIO import StringIO
 from PyPDF2 import PdfFileWriter, PdfFileReader
@@ -78,7 +79,8 @@ class SuiviDossierWorkflow(xwf_models.Workflow):
         ('inscription_complet', 'Dossier inscription complet'),
         ('inscription_incomplet', 'Dossier inscription incomplet'),
         ('inscription_incom_r', 'Dossier inscription incomplet avec renvoi'),
-        ('inscription_traite', 'Dossier inscription traite'), ('inscription_refuse', 'Dossier inscription refusé'),
+        ('inscription_traite', 'Remontée OPI effectué'),
+        ('inscription_refuse', 'Dossier inscription refusé'),
         ('inscription_annule', 'Dossier inscription annulé'),
     )
 

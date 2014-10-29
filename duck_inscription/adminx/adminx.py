@@ -29,7 +29,7 @@ class WishInline(object):
         return "{} {}".format(obj.code_dossier, obj.etape.label)
 
     def actions(self, obj):
-        result = ''
+        result = ' '
         if obj.state.is_inscription:
             url = reverse('changement_centre', kwargs={'pk': obj.pk})
             result += ACTION.format(id=obj.pk, url=url)
