@@ -1,7 +1,5 @@
 # coding=utf-8
 from __future__ import unicode_literals
-from datetime import date
-from django.db import DatabaseError
 from django.http import HttpResponse
 from django.views.decorators.cache import never_cache
 from openpyxl.workbook import Workbook
@@ -15,7 +13,7 @@ import datetime
 from duck_inscription.models import SettingsEtape, NoteMasterModel
 from duck_inscription.models import Wish
 
-import inspect
+
 class StatistiquePal(views.Dashboard):
     base_template = 'statistique/stats_pal.html'
     widget_customiz = False
@@ -86,7 +84,6 @@ xadmin.site.register_view(r'^stats_apogee/$', StatistiqueApogee, 'stats_apogee')
 
 class ExtractionStatistiqueBase(BaseAdminView):
 
-
     def set_attr_queryset(self, **kwargs):
         for attr in self.attrs_queryset:
             setattr(self, attr, kwargs.get(attr, None))
@@ -114,15 +111,6 @@ class ExtractionStatistiqueBase(BaseAdminView):
         date = datetime.datetime.today().strftime('%d-%m-%Y')
         response['Content-Disposition'] = 'attachment; filename=%s_%s.xlsx' % ('extraction', date)
         return response
-
-    def _value_attr(self, value, attrs):
-        attrs = attrs.split('.')
-
-        value = getattr(value, attrs.pop(0))
-        if len(attrs):
-            eval()
-            return self._value_attr(value, attrs)
-        return value
 
 
 class ExtrationStatistique(ExtractionStatistiqueBase):
@@ -166,43 +154,6 @@ class ExtractionStatApogee(ExtractionStatistiqueBase):
         return {
             'ordinaire': {'cod_anu': self.annee, 'cod_etp': self.step},
         }
-
-    # def get(self, request, *args, **kwargs):
-    #     cod_etp, annee = kwargs['step'], kwargs['annee']
-    #     queryset = InsAdmEtp.inscrits.filter(cod_anu=annee, cod_etp=cod_etp)
-    #     wb = Workbook()
-    #     ws = wb.active
-    #     ws.cell(row=1, column=1).value = 'Numero Etudiant:'
-    #     ws.cell(row=1, column=2).value = 'Nom patronimique:'
-    #     ws.cell(row=1, column=3).value = "Nom d'époux:"
-    #     ws.cell(row=1, column=4).value = "Prénom:"
-    #     ws.cell(row=1, column=5).value = "Deuxiéme prénom"
-    #     ws.cell(row=1, column=6).value = "Email Perso:"
-    #     ws.cell(row=1, column=7).value = "Email Foad"
-    #     ws.cell(row=1, column=8).value = "Reinscription:"
-    #     for row, etp in enumerate(queryset):
-    #         ind = etp.cod_ind
-    #         ws.cell(row=row + 2, column=1).value = ind.cod_etu
-    #         ws.cell(row=row + 2, column=2).value = ind.lib_nom_pat_ind
-    #         ws.cell(row=row + 2, column=3).value = ind.lib_nom_usu_ind
-    #         ws.cell(row=row + 2, column=4).value = ind.lib_pr1_ind
-    #         ws.cell(row=row + 2, column=5).value = ind.lib_pr2_ind
-    #         ws.cell(row=row + 2, column=6).value = str(ind.get_email(annee))
-    #         ws.cell(row=row + 2, column=7).value = str(ind.cod_etu) + '@foad.iedparis8.net'
-    #         try:
-    #             ws.cell(row=row + 2, column=8).value = "Oui" if etp.is_reins else "Non"
-    #         except DatabaseError:
-    #             ws.cell(row=row + 2, column=8).value = "Error"
-    #
-    #
-    #
-    #
-    #
-    #     response = HttpResponse(save_virtual_workbook(wb), mimetype='application/vnd.ms-excel')
-    #     date = datetime.datetime.today().strftime('%d-%m-%Y')
-    #     response['Content-Disposition'] = 'attachment; filename=%s_%s_%s.xlsx' % ('extraction_apogee', cod_etp, date)
-    #     return response
-
 xadmin.site.register_view(r'^extraction_apogee/(?P<annee>\w+)/(?P<step>\w+)/$', ExtractionStatApogee,
                           'extraction_apogee')
 

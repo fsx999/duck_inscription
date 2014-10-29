@@ -13,7 +13,6 @@ from duck_inscription.models import SettingsEtape
 from duck_inscription.models import Wish
 
 
-
 class DossierReception(views.FormAdminView):
     form = DossierReceptionForm
     title = 'Dossier Reception'
@@ -297,7 +296,10 @@ class DossierInscriptionView(views.FormAdminView):
         self.setup_forms()
 
         if self.valid_forms():
+
             code_dossier = self.form_obj.cleaned_data['code_dossier']
+
+
             choix = self.form_obj.cleaned_data['choix']
 
             self.motif = self.form_obj.cleaned_data['motif']
@@ -392,6 +394,8 @@ class DossierInscriptionView(views.FormAdminView):
                 self.message_user(msg, 'error')
             except InvalidTransitionError as e:
                 self.message_user(e, 'error')
+            except ValueError:
+                self.message_user('Le code du dossier ne dois contenir que des chiffres', 'error')
 
         return self.get_response()
 
