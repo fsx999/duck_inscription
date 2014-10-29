@@ -15,7 +15,7 @@ import datetime
 from duck_inscription.models import SettingsEtape, NoteMasterModel
 from duck_inscription.models import Wish
 
-
+import inspect
 class StatistiquePal(views.Dashboard):
     base_template = 'statistique/stats_pal.html'
     widget_customiz = False
@@ -85,14 +85,7 @@ xadmin.site.register_view(r'^stats_apogee/$', StatistiqueApogee, 'stats_apogee')
 
 
 class ExtractionStatistiqueBase(BaseAdminView):
-    model_extration = Wish
-    attrs_queryset = ['step', 'etat', 'type_stat']
-    structure_excel = [['Numero Etudiant', 'individu.student_code'],
-                       ['Nom patronimique', 'individu.last_name'],
-                       ['Nom d\'époux', 'individu.common_name'],
-                       ["Prénom:", 'individu.first_name1'],
-                       ['Deuxiéme prénom', "individu.first_name2"],
-                       ["Email", 'individu.personal_email']]
+
 
     def set_attr_queryset(self, **kwargs):
         for attr in self.attrs_queryset:
@@ -102,6 +95,46 @@ class ExtractionStatistiqueBase(BaseAdminView):
     def get_structure_excel(self):
         return self.structure_excel
 
+    def create_workbook(self):
+        wb = Workbook()
+        ws = wb.active
+
+        queryset = self.model_extraction.objects.filter(**self.filter_queryset[self.type_stat])
+        for collumn, cell in enumerate(self.get_structure_excel, start=1):
+            ws.cell(row=1, column=collumn).value = cell[0]
+
+        for row, obj in enumerate(queryset, start=2):
+            for collumn, cell in enumerate(self.get_structure_excel, start=1):
+                ws.cell(row=row, column=collumn).value = eval(cell[1])
+        return wb
+
+    def get(self, request, *args, **kwargs):
+        self.set_attr_queryset(**kwargs)
+        response = HttpResponse(save_virtual_workbook(self.create_workbook()), mimetype='application/vnd.ms-excel')
+        date = datetime.datetime.today().strftime('%d-%m-%Y')
+        response['Content-Disposition'] = 'attachment; filename=%s_%s.xlsx' % ('extraction', date)
+        return response
+
+    def _value_attr(self, value, attrs):
+        attrs = attrs.split('.')
+
+        value = getattr(value, attrs.pop(0))
+        if len(attrs):
+            eval()
+            return self._value_attr(value, attrs)
+        return value
+
+
+class ExtrationStatistique(ExtractionStatistiqueBase):
+    model_extraction = Wish
+    attrs_queryset = ['step', 'etat', 'type_stat']
+    structure_excel = [['Numero Etudiant', 'obj.individu.student_code'],
+                       ['Nom patronimique', 'obj.individu.last_name'],
+                       ['Nom d\'époux', 'obj.individu.common_name'],
+                       ["Prénom:", 'obj.individu.first_name1'],
+                       ['Deuxiéme prénom', "obj.individu.first_name2"],
+                       ["Email", 'obj.individu.personal_email']]
+
     @property
     def filter_queryset(self):
         return {
@@ -110,68 +143,65 @@ class ExtractionStatistiqueBase(BaseAdminView):
             'etat': {'suivi_dossier': self.etat, 'etape__cod_etp': self.step},
             'etat_suivi_dossier': {'etape_dossier__to_state': self.etat, 'etape__cod_etp': self.step}
         }
-
-    def create_workbook(self):
-        wb = Workbook()
-        ws = wb.active
-
-        queryset = Wish.objects.filter(**self.filter_queryset[self.type_stat])
-        for collumn, cell in enumerate(self.get_structure_excel, start=1):
-            ws.cell(row=1, column=collumn).value = cell[0]
-
-        for row, wish in enumerate(queryset, start=2):
-            for collumn, cell in enumerate(self.get_structure_excel, start=1):
-                ws.cell(row=row, column=collumn).value = getattr(wish, cell[1])
-        return wb
-
-
-class ExtrationStatistique(ExtractionStatistiqueBase):
-    def get(self, request, *args, **kwargs):
-        self.set_attr_queryset(**kwargs)
-        response = HttpResponse(save_virtual_workbook(self.create_workbook()), mimetype='application/vnd.ms-excel')
-        date = datetime.datetime.today().strftime('%d-%m-%Y')
-        response['Content-Disposition'] = 'attachment; filename=%s_%s.xlsx' % ('extraction', date)
-        return response
 xadmin.site.register_view(r'^extraction/(?P<type_stat>\w+)/(?P<etat>\w+)/(?P<step>\w+)/$', ExtrationStatistique,
                           'extraction_stat')
 
 
-class ExtractionStatApogee(BaseAdminView):
-    def get(self, request, *args, **kwargs):
-        cod_etp, annee = kwargs['step'], kwargs['annee']
-        queryset = InsAdmEtp.inscrits.filter(cod_anu=annee, cod_etp=cod_etp)
-        wb = Workbook()
-        ws = wb.active
-        ws.cell(row=1, column=1).value = 'Numero Etudiant:'
-        ws.cell(row=1, column=2).value = 'Nom patronimique:'
-        ws.cell(row=1, column=3).value = "Nom d'époux:"
-        ws.cell(row=1, column=4).value = "Prénom:"
-        ws.cell(row=1, column=5).value = "Deuxiéme prénom"
-        ws.cell(row=1, column=6).value = "Email Perso:"
-        ws.cell(row=1, column=7).value = "Email Foad"
-        ws.cell(row=1, column=8).value = "Reinscription:"
-        for row, etp in enumerate(queryset):
-            ind = etp.cod_ind
-            ws.cell(row=row + 2, column=1).value = ind.cod_etu
-            ws.cell(row=row + 2, column=2).value = ind.lib_nom_pat_ind
-            ws.cell(row=row + 2, column=3).value = ind.lib_nom_usu_ind
-            ws.cell(row=row + 2, column=4).value = ind.lib_pr1_ind
-            ws.cell(row=row + 2, column=5).value = ind.lib_pr2_ind
-            ws.cell(row=row + 2, column=6).value = str(ind.get_email(annee))
-            ws.cell(row=row + 2, column=7).value = str(ind.cod_etu) + '@foad.iedparis8.net'
-            try:
-                ws.cell(row=row + 2, column=8).value = "Oui" if etp.is_reins else "Non"
-            except DatabaseError:
-                ws.cell(row=row + 2, column=8).value = "Error"
+class ExtractionStatApogee(ExtractionStatistiqueBase):
+    model_extraction = InsAdmEtp
+    attrs_queryset = ['step', 'annee']
+    structure_excel = [['Numero Etudiant', 'obj.cod_ind.cod_etu'],
+                       ['Nom patronimique', 'obj.cod_ind.lib_nom_pat_ind'],
+                       ['Nom d\'époux', 'obj.cod_ind.lib_nom_usu_ind'],
+                       ["Prénom:", 'obj.cod_ind.lib_pr1_ind'],
+                       ['Deuxiéme prénom', "obj.cod_ind.lib_pr2_ind"],
+                       ["Email perso", 'str(obj.cod_ind.get_email(self.annee))'],
+                       ["Email Foad", 'str(obj.cod_ind.cod_etu) + \'@foad.iedparis8.net\''],
+                       ["Reinscription:", "'Oui' if obj.is_reins else 'Non'"]]
 
+    type_stat = 'ordinaire'
 
+    @property
+    def filter_queryset(self):
+        return {
+            'ordinaire': {'cod_anu': self.annee, 'cod_etp': self.step},
+        }
 
-
-
-        response = HttpResponse(save_virtual_workbook(wb), mimetype='application/vnd.ms-excel')
-        date = datetime.datetime.today().strftime('%d-%m-%Y')
-        response['Content-Disposition'] = 'attachment; filename=%s_%s_%s.xlsx' % ('extraction_apogee', cod_etp, date)
-        return response
+    # def get(self, request, *args, **kwargs):
+    #     cod_etp, annee = kwargs['step'], kwargs['annee']
+    #     queryset = InsAdmEtp.inscrits.filter(cod_anu=annee, cod_etp=cod_etp)
+    #     wb = Workbook()
+    #     ws = wb.active
+    #     ws.cell(row=1, column=1).value = 'Numero Etudiant:'
+    #     ws.cell(row=1, column=2).value = 'Nom patronimique:'
+    #     ws.cell(row=1, column=3).value = "Nom d'époux:"
+    #     ws.cell(row=1, column=4).value = "Prénom:"
+    #     ws.cell(row=1, column=5).value = "Deuxiéme prénom"
+    #     ws.cell(row=1, column=6).value = "Email Perso:"
+    #     ws.cell(row=1, column=7).value = "Email Foad"
+    #     ws.cell(row=1, column=8).value = "Reinscription:"
+    #     for row, etp in enumerate(queryset):
+    #         ind = etp.cod_ind
+    #         ws.cell(row=row + 2, column=1).value = ind.cod_etu
+    #         ws.cell(row=row + 2, column=2).value = ind.lib_nom_pat_ind
+    #         ws.cell(row=row + 2, column=3).value = ind.lib_nom_usu_ind
+    #         ws.cell(row=row + 2, column=4).value = ind.lib_pr1_ind
+    #         ws.cell(row=row + 2, column=5).value = ind.lib_pr2_ind
+    #         ws.cell(row=row + 2, column=6).value = str(ind.get_email(annee))
+    #         ws.cell(row=row + 2, column=7).value = str(ind.cod_etu) + '@foad.iedparis8.net'
+    #         try:
+    #             ws.cell(row=row + 2, column=8).value = "Oui" if etp.is_reins else "Non"
+    #         except DatabaseError:
+    #             ws.cell(row=row + 2, column=8).value = "Error"
+    #
+    #
+    #
+    #
+    #
+    #     response = HttpResponse(save_virtual_workbook(wb), mimetype='application/vnd.ms-excel')
+    #     date = datetime.datetime.today().strftime('%d-%m-%Y')
+    #     response['Content-Disposition'] = 'attachment; filename=%s_%s_%s.xlsx' % ('extraction_apogee', cod_etp, date)
+    #     return response
 
 xadmin.site.register_view(r'^extraction_apogee/(?P<annee>\w+)/(?P<step>\w+)/$', ExtractionStatApogee,
                           'extraction_apogee')
