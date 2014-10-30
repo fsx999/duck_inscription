@@ -77,7 +77,14 @@ class EquivalenceView(views.FormAdminView):
                 wish = Wish.objects.get(code_dossier=code_dossier)
                 if wish.etape not in self.request.user.setting_user.etapes.all():
                     raise PermissionDenied
-                if wish.suivi_dossier.is_equivalence_traite or wish.suivi_dossier.is_equivalence_refuse:
+                if choix == "autoriser_inscription":
+                    try:
+                        wish.ouverture_inscription_from_equi()
+                        msg = "Pam pam ! {} peut commencer la procedure d'inscription".format(wish.individu.last_name)
+                        self.message_user(msg, 'success')
+                    except InvalidTransitionError as erreur_trans:
+                        raise erreur_trans
+                elif wish.suivi_dossier.is_equivalence_traite or wish.suivi_dossier.is_equivalence_refuse:
                     msg = 'Dossier déjà traité'
                     self.message_user(msg, 'warning')
                 elif not wish.state.is_equivalence:

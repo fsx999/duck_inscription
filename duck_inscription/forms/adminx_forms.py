@@ -20,7 +20,9 @@ class ImprimerEnMasseForm(forms.Form):
 class EquivalenceForm(DossierReceptionForm):
     etapes = forms.ModelChoiceField(queryset=SettingsEtape.objects.all(), required=True)
     choix = forms.ChoiceField(
-        choices=(('complet', 'Complet'), ('accepte', 'Accepté'), ('incomplet', 'Incomplet'), ('refuse', 'Refusé')),
+        choices=(('complet', 'Complet'), ('accepte', 'Accepté'),
+                 ('incomplet', 'Incomplet'), ('refuse', 'Refusé'),
+                 ('autoriser_inscription', "Autoriser s'inscrire")),
         widget=forms.RadioSelect(), required=True)
     motif = forms.CharField(widget=forms.Textarea, required=False)
 
