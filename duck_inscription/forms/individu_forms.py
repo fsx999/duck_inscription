@@ -32,10 +32,11 @@ FRANCE = '100'
 
 class GMT0(tzinfo):
     def utcoffset(self, dt):
-        return timedelta(hours=0, minutes=0)
+        print timedelta(0)
+        return timedelta(0)
 
     def tzname(self, dt):
-        return "GMT +5"
+        return "UTC"
 
     def dst(self, dt):
         return timedelta(0)
@@ -157,7 +158,7 @@ class CodeEtudiantForm(forms.Form):
         data = super(CodeEtudiantForm, self).clean()
         code_etu = data.get("code_etu", 0)
         date_naissance = data.get("date_naissance", date.today())
-        date_naissance = datetime(*(date_naissance.timetuple()[:6]))
+        date_naissance = datetime(*(date_naissance.timetuple()[:6]), tzinfo=GMT0())
         print date_naissance
         if not Individu.objects.filter(cod_etu=code_etu, date_nai_ind=date_naissance):
             raise forms.ValidationError(u"Le numéro étudiant et la date de naissance ne correspondent pas")

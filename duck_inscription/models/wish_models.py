@@ -44,16 +44,16 @@ class WishWorkflow(xwf_models.Workflow):
         ('ouverture_equivalence', 'creation', 'ouverture_equivalence'),
         ('liste_diplome', 'ouverture_equivalence', 'liste_diplome'),
         ('demande_equivalence', ('creation', 'liste_diplome'), 'demande_equivalence'),
-        ('equivalence', ('creation', 'liste_diplome', 'demande_equivalence'), 'equivalence'), (
-        'liste_attente_equivalence', ('ouverture_equivalence', 'demande_equivalence', 'liste_diplome'),
-        'liste_attente_equivalence'), (
-        'ouverture_candidature', ('creation', 'ouverture_equivalence', 'equivalence', 'demande_equivalence'),
-        'ouverture_candidature'), ('note_master', 'ouverture_candidature', 'note_master'),
+        ('equivalence', ('creation', 'liste_diplome', 'demande_equivalence'), 'equivalence'),
+        ('liste_attente_equivalence', ('ouverture_equivalence', 'demande_equivalence', 'liste_diplome'),
+         'liste_attente_equivalence'),
+        ('ouverture_candidature', ('creation', 'ouverture_equivalence', 'equivalence', 'demande_equivalence'),
+         'ouverture_candidature'),
+        ('note_master', 'ouverture_candidature', 'note_master'),
         ('candidature', ('note_master', 'ouverture_candidature', 'liste_attente_candidature'), 'candidature'),
-        ('liste_attente_candidature', ('ouverture_candidature',), 'liste_attente_candidature'), (
-        'ouverture_inscription', (
-        'creation', 'ouverture_equivalence', 'ouverture_candidature', 'equivalence', 'candidature',
-        'dossier_inscription'), 'ouverture_inscription'),
+        ('liste_attente_candidature', ('ouverture_candidature',), 'liste_attente_candidature'),
+        ('ouverture_inscription', ('creation', 'ouverture_equivalence', 'ouverture_candidature', 'equivalence',
+                                   'candidature', 'dossier_inscription'), 'ouverture_inscription'),
         ('dossier_inscription', ('ouverture_inscription',), 'dossier_inscription'),
         ('choix_ied_fp', 'dossier_inscription', 'choix_ied_fp'), ('droit_universitaire', 'choix_ied_fp', 'droit_univ'),
         ('inscription', ('droit_univ', 'choix_ied_fp', 'liste_attente_inscription'), 'inscription'),
@@ -107,8 +107,7 @@ class SuiviDossierWorkflow(xwf_models.Workflow):
         ('inscription_incomplet_renvoi', ('inscription_reception',), 'inscription_incom_r'),
         ('inscription_complet', ('inscription_reception', 'inscription_incomplet'), 'inscription_complet'),
         ('inscription_traite', ('inscription_reception', 'inscription_complet', 'inscription_incomplet',
-                                'inscription_refuse'),
-         'inscription_traite',),
+                                'inscription_refuse'), 'inscription_traite',),
         ('inscription_refuse', ('inscription_reception', 'inscription_complet', 'inscription_incomplet', 'inactif'),
          'inscription_refuse',),
         ('inscription_annule', ('inscription_annule', 'inscription_refuse', 'inscription_reception',
@@ -189,11 +188,6 @@ class WishParcourTransitionLog(django_xworkflows.models.BaseTransitionLog):
 #     def __unicode__(self):
 #         return self.label
 #
-#     def has_diplome(self):
-#         if self.diplome_step.count() == 0:
-#             return False
-#         else:
-#             return True
 #
 #     def stat_tarif(self):
 #         # resultat = {}
@@ -231,82 +225,6 @@ class WishParcourTransitionLog(django_xworkflows.models.BaseTransitionLog):
 #         resultat['tarif_primo'] = resultat['nb_primo'] * self.tarif
 #         resultat['total'] = resultat['tarif_reins'] + resultat['tarif_primo']
 #
-#         return resultat
-#
-#     def stat_pal(self):
-#         resultat = {}
-#         annee = AnneeEnCour.objects.get(ouverte_inscription=True)
-#         wishes = self.wish_set.filter(annee=annee)
-#         if not self.no_equivalence:
-#             resultat['nb_equivalence'] = wishes.filter(etape='equivalence').count()
-#             resultat['nb_equivalence_reception'] = wishes.filter(
-#                 etapedossier__etape__name='equivalence_reception').count()
-#             resultat['nb_equivalence_traite'] = wishes.filter(etapedossier__etape__name='equivalence_traite').count()
-#             resultat['nb_equivalence_en_cours'] = resultat['nb_equivalence_reception'] - resultat['nb_equivalence_traite']
-#         if self.candidature:
-#             resultat['nb_candidature'] = wishes.filter(etape='candidature').count()
-#             resultat['nb_candidature_reception'] = wishes.filter(etapedossier__etape__name='candidature_reception').count()
-#             nb_candidature_refuse = wishes.filter(etapedossier__etape__name='candidature_refuse').count()
-#             nb_candidature_accepte = wishes.filter(etapedossier__etape__name='candidature_traite').count()
-#             resultat['nb_candidature_accepte'] = nb_candidature_accepte
-#             resultat['nb_candidature_traite'] = nb_candidature_refuse + nb_candidature_accepte
-#             resultat['nb_candidature_en_cours'] = resultat['nb_candidature_reception'] - resultat['nb_candidature_traite']
-#         return resultat
-#
-#     def stat(self):
-#         resultat = {}
-#         #        wish = self.wish_set.all()
-#         annee = AnneeEnCour.objects.get(ouverte_inscription='O')
-#         etapes = self.wish_set.filter(annee=annee).values_list('etape', 'is_reins')
-#         d = {}
-#         a = {}
-#         [d.__setitem__(item[0], 1 + d.get(item[0], 0)) for item in etapes]
-#         [a.__setitem__(item[0], 1 + a.get(item[0], 0)) for item in etapes if item[1] is True]
-#         #        etape = Etape.objects.get(name="inscription_reception")
-#         resultat['nb_voeu'] = self.wish_set.filter(annee=annee).count()
-#         resultat['nb_reins'] = a.get('inscription', 0)
-#         resultat['nb_inscription'] = d.get('inscription', 0)
-#         resultat['nb_primo_inscription'] = resultat['nb_inscription'] - resultat['nb_reins']
-#
-#         resultat['nb_dossier_inscription_reception'] = EtapeDossier.objects.filter(etape__name="inscription_reception",
-#                                                                                    wish__step=self,
-#                                                                                    wish__annee=annee).count()
-#         resultat['nb_dossier_reins_reception'] = EtapeDossier.objects.filter(etape__name="inscription_reception",
-#                                                                              wish__step=self,
-#                                                                              wish__is_reins=True,
-#                                                                              wish__annee=annee).count()
-#         resultat['nb_dossier_primo_reception'] = resultat['nb_dossier_inscription_reception'] - resultat[
-#             'nb_dossier_reins_reception']
-#         resultat['nb_dossier_complet'] = EtapeDossier.objects.filter(etape__name="inscription_complet",
-#                                                                      wish__step=self,
-#                                                                      wish__annee=annee).count()
-#         resultat['nb_dossier_reins_complet'] = EtapeDossier.objects.filter(etape__name="inscription_complet",
-#                                                                            wish__step=self, wish__is_reins=True,
-#                                                                            wish__annee=annee
-#                                                                            ).count()
-#         resultat['nb_dossier_primo_complet'] = resultat['nb_dossier_complet'] - resultat['nb_dossier_reins_complet']
-#         resultat['nb_inscription_incomplet'] = EtapeDossier.objects.filter(etape__name="inscription_incomplet",
-#                                                                            wish__step=self,
-#                                                                            wish__annee=annee).count()
-#         resultat['nb_liste_attente'] = self.wish_set.filter(etape="liste_attente_inscription",
-#                                                             annee=annee).count()
-#         resultat['nb_inscription_fp'] = self.wish_set.filter(etape="inscription",
-#                                                              centre_gestion__centre_gestion='fp',
-#                                                              annee=annee).count()
-#
-#         return resultat
-#
-#     def stat_apogee(self):
-#         resultat = {}
-#         #        wish = self.wish_set.all()
-#
-#         try:
-#             resultat['nb_dossier_apogee'] = INS_ADM_ETP.inscrits.filter(COD_ETP=self.name).count()
-#             resultat['nb_dossier_fp'] = INS_ADM_ETP.inscrits.filter(COD_ETP=self.name, COD_CGE='FPE').count()
-#             resultat['nb_dossier_ied'] = INS_ADM_ETP.inscrits.filter(COD_ETP=self.name, COD_CGE='IED').count()
-#
-#         except DatabaseError:
-#             resultat['nb_dossier_apogee'] = u"Apogée indisponible"
 #         return resultat
 #
 
