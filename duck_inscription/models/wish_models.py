@@ -89,16 +89,15 @@ class SuiviDossierWorkflow(xwf_models.Workflow):
         ('equivalence_receptionner', ('inactif', 'equivalence_incomplet'), 'equivalence_reception'),
         ('equivalence_incomplet', 'equivalence_reception', 'equivalence_incomplet'),
         ('equivalence_complet', ('equivalence_reception', 'equivalence_incomplet'), 'equivalence_complet'),
-        ('equivalence_traite', 'equivalence_complet', 'equivalence_traite'), (
-        'equivalece_refuse', ('equivalence_reception', 'equivalence_incomplet', 'equivalence_complet'),
-        'equivalence_refuse'),
-
+        ('equivalence_traite', 'equivalence_complet', 'equivalence_traite'),
+        ('equivalece_refuse', ('equivalence_reception', 'equivalence_incomplet', 'equivalence_complet'),
+         'equivalence_refuse'),
         ('candidature_reception', ('inactif', 'equivalence_traite', 'candidature_incomplet'), 'candidature_reception'),
         ('candidature_complet', ('candidature_reception', 'candidature_incomplet'), 'candidature_complet'),
         ('candidature_incomplet', 'candidature_reception', 'candidature_incomplet'),
-        ('candidature_traite', 'candidature_complet', 'candidature_traite'), (
-        'candidature_refuse', ('candidature_reception', 'candidature_incomplet', 'candidature_complet'),
-        'candidature_refuse'),
+        ('candidature_traite', 'candidature_complet', 'candidature_traite'),
+        ('candidature_refuse', ('candidature_reception', 'candidature_incomplet', 'candidature_complet'),
+         'candidature_refuse'),
 
         ('inscription_reception',
          ('inactif', 'equivalence_traite', 'candidature_complet', 'candidature_traite', 'inscription_incomplet',
@@ -106,11 +105,12 @@ class SuiviDossierWorkflow(xwf_models.Workflow):
          'inscription_reception'),
         ('inscription_incomplet', ('inscription_reception',), 'inscription_incomplet'),
         ('inscription_incomplet_renvoi', ('inscription_reception',), 'inscription_incom_r'),
-        ('inscription_complet', ('inscription_reception', 'inscription_incomplet'), 'inscription_complet'), (
-        'inscription_traite', ('inscription_reception', 'inscription_complet', 'inscription_incomplet'),
-        'inscription_traite',), (
-        'inscription_refuse', ('inscription_reception', 'inscription_complet', 'inscription_incomplet', 'inactif'),
-        'inscription_refuse',),
+        ('inscription_complet', ('inscription_reception', 'inscription_incomplet'), 'inscription_complet'),
+        ('inscription_traite', ('inscription_reception', 'inscription_complet', 'inscription_incomplet',
+                                'inscription_refuse'),
+         'inscription_traite',),
+        ('inscription_refuse', ('inscription_reception', 'inscription_complet', 'inscription_incomplet', 'inactif'),
+         'inscription_refuse',),
         ('inscription_annule', ('inscription_annule', 'inscription_refuse', 'inscription_reception',
                                 'inscription_complet',
                                 'inscription_incomplet', 'inactif', 'inscription_incom_r'),
