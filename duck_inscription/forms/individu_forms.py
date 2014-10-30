@@ -38,7 +38,6 @@ class GMT0(tzinfo):
     def tzname(self, dt):
         return "UTC"
 
-
     def dst(self, dt):
         return timedelta(0)
 
