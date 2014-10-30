@@ -236,7 +236,7 @@ class Individu(xwf_models.WorkflowEnabled, models.Model):
             self.dossier_inscription.etablissement_bac = etablissement_autre
 
         if not self.student_code:
-            if self.ine == u"000000000000":
+            if self.ine == u"000000000000" or u"00000000000":
                 ine = ""
                 cle = ""
             individu = IndOpi.objects.using(db).get_or_create(
