@@ -22,7 +22,7 @@ class EquivalenceForm(DossierReceptionForm):
     choix = forms.ChoiceField(
         choices=(('complet', 'Complet'), ('accepte', 'Accepté'),
                  ('incomplet', 'Incomplet'), ('refuse', 'Refusé'),
-                 ('autoriser_inscription', "Autoriser s'inscrire")),
+                 ('autoriser_inscription', "Autoriser à s'inscrire (sans candidature)")),
         widget=forms.RadioSelect(), required=True)
     motif = forms.CharField(widget=forms.Textarea, required=False)
 
