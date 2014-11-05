@@ -1,6 +1,9 @@
 # coding=utf-8
 from __future__ import unicode_literals
+from django.contrib import messages
+from django.db import DatabaseError
 from django.http import HttpResponse
+from django.shortcuts import redirect
 from django.views.decorators.cache import never_cache
 from openpyxl.workbook import Workbook
 from openpyxl.writer.excel import save_virtual_workbook
@@ -102,7 +105,7 @@ class ExtractionStatistiqueBase(BaseAdminView):
 
         for row, obj in enumerate(queryset, start=2):
             for collumn, cell in enumerate(self.get_structure_excel, start=1):
-                ws.cell(row=row, column=collumn).value = eval(cell[1])
+                    ws.cell(row=row, column=collumn).value = eval(cell[1])
         return wb
 
     def get(self, request, *args, **kwargs):
@@ -136,6 +139,7 @@ xadmin.site.register_view(r'^extraction/(?P<type_stat>\w+)/(?P<etat>\w+)/(?P<ste
 
 
 class ExtractionStatApogee(ExtractionStatistiqueBase):
+
     model_extraction = InsAdmEtp
     attrs_queryset = ['step', 'annee']
     structure_excel = [['Numero Etudiant', 'obj.cod_ind.cod_etu'],
@@ -148,6 +152,18 @@ class ExtractionStatApogee(ExtractionStatistiqueBase):
                        ["Reinscription:", "'Oui' if obj.is_reins else 'Non'"]]
 
     type_stat = 'ordinaire'
+    url = '/stats_apogee/'
+
+    def get(self, request, *args, **kwargs):
+        self.set_attr_queryset(**kwargs)
+        try:
+            response = HttpResponse(save_virtual_workbook(self.create_workbook()), mimetype='application/vnd.ms-excel')
+        except DatabaseError:
+            messages.error(request, 'Connection à apogée impossible')
+            return redirect('stat_apogee')
+        date = datetime.datetime.today().strftime('%d-%m-%Y')
+        response['Content-Disposition'] = 'attachment; filename=%s_%s.xlsx' % ('extraction', date)
+        return response
 
     @property
     def filter_queryset(self):
