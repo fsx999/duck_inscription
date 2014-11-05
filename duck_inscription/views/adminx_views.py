@@ -1,20 +1,17 @@
 # coding=utf-8
 from io import StringIO
 from PyPDF2 import PdfFileReader, PdfFileWriter
-from django.contrib.contenttypes.models import ContentType
 from django.core.urlresolvers import reverse_lazy, reverse
 from django.db import DatabaseError
 from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.views.generic import FormView, TemplateView, View
-from django_xworkflows.xworkflow_log.models import TransitionLog
 from xworkflows import InvalidTransitionError
 from duck_inscription.forms.adminx_forms import DossierReceptionForm, ImprimerEnMasseForm, ChangementCentreGestionForm
 from duck_inscription.models import Wish, PaiementAllModel
 from django.conf import settings
 from duck_inscription.templatetags.lib_inscription import annee_en_cour
 from xhtml2pdf import pdf as pisapdf
-from xhtml2pdf import pisa
 from django.contrib import messages
 
 class DossierReceptionView(FormView):
