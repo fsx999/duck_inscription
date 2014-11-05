@@ -325,7 +325,7 @@ class Individu(xwf_models.WorkflowEnabled, models.Model):
             individu.date_nai_ind_opi = self.birthday
             individu.daa_ens_sup_opi = individu_apogee.daa_ens_sup
             individu.daa_etb_opi = individu_apogee.daa_etb
-
+            individu.daa_ent_etb_opi = individu_apogee.daa_ent_etb
             individu.lib_nom_pat_ind_opi = self.last_name
             individu.lib_nom_usu_ind_opi = self.common_name
             individu.lib_pr1_ind_opi = self.first_name1
