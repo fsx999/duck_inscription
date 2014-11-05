@@ -3,6 +3,7 @@ from io import StringIO
 from PyPDF2 import PdfFileReader, PdfFileWriter
 from django.contrib.contenttypes.models import ContentType
 from django.core.urlresolvers import reverse_lazy, reverse
+from django.db import DatabaseError
 from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.views.generic import FormView, TemplateView, View
@@ -205,16 +206,14 @@ class OpiView(View):
         if opi:
 
             wish = Wish.objects.get(code_dossier=opi)
-            # if wish.suivi_dossier.is_inscription_traite:
-            #     messages.error(request, u'Le dossier a déjà été traité')
-            #
-            # else:
-            wish.save_opi()
             try:
+                wish.save_opi()
                 wish.inscription_traite()
                 messages.success(request, 'Etudiant {} remontee'.format(wish.individu.code_opi))
             except InvalidTransitionError:
                 messages.error(request, 'Dossier déjà traité')
+            except DatabaseError:
+                messages.error(request, 'Connection à apogée impossible')
 
                 # self.message_user('Etudiant {} remontee'.format(wish.individu.code_opi), 'success')
         return redirect('/duck_inscription/wish/')

@@ -34,6 +34,7 @@ class WishInline(object):
             url = reverse('changement_centre', kwargs={'pk': obj.pk})
             result += ACTION.format(id=obj.pk, url=url)
         return result
+
     actions.allow_tags = True
     actions.short_description = 'action'
 
@@ -55,6 +56,7 @@ class WishInline(object):
         reins = self.reins(obj)
         date_liste_inscription = obj.date_liste_inscription or ''
         return test.format(centre_gestion, reins, date_liste_inscription)
+
     description.allow_tags = True
     reins.short_description = 'Réinscription'
 
@@ -73,8 +75,8 @@ class WishInline(object):
         if self.request.user.is_superuser:
             return self.readonly_fields
         else:
-            return ['label', 'description', 'current_state', 'get_transition_log',
-                    'get_suivi_dossier', 'print_dossier_equi', 'actions']
+            return ['label', 'description', 'current_state', 'get_transition_log', 'get_suivi_dossier',
+                    'print_dossier_equi', 'actions']
 
     @property
     def get_exclude(self):
@@ -130,6 +132,7 @@ class WishInline(object):
 
     def current_state(self, obj):
         return WishWorkflow.states[obj.state].title
+
     current_state.short_description = 'Etat du dossier'
     current_state.allow_tags = True
 
@@ -185,7 +188,6 @@ class IndividuXadmin(object):
         else:
             return self.readonly_fields + ('state', )
 
-
     def get_transition_log(self, obj):
         reponse = '<table>'
         for transition in obj.etape_dossier.all():
@@ -240,7 +242,6 @@ class OpiView(object):
     list_export = []
     list_per_page = 10
     search_fields = ['code_dossier', 'individu__last_name', 'individu__first_name1']
-    # list_display_links_details = True
     hidden_menu = True
     list_display = ('__str__', 'info_manquante', 'opi_url')
 
@@ -256,6 +257,7 @@ class OpiView(object):
         reponse = ""
         reponse += "annee dernier diplome" + unicode(dossier_inscription.annee_dernier_diplome) + "<br>"
         return reponse
+
     info_manquante.allow_tags = True
     info_manquante.short_description = 'info manquante'
 
@@ -268,33 +270,6 @@ class OpiView(object):
 
     def has_add_permission(self):
         return False
-
-    # @csrf_protect_m
-    # @filter_hook
-    # def get(self, request, *args, **kwargs):
-    #     """
-    #     The 'change list' admin view for this model.
-    #     """
-    #     response = self.get_result_list()
-    #     if response:
-    #         return response
-    #
-    #     context = self.get_context()
-    #     context.update(kwargs or {})
-    #
-    #     response = self.get_response(context, *args, **kwargs)
-    #     opi = self.request.GET.get('opi', None)
-    #     if opi:
-    #         wish = Wish.objects.get(code_dossier=opi)
-    #         if wish.suivi_dossier.is_inscription_traite:
-    #             self.message_user('Le dossier a déjà été traité', 'error')
-    #         else:
-    #             wish.save_opi()
-    #             wish.inscription_traite()
-    #             self.message_user('Etudiant {} remontee'.format(wish.individu.code_opi), 'success')
-    #
-    #     return response or TemplateResponse(request, self.object_list_template or self.get_template_list(
-    #         'views/model_list.html'), context, current_app=self.admin_site.name)
 
 
 xadmin.site.unregister(User)
