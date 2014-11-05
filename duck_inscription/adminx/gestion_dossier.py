@@ -81,6 +81,7 @@ class EquivalenceView(views.FormAdminView):
                     try:
                         wish.ouverture_inscription_from_equi()
                         msg = "Pam pam ! {} peut commencer la procedure d'inscription".format(wish.individu.last_name)
+                        self._envoi_email(wish, Mail.objects.get(name='email_autorise_from_equi'))
                         self.message_user(msg, 'success')
                     except InvalidTransitionError as erreur_trans:
                         raise erreur_trans
