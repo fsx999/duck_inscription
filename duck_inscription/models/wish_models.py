@@ -37,7 +37,8 @@ class WishWorkflow(xwf_models.Workflow):
         ('ouverture_inscription', 'Ouverture inscription'), ('dossier_inscription', 'Dossier inscription'),
         ('choix_ied_fp', 'Choix centre gestion'), ('droit_univ', 'Droit universitaire'),
         ('inscription', 'Dossier en inscription'), ('liste_attente_inscription', 'Liste attente inscription'),
-        ('auditeur', 'Dossier Auditeur')
+        ('auditeur', 'Dossier Auditeur'),
+        ('auditeur_traite', 'Dossier Auditeur Traité')
     )
 
     transitions = (
@@ -59,7 +60,9 @@ class WishWorkflow(xwf_models.Workflow):
         ('dossier_inscription', ('ouverture_inscription',), 'dossier_inscription'),
         ('choix_ied_fp', 'dossier_inscription', 'choix_ied_fp'), ('droit_universitaire', 'choix_ied_fp', 'droit_univ'),
         ('inscription', ('droit_univ', 'choix_ied_fp', 'liste_attente_inscription'), 'inscription'),
-        ('liste_attente_inscription', 'inscription', 'liste_attente_inscription'), ('auditeur', 'creation', 'auditeur')
+        ('liste_attente_inscription', 'inscription', 'liste_attente_inscription'),
+        ('auditeur', 'creation', 'auditeur'),
+        ('auditeur_traite', 'auditeur', 'auditeur_traite')
     )
 
     initial_state = 'creation'
@@ -331,7 +334,6 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
         return self.is_reins
 
     def envoi_email_reception(self):
-        print self.state.name
         if self.state.name == "equivalence":
             etape = u"d'équivalence"
 

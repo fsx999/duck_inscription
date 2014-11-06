@@ -1,0 +1,33 @@
+{% extends "xadmin/base_site.html" %}
+
+{% load static floppyforms %}
+{% block title %}
+Gestion de la réception des dossiers
+{% endblock %}
+{% block navbar %}{% endblock %}
+{% block content-nav %}{% endblock %}
+{% block content %}
+
+
+        <div class="well">
+        <h1>Gestion de la réception des dossiers (équivalences, candidatures, inscriptions)</h1>
+           </div>
+        <form class="form-horizontal" action="" method="post">
+            {% csrf_token %}
+            <div class="well">
+                {% form form %}
+            </div>
+            <div class="form-group">
+                <div class="col-sm-offset-3 col-sm-10">
+            <button type="submit" class="btn btn-success">Valider</button>
+                    </div></div>
+        </form>
+        <section class="well">
+
+                {{ message|safe}}
+
+
+        </section>
+
+    <script type="text/javascript" src="{%  static "backoffice/js/dossier_receptionne.js" %}"></script>
+{% endblock %}

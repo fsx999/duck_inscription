@@ -37,6 +37,7 @@ class IncriptionDashBoard(views.website.IndexView):
                           {'title': 'Gestion Equivalence', 'url': '/dossier_equivalence'},
                           {'title': 'Gestion Candidature', 'url': '/dossier_candidature'},
                           {'title': 'Gestion Dossier inscription', 'url': '/traitement_inscription'},
+                          {'title': 'Gestion Dossier inscription Auditeur', 'url': '/traitement_inscription_auditeur'},
                           {'title': 'Remontee opi', 'model': Wish},
                           ]},
                 {"type": "qbutton", "title": "Consultation des dossiers",

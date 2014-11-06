@@ -2,7 +2,7 @@
 from django.conf.urls import patterns, url
 from django.contrib.auth.decorators import login_required
 from duck_inscription.views import InscriptionPdfView, CandidaturePdfView
-from duck_inscription.views.adminx_views import DossierReceptionView, EquivalencePdfAdminView, \
+from duck_inscription.views.adminx_views import EquivalencePdfAdminView, \
     DecisionEquivalencePdfAdminView, ImprimerTousDecisions, ImprimerDecisionsEquivalenceEnMasseView, \
     ChangementCentreGestionView, OpiView
 

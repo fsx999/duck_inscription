@@ -99,6 +99,8 @@ class ChangementCentreGestionForm(forms.Form):
         return super(ChangementCentreGestionForm, self).clean()
 
 
-
+class AuditeurLibreForm(DossierReceptionForm):
+    choix = forms.ChoiceField(choices=(('complet', 'Complet'),),
+                              widget=forms.RadioSelect(), required=True)
 
 
