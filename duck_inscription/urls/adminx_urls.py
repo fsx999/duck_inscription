@@ -9,7 +9,7 @@ from duck_inscription.views.adminx_views import EquivalencePdfAdminView, \
 urlpatterns = patterns('',
                        # url(r'dossier_receptionner/$', login_required(DossierReceptionView.as_view()),
                        #     name='dossier_receptionner'),
-                        url(r'imprimer_decisions_ordre/$', login_required(ImprimerDecisionsEquivalenceEnMasseView.as_view()),
+                       url(r'imprimer_decisions_ordre/$', login_required(ImprimerDecisionsEquivalenceEnMasseView.as_view()),
                            name='imprimer_decisions_ordre'),
                        url(r'^impression_dossier_equivalence/(?P<pk>\d+)/$', login_required(EquivalencePdfAdminView.as_view()),
                            name="impression_equivalence"),

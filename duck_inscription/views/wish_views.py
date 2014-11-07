@@ -600,7 +600,6 @@ class AuditeurPdfView(TemplateView):
         return context
 
     def render_to_response(self, context, **response_kwargs):
-        count_auditeur = Wish.objects.filter(is_auditeur=True).count()
         response = HttpResponse(mimetype='application/pdf')
         response['Content-Disposition'] = 'attachment; filename=auditeur_libre.pdf'
         pdf = pisapdf.pisaPDF()
