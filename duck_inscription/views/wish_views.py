@@ -559,7 +559,7 @@ class NewAuditeurView(FormView):
             wish.auditeur()
             return redirect(wish.get_absolute_url())
 
-        return redirect('home')
+        return redirect('accueil')
 
     def form_invalid(self, form):
         return super(NewAuditeurView, self).form_invalid(form)

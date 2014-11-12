@@ -14,7 +14,6 @@ from django_apogee.models import AnneeUni, VersionEtape as VersionEtapeApogee, E
 from duck_inscription.models import SettingAnneeUni, SettingsEtape, Wish, WishTransitionLog, WishParcourTransitionLog
 
 
-
 class Command(BaseCommand):
     def handle(self, *args, **options):
         # on récupére les personnes du jour (soit la date de création, de modif plus grand que la veille
@@ -49,6 +48,3 @@ Une rubrique « Election » sera ouverte sur la plateforme de l’IED dans l�
 
         for x in Wish.objects.filter(etape_dossier__to_state='inscription_reception'):
             send_mail('[IED] Election', text, 'nepasrepondre@iedparis8.net', [x.individu.personal_email])
-
-
-
