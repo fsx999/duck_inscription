@@ -22,16 +22,11 @@ urlpatterns = patterns('',
                        url(r'^test_ine/$', IneTestView.as_view(),
                            name="test_ine"),
                        url(r'^adresse/$', user_verif_etape_and_login(AdresseIndividuView.as_view()), name="adresse"),
-
                        url(r'^recapitulatif/(?P<option>.+)',
                            user_verif_etape_and_login(RecapitulatifIndividuView.as_view()),
                            name="recap"),
                        url(r'^recapitulatif/$', user_verif_etape_and_login(RecapitulatifIndividuView.as_view()),
                            name="recap"),
-
                        url(r'^dossier_inscription/(?P<pk>\d+)/$',
-                           login_required(
-                           DossierInscriptionView.as_view()),
-                           name="dossier_inscription"),
-
-)
+                           login_required(DossierInscriptionView.as_view()),
+                           name="dossier_inscription"),)

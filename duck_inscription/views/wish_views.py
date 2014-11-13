@@ -558,7 +558,7 @@ class NewAuditeurView(FormView):
             wish.auditeur()
             return redirect(wish.get_absolute_url())
 
-        return redirect('home')
+        return redirect('accueil')
 
     def form_invalid(self, form):
         return super(NewAuditeurView, self).form_invalid(form)
@@ -599,7 +599,6 @@ class AuditeurPdfView(TemplateView):
         return context
 
     def render_to_response(self, context, **response_kwargs):
-        count_auditeur = Wish.objects.filter(is_auditeur=True).count()
         response = HttpResponse(mimetype='application/pdf')
         response['Content-Disposition'] = 'attachment; filename=auditeur_libre.pdf'
         pdf = pisapdf.pisaPDF()
