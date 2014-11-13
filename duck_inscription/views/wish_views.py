@@ -344,7 +344,6 @@ class OuverturePaiementView(TemplateView):
         return self.render_to_response(context)
 
 
-
 class ChoixIedFpView(TemplateView):
     template_name = "duck_inscription/wish/choix_ied_fp.html"
 
