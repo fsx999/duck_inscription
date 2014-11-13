@@ -210,8 +210,8 @@ class OpiView(View):
                 messages.success(request, 'Etudiant {} remontee'.format(wish.individu.code_opi))
             except InvalidTransitionError:
                 messages.error(request, 'Dossier déjà traité')
-            except DatabaseError:
-                messages.error(request, 'Connection à apogée impossible')
+            except DatabaseError as e:
+                messages.error(request, 'Connection à apogée impossible: {}'.format(e))
 
                 # self.message_user('Etudiant {} remontee'.format(wish.individu.code_opi), 'success')
         return redirect('/duck_inscription/wish/')
