@@ -469,14 +469,14 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
             return 0
 
     def date_limite_envoi(self):
-        if self.is_reins_formation():
-            return self.etape.date_fermeture_reinscription
-
-        elif self.etape.limite_etu:
-            date = (self.date_validation or datetime.date.today()) + datetime.timedelta(21)
-            return date
-        else:
-            return self.etape.date_fermeture_inscription
+        # if self.is_reins_formation():
+        return self.etape.date_fermeture_reinscription
+        #
+        # elif self.etape.limite_etu:
+        #     date = (self.date_validation or datetime.date.today()) + datetime.timedelta(21)
+        #     return date
+        # else:
+        #     return self.etape.date_fermeture_inscription
 
     def droit_total(self):
         return float(self.droit_univ() + self.tarif_secu())
