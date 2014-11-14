@@ -152,6 +152,15 @@ class Individu(xwf_models.WorkflowEnabled, models.Model):
     def __str__(self):
         return u"%s %s %s %s" % (self.last_name, self.common_name, self.first_name1, self.first_name2)
 
+    def numeros_telephones(self):
+        html_reponse = "<p>"
+        for adresse in self.adresses.all():
+            html_reponse += "{}<br>".format(adresse.listed_number)
+        return html_reponse+"</p>"
+
+    numeros_telephones.short_description = "Tel:"
+    numeros_telephones.allow_tags = True
+
     def p28(self):
         e = (date.today() - self.birthday)
         if e.days / 365 > 28:

@@ -4,6 +4,7 @@ from xadmin import views
 import xadmin
 from duck_inscription.models import Individu
 from duck_inscription.models import Wish
+from django_apogee.models import Individu as IndividuApogee
 
 class BaseSetting(object):
     use_bootswatch = True
@@ -14,7 +15,7 @@ xadmin.site.register(views.BaseAdminView, BaseSetting)
 
 class GlobalSetting(object):
     menu_style = 'accordion'
-    global_search_models = [Individu, Wish]
+    global_search_models = [Individu, Wish, IndividuApogee]
     global_add_models = []
 
 
