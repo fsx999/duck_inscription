@@ -262,11 +262,11 @@ class Individu(xwf_models.WorkflowEnabled, models.Model):
             individu.cod_nne_ind_opi = ine
             individu.cod_cle_nne_ind_opi = cle
             individu.daa_ent_etb_opi = annee_premiere_inscription_universite_fr
-            individu.lib_nom_pat_ind_opi = self.last_name
-            individu.lib_nom_usu_ind_opi = self.common_name
-            individu.lib_pr1_ind_opi = self.first_name1
-            individu.lib_pr2_ind_opi = self.first_name2
-            individu.lib_pr3_ind_opi = self.first_name3
+            individu.lib_nom_pat_ind_opi = self.last_name.upper()
+            individu.lib_nom_usu_ind_opi = self.common_name.upper()
+            individu.lib_pr1_ind_opi = self.first_name1.upper()
+            individu.lib_pr2_ind_opi = self.first_name2.upper()
+            individu.lib_pr3_ind_opi = self.first_name3.upper()
             individu.num_tel_ind_opi = self.get_tel()
             individu.cod_etu_opi = self.student_code
             individu.lib_vil_nai_etu_opi = self.town_birth
