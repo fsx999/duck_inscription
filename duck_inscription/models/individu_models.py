@@ -323,8 +323,8 @@ class Individu(xwf_models.WorkflowEnabled, models.Model):
             individu = IndOpi.objects.using(db).get_or_create(
                 cod_ind_opi=self.code_opi,
                 date_nai_ind_opi=self.birthday,
-                lib_pr1_ind_opi=self.first_name1,
-                lib_nom_pat_ind_opi=self.last_name,
+                lib_pr1_ind_opi=self.first_name1.upper(),
+                lib_nom_pat_ind_opi=self.last_name.upper(),
                 cod_opi_int_epo=self.code_opi,)[0]
             individu.cod_ind_opi = self.code_opi
             individu.cod_sim = individu_apogee.cod_sim
