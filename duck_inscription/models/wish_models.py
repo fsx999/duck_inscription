@@ -109,11 +109,13 @@ class SuiviDossierWorkflow(xwf_models.Workflow):
          ('inactif', 'equivalence_traite', 'candidature_complet', 'candidature_traite', 'inscription_incomplet',
           'inscription_incom_r'),
          'inscription_reception'),
-        ('inscription_incomplet', ('inscription_reception',), 'inscription_incomplet'),
-        ('inscription_incomplet_renvoi', ('inscription_reception',), 'inscription_incom_r'),
+        ('inscription_incomplet', ('inscription_reception', 'inscription_complet',
+                                   'inscription_traite'), 'inscription_incomplet'),
+        ('inscription_incomplet_renvoi', ('inscription_reception', 'inscription_complet','inscription_traite'),
+         'inscription_incom_r'),
         ('inscription_complet', ('inscription_reception', 'inscription_incomplet'), 'inscription_complet'),
         ('inscription_traite', ('inscription_reception', 'inscription_complet', 'inscription_incomplet',
-                                'inscription_refuse'), 'inscription_traite',),
+                                'inscription_refuse', 'inscription_traite'), 'inscription_traite',),
         ('inscription_refuse', ('inscription_reception', 'inscription_complet', 'inscription_incomplet', 'inactif'),
          'inscription_refuse',),
         ('inscription_annule', ('inscription_annule', 'inscription_refuse', 'inscription_reception',
@@ -469,14 +471,14 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
             return 0
 
     def date_limite_envoi(self):
-        if self.is_reins_formation():
-            return self.etape.date_fermeture_reinscription
-
-        elif self.etape.limite_etu:
-            date = (self.date_validation or datetime.date.today()) + datetime.timedelta(21)
-            return date
-        else:
-            return self.etape.date_fermeture_inscription
+        # if self.is_reins_formation():
+        return self.etape.date_fermeture_reinscription
+        #
+        # elif self.etape.limite_etu:
+        #     date = (self.date_validation or datetime.date.today()) + datetime.timedelta(21)
+        #     return date
+        # else:
+        #     return self.etape.date_fermeture_inscription
 
     def droit_total(self):
         return float(self.droit_univ() + self.tarif_secu())

@@ -204,10 +204,10 @@ class CandidatureView(views.FormAdminView):
                 wish = Wish.objects.get(code_dossier=code_dossier)
                 if wish.etape not in self.request.user.setting_user.etapes.all():
                     raise PermissionDenied
-                if wish.suivi_dossier.is_candidature_traite:
-                    msg = 'Dossier déjà traité'
-                    self.message_user(msg, 'warning')
-                elif not wish.state.is_candidature and not wish.state.is_liste_attente_candidature:
+                # if wish.suivi_dossier.is_candidature_traite:
+                #     msg = 'Dossier déjà traité'
+                #     self.message_user(msg, 'warning')
+                if not wish.state.is_candidature and not wish.state.is_liste_attente_candidature:
                     msg = 'Dossier n\'est pas en candidature'
                     self.message_user(msg, 'warning')
                 elif choix == 'complet':
@@ -241,7 +241,8 @@ class CandidatureView(views.FormAdminView):
 
                 elif choix == 'accepte':
                     mail = 'email_candidature_accepte'
-
+                    if wish.state.is_liste_attente_candidature:
+                        wish.candidature()
                     try:
                         wish.candidature_traite()
                     except (InvalidTransitionError, ForbiddenTransition) as e:
@@ -380,7 +381,7 @@ class DossierInscriptionView(views.FormAdminView):
                 wish = Wish.objects.get(code_dossier=code_dossier)
                 if wish.etape not in self.request.user.setting_user.etapes.all():
                     raise PermissionDenied
-                if wish.suivi_dossier.is_inscription_traite or wish.suivi_dossier.is_inscription_refuse:
+                if wish.suivi_dossier.is_inscription_refuse:
                     msg = 'Dossier déjà traité'
                     self.message_user(msg, 'warning')
                 elif not wish.state.is_inscription and not wish.state.is_liste_attente_inscription:
