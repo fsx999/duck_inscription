@@ -241,7 +241,8 @@ class CandidatureView(views.FormAdminView):
 
                 elif choix == 'accepte':
                     mail = 'email_candidature_accepte'
-
+                    if wish.state.is_liste_attente_candidature:
+                        wish.candidature()
                     try:
                         wish.candidature_traite()
                     except (InvalidTransitionError, ForbiddenTransition) as e:
