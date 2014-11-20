@@ -1,6 +1,7 @@
 # coding=utf-8
 from django.conf.urls import patterns, url
 from django.contrib.auth.decorators import login_required
+from duck_inscription.adminx import ExtrationEtiquettesView
 from duck_inscription.views import InscriptionPdfView, CandidaturePdfView
 from duck_inscription.views.adminx_views import EquivalencePdfAdminView, \
     DecisionEquivalencePdfAdminView, ImprimerTousDecisions, ImprimerDecisionsEquivalenceEnMasseView, \
@@ -22,4 +23,9 @@ urlpatterns = patterns(
     url(r'^changement_centre/(?P<pk>\d+)/$', login_required(ChangementCentreGestionView.as_view()),
         name="changement_centre"),
     url(r'^remontee_opi/$', login_required(OpiView.as_view()),
-        name="remontee_opi"),)
+        name="remontee_opi"),
+    url(r'^extraction_etiquette_view/(?P<step>\w+)/$',
+        ExtrationEtiquettesView.as_view(),
+        name='extraction_etiquettes'),
+    )
+

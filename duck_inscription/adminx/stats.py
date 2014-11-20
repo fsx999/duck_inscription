@@ -7,8 +7,9 @@ from django.shortcuts import redirect
 from django.views.decorators.cache import never_cache
 from openpyxl.workbook import Workbook
 from openpyxl.writer.excel import save_virtual_workbook
+from wkhtmltopdf.views import PDFTemplateView
 import xlwt
-from django_apogee.models import InsAdmEtp
+from django_apogee.models import InsAdmEtp, Individu
 from xadmin.views import filter_hook, BaseAdminView
 from xadmin import views
 import xadmin
@@ -197,6 +198,27 @@ class ExtractionPiel(views.Dashboard):
 
 
 xadmin.site.register_view(r'^extraction/$', ExtractionPiel, 'extraction')
+
+
+class ExtrationEtiquettesView(PDFTemplateView):
+    filename = "Etiquettes.pdf"
+    template_name = "extraction/etiquette_postale.html"
+    cmd_options = {
+        'orientation': 'landscape',
+    }
+
+    def get_context_data(self, **kwargs):
+        cod_etp = self.kwargs.get('step', None)
+        etudiants = Individu.objects.filter(etapes_ied__cod_etp=cod_etp,
+                                            etapes_ied__cod_anu=2014, etapes_ied__eta_iae='E',
+                                            etapes_ied__tem_iae_prm='O', ).order_by('lib_nom_pat_ind')
+
+        context = super(ExtrationEtiquettesView, self).get_context_data(**kwargs)
+
+        context["etudiants"] = etudiants
+
+        return context
+
 
 
 class ExtrationPalView(BaseAdminView):
