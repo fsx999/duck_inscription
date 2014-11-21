@@ -200,6 +200,12 @@ class ExtractionPiel(views.Dashboard):
 xadmin.site.register_view(r'^extraction/$', ExtractionPiel, 'extraction')
 
 
+class DatesAndTarifs(ExtractionPiel):
+    base_template = "informations/date_et_tarifs.html"
+
+xadmin.site.register_view(r'^datesandtarifs/$', DatesAndTarifs, 'datesandtarifs')
+
+
 class ExtrationEtiquetteView(PDFTemplateView):
     filename = "etiquette.pdf"
     template_name = "extraction/etiquette_postale.html"
