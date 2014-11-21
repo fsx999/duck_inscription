@@ -21,6 +21,7 @@ class GlobalSetting(object):
 
 xadmin.site.register(views.CommAdminView, GlobalSetting)
 
+
 class MainDashboard(object):
     widgets = [[{"type": "qbutton", "title": "Scolarité", "btns": [
 
