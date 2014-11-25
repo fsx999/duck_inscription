@@ -21,11 +21,16 @@ class GlobalSetting(object):
 
 xadmin.site.register(views.CommAdminView, GlobalSetting)
 
+
 class MainDashboard(object):
     widgets = [[{"type": "qbutton", "title": "Scolarité", "btns": [
-
-        {'title': "Pré-Inscription", 'url': 'inscription'}, {'title': "Statistique", 'url': 'statistiques'},
-        {'title': 'Extraction', 'url': 'extraction'}]}, ]]
+        {'title': "Pré-Inscription", 'url': 'inscription'},
+        {'title': 'Consultation dossier inscription etudiant apogée', 'url': '/django_apogee/individu'},
+        {'title': 'Extraction', 'url': 'extraction'}]},
+                {"type":"qbutton", "title": "Informations", "btns": [
+                    {'title': "Statistique", 'url': 'statistiques'},
+                    {'title': "Dates et tarifs", 'url': 'datesandtarifs'},
+                ]}]]
     site_title = 'Backoffice'
     title = 'Accueil'
     widget_customiz = False
@@ -42,8 +47,7 @@ class IncriptionDashBoard(views.website.IndexView):
                           {'title': 'Remontee opi', 'model': Wish},
                           ]},
                 {"type": "qbutton", "title": "Consultation des dossiers",
-                "btns": [{'title': 'Consultation dossier inscription', 'model': Individu},
-                         {'title': 'Consultation dossier inscription etudiant apogeé', 'url':'/django_apogee/individu'}]}
+                "btns": [{'title': 'Consultation dossier inscription', 'model': Individu},]}
                ]]
     site_title = 'Backoffice'
     title = 'Accueil'

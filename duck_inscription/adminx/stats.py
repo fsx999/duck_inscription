@@ -200,6 +200,27 @@ class ExtractionPiel(views.Dashboard):
 xadmin.site.register_view(r'^extraction/$', ExtractionPiel, 'extraction')
 
 
+class DatesAndTarifs(ExtractionPiel):
+    base_template = "informations/date_et_tarifs.html"
+
+xadmin.site.register_view(r'^datesandtarifs/$', DatesAndTarifs, 'datesandtarifs')
+
+
+class ExtrationEtiquetteView(PDFTemplateView):
+    filename = "etiquette.pdf"
+    template_name = "extraction/etiquette_postale.html"
+    cmd_options = {
+        'orientation': 'landscape',
+    }
+
+    def get_context_data(self, **kwargs):
+        cod_ind = self.kwargs.get('cod_ind', None)
+        etudiant = Individu.objects.get(cod_ind=cod_ind)
+        context = super(ExtrationEtiquetteView, self).get_context_data(**kwargs)
+        context['etudiants'] = [etudiant] * 4
+        return context
+
+
 class ExtrationEtiquettesView(PDFTemplateView):
     filename = "Etiquettes.pdf"
     template_name = "extraction/etiquette_postale.html"
