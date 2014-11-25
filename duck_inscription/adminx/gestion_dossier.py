@@ -12,6 +12,7 @@ from xadmin import views
 import xadmin
 from duck_inscription.models import SettingsEtape
 from duck_inscription.models import Wish
+from foad.models import AuditeurLibreApogee
 
 
 class DossierReception(views.FormAdminView):
@@ -325,6 +326,7 @@ class DossierAuditeurView(views.FormAdminView):
                     try:
                         wish.auditeur_traite()
                         self._envoi_email(wish, template)
+                        AuditeurLibreApogee.objects.create_auditeur(wish.individu)
                         self.message_user('Dossier traité', 'success')
                     except InvalidTransitionError as e:
                         if wish.suivi_dossier.is_inscription_complet:
