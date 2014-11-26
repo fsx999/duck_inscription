@@ -108,15 +108,14 @@ class SettingsEtape(Etape):
     def stat_suivi_dossier(self):
         from duck_inscription.models import WishTransitionLog
         return dict(WishTransitionLog.objects.filter(
-            wish__etape=self).values_list('to_state').annotate(Count('to_state')))
+            wish__etape=self, wish__auditeur=False).values_list('to_state').annotate(Count('to_state')))
 
     def stat_etat_dossier(self):
-        return dict(self.wish_set.all().values_list('suivi_dossier').annotate(Count('suivi_dossier')))
+        return dict(self.wish_set.filter(auditeur=False).values_list('suivi_dossier').annotate(Count('suivi_dossier')))
 
     def stat_nb_reception(self):
         from duck_inscription.models import WishTransitionLog
-        return WishTransitionLog.objects.filter(wish__etape=self, to_state='inscription_reception').distinct('wish').count()
-
+        return WishTransitionLog.objects.filter(wish__auditeur=False, wish__etape=self, to_state='inscription_reception').distinct('wish').count()
 
     def stat_apogee(self):
         from django_apogee.models import InsAdmEtp
