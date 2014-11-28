@@ -38,7 +38,10 @@ def tag_totaux(etapes, function, param):
     totaux = 0
     for etape in etapes:
         func = getattr(etape, function)
-        totaux += func()[param]
+        try:
+            totaux += func()[param]
+        except KeyError:
+            totaux += 0
     return totaux
 
 

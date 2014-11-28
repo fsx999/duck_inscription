@@ -37,6 +37,17 @@
         {% endwith %}
 
         {% endfor %}
-        </tbody>
+        <tr>
+            <td>Totaux</td>
+            <td>{% tag_totaux etapes 'stat_parcours_dossier' 'inscription' %}</td>
+            <td>{% tag_totaux etapes 'stat_nb_reception' 'nb_reception' %}</td>
+            <td>{% tag_totaux etapes 'stat_etat_dossier' 'inscription_incomplet' %}</td>
+            <td>{% tag_totaux etapes 'stat_etat_dossier' 'inscription_incom_r' %}</td>
+            <td>{% tag_totaux etapes 'stat_suivi_dossier' 'inscription_complet' %}</td>
+            <td>{% tag_totaux etapes 'stat_etat_dossier' 'inscription_traite' %}</td>
+            <td>{% tag_totaux etapes 'stat_parcours_dossier' 'liste_attente_inscription' %}</td>
+            <td>{% tag_totaux etapes 'stat_suivi_dossier' 'liste_attente_and_equi' %}</td>
+        </tr>
+
     </table>
 {% endblock %}
