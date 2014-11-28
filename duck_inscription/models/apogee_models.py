@@ -115,8 +115,7 @@ class SettingsEtape(Etape):
 
     def stat_nb_reception(self):
         from duck_inscription.models import WishTransitionLog
-        return WishTransitionLog.objects.filter(wish__etape=self, to_state='inscription_reception').distinct('wish').count()
-
+        return {"nb_reception": WishTransitionLog.objects.filter(wish__etape=self, to_state='inscription_reception').distinct('wish').count()}
 
     def stat_apogee(self):
         from django_apogee.models import InsAdmEtp

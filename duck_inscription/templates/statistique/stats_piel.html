@@ -1,17 +1,19 @@
 {% extends "xadmin/base_site.html" %}
+{% load lib_inscription %}
 {% block nav_title %}Statistique Pré-inscription{% endblock %}
 {% block content %}
     <table class="table table-bordered table-striped">
         <thead>
         <tr>
             <th></th>
-            <th colspan="7">Dossier de pré-inscription</th>
+            <th colspan="8">Dossier de pré-inscription</th>
         </tr>
         <tr>
             <th>Etape</th>
             <th>Effectué</th>
             <th>Réceptionné</th>
             <th>Incomplet</th>
+            <th>Incomplet(avec renvoi)</th>
             <th>Complet</th>
             <th>Traité (OPI)</th>
             <th>Liste attente</th>
@@ -24,8 +26,9 @@
         <tr>
             <td>{{ etape.label }}</td>
             <td><a href=" {% url 'xadmin:extraction_stat' 'parcours_dossier' 'inscription' etape.cod_etp %}"> {{ stat.inscription }}</a></td>
-            <td><a href=" {% url 'xadmin:extraction_stat' 'etat_suivi_dossier' 'inscription_reception' etape.cod_etp %}"> {{ etape.stat_nb_reception }}</a></td>
-            <td><a href=" {% url 'xadmin:extraction_stat' 'etat' 'inscription_incomplet' etape.cod_etp %}">{{ etats.inscription_incomplet }}</a> {{ etats.inscription_incom_r }}</td>
+            <td><a href=" {% url 'xadmin:extraction_stat' 'etat_suivi_dossier' 'inscription_reception' etape.cod_etp %}"> {{ etape.stat_nb_reception.nb_reception }}</a></td>
+            <td><a href=" {% url 'xadmin:extraction_stat' 'etat' 'inscription_incomplet' etape.cod_etp %}">{{ etats.inscription_incomplet }}</a></td>
+            <td>{{ etats.inscription_incom_r }}</td>
             <td><a href=" {% url 'xadmin:extraction_stat' 'etat' 'inscription_complet' etape.cod_etp %}">{{ stat_suivi.inscription_complet }}</a></td>
             <td><a href=" {% url 'xadmin:extraction_stat' 'etat' 'inscription_traite' etape.cod_etp %}">{{ etats.inscription_traite }}</a></td>
             <td><a href=" {% url 'xadmin:extraction_stat' 'parcours_dossier' 'liste_attente_inscription' etape.cod_etp %}">{{ stat.liste_attente_inscription }}</a></td>

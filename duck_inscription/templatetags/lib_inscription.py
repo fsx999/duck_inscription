@@ -33,3 +33,13 @@ def annee_en_cour():
         return "{} / {}".format(annee, int(annee) + 1)
     return "Fermé"
 
+@register.simple_tag
+def tag_totaux(etapes, function, param):
+    totaux = 0
+    for etape in etapes:
+        func = getattr(etape, function)
+        totaux += func()[param]
+    return totaux
+
+
+
