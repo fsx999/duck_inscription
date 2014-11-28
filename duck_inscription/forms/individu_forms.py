@@ -158,8 +158,7 @@ class CodeEtudiantForm(forms.Form):
         data = super(CodeEtudiantForm, self).clean()
         code_etu = data.get("code_etu", 0)
         date_naissance = data.get("date_naissance", date.today())
-        date_naissance = datetime(*(date_naissance.timetuple()[:6]), tzinfo=GMT0())
-        print date_naissance
+        # date_naissance = datetime(*(date_naissance.timetuple()[:6]), tzinfo=GMT0())
         if not Individu.objects.filter(cod_etu=code_etu, date_nai_ind=date_naissance):
             raise forms.ValidationError(u"Le numéro étudiant et la date de naissance ne correspondent pas")
         return data

@@ -374,6 +374,29 @@ class Individu(xwf_models.WorkflowEnabled, models.Model):
                 type = 2 if adresse.type == 1 else 1
                 self._save(adresse, type, db)
 
+    def get_adresse_annuelle_simple(self):
+        try:
+            a = self.adresses.get(type='1')
+            return a.get_full_adresse_simple()
+        except AdresseIndividu.DoesNotExist:
+            return "Aucune"
+
+    def get_full_adresse_simple(self):
+        response = ''
+
+        if self.label_adr_1:
+            response += self.label_adr_1
+        if self.label_adr_2:
+            response += " " + self.label_adr_2
+        if self.label_adr_3:
+            response += " " + self.label_adr_3
+        if self.com_bdi:
+            response += " " + self.com_bdi.cod_bdi + " " + self.com_bdi.lib_ach
+        if self.label_adr_etr:
+            response += " " + self.label_adr_etr
+        response += " " + self.code_pays.lib_pay
+        return response
+
     def _save(self, adresse, type, db):
         cod_bdi = None
         cod_com = None
