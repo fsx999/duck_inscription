@@ -1,4 +1,5 @@
 {% extends "xadmin/base_site.html" %}
+{% load lib_inscription %}
 {% block nav_title %}Statistique PAL{% endblock %}
 {% block content %}
     <table class="table table-bordered table-striped">
@@ -42,6 +43,17 @@
         {% endwith %}
 
         {% endfor %}
+        <tr>
+            <td>Totaux</td>
+            <td>{% tag_totaux etapes 'stat_parcours_dossier' 'equivalence' %}</td>
+            <td>{% tag_totaux etapes 'stat_suivi_dossier' 'equivalence_reception' %}</td>
+            <td>{% tag_totaux etapes 'stat_suivi_dossier' 'equivalence_refuse' %}</td>
+            <td>{% tag_totaux etapes 'stat_suivi_dossier' 'equivalence_traite' %}</td>
+            <td>{% tag_totaux etapes 'stat_parcours_dossier' 'candidature' %}</td>
+            <td>{% tag_totaux etapes 'stat_suivi_dossier' 'candidature_reception' %}</td>
+            <td>{% tag_totaux etapes 'stat_suivi_dossier' 'candidature_refuse' %}</td>
+            <td>{% tag_totaux etapes 'stat_suivi_dossier' 'candidature_traite' %}</td>
+        </tr>
         </tbody>
     </table>
 {% endblock %}
