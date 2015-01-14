@@ -96,11 +96,14 @@ class ExtractionStatistiqueBase(BaseAdminView):
     def get_structure_excel(self):
         return self.structure_excel
 
+    def get_queryset(self):
+        return self.model_extraction.objects.filter(**self.filter_queryset[self.type_stat])
+
     def create_workbook(self):
         wb = Workbook()
         ws = wb.active
 
-        queryset = self.model_extraction.objects.filter(**self.filter_queryset[self.type_stat])
+        queryset = self.get_queryset()
         for collumn, cell in enumerate(self.get_structure_excel, start=1):
             ws.cell(row=1, column=collumn).value = cell[0]
 
@@ -154,6 +157,9 @@ class ExtractionStatApogee(ExtractionStatistiqueBase):
 
     type_stat = 'ordinaire'
     url = '/stats_apogee/'
+
+    def get_queryset(self):
+        return self.model_extraction.inscrits.filter(**self.filter_queryset[self.type_stat])
 
     def get(self, request, *args, **kwargs):
         self.set_attr_queryset(**kwargs)
