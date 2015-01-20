@@ -13,6 +13,7 @@ class IEDPlugin(BaseAdminPlugin):
     urls = [
         {'name': 'Wiki', 'url': '/wiki'},
         {'name': 'Forum', 'url': '/forum'},
+        {'name': 'Support', 'url': '/support'},
     ]
 
     def get_context(self, context):
