@@ -23,14 +23,24 @@ xadmin.site.register(views.CommAdminView, GlobalSetting)
 
 
 class MainDashboard(object):
-    widgets = [[{"type": "qbutton", "title": "Scolarité", "btns": [
-        {'title': "Pré-Inscription", 'url': 'inscription'},
-        {'title': 'Consultation dossier inscription etudiant apogée', 'url': '/django_apogee/individu'},
-        {'title': 'Extraction', 'url': 'extraction'}]},
-                {"type":"qbutton", "title": "Informations", "btns": [
-                    {'title': "Statistique", 'url': 'statistiques'},
-                    {'title': "Dates et tarifs", 'url': 'datesandtarifs'},
-                ]}]]
+    widgets = [[{"type": "qbutton",
+                 "title": "Scolarité",
+                 "btns": [
+                     {'title': "Pré-Inscription", 'url': 'inscription'},
+                     {'title': 'Consultation dossier inscription etudiant apogée', 'url': '/django_apogee/individu'},
+                     {'title': 'Extraction', 'url': 'extraction'}]},
+                {"type": "qbutton",
+                 "title": "Informations",
+                 "btns": [
+                     {'title': "Statistique", 'url': 'statistiques'},
+                     {'title': "Dates et tarifs", 'url': 'datesandtarifs'}, ]},
+                {"type": "qbutton",
+                 "title": "Gestion financière",
+                 "btns": [
+                     {'title': "Gestion des paiements", 'url': 'gestion_financiere_annee'},
+                     # {'title': "Dates et tarifs", 'url': 'datesandtarifs'},
+                     ]},
+               ]]
     site_title = 'Backoffice'
     title = 'Accueil'
     widget_customiz = False
