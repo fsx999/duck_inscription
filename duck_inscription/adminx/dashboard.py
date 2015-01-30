@@ -37,7 +37,7 @@ class MainDashboard(object):
                 {"type": "qbutton",
                  "title": "Gestion financière",
                  "btns": [
-                     {'title': "Gestion des paiements", 'url': 'gestion_financiere_annee'},
+                     {'title': "Gestion des paiements", 'url': 'xadmin:gestion_financiere_annee'},
                      # {'title': "Dates et tarifs", 'url': 'datesandtarifs'},
                      ]},
                ]]
