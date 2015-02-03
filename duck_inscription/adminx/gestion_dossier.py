@@ -324,7 +324,7 @@ class DossierAuditeurView(views.FormAdminView):
                 elif choix == 'complet':
                     template = Mail.objects.get(name='email_auditeur_traite')
                     try:
-                        wish.auditeur_traite()
+                        # wish.auditeur_traite()
                         self._envoi_email(wish, template)
                         AuditeurLibreApogee.objects.create_auditeur(wish.individu)
                         self.message_user('Dossier traité', 'success')
