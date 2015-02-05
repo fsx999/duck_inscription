@@ -167,7 +167,7 @@ class ExtractionStatApogee(ExtractionStatistiqueBase):
             response = HttpResponse(save_virtual_workbook(self.create_workbook()), mimetype='application/vnd.ms-excel')
         except DatabaseError:
             messages.error(request, 'Connection à apogée impossible')
-            return redirect('stat_apogee')
+            return redirect('xadmin:stat_apogee')
         date = datetime.datetime.today().strftime('%d-%m-%Y')
         response['Content-Disposition'] = 'attachment; filename=%s_%s.xlsx' % ('extraction', date)
         return response
