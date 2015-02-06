@@ -40,6 +40,13 @@ class MainDashboard(object):
                      {'title': "Gestion des paiements", 'url': 'xadmin:gestion_financiere_annee'},
                      # {'title': "Dates et tarifs", 'url': 'datesandtarifs'},
                      ]},
+                {"type": "qbutton",
+                 "title": "Gestion examen",
+                 "btns": [
+                     {'title': "Gestion des examens à l'etranger", 'url': 'xadmin:duck_examen_etapeexamen_changelist'},
+                     {'title': "Gestion des centres", 'url': 'xadmin:duck_examen_examcenter_changelist'},
+                     # {'title': "Dates et tarifs", 'url': 'datesandtarifs'},
+                     ]},
                ]]
     site_title = 'Backoffice'
     title = 'Accueil'
