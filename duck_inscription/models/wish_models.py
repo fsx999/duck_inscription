@@ -27,8 +27,10 @@ __author__ = 'paul'
 class WishWorkflow(xwf_models.Workflow):
     log_model = 'duck_inscription.WishParcourTransitionLog'
     states = (
-        ('creation', 'Création'), ('ouverture_equivalence', 'Ouverture equivalence'),
-        ('liste_diplome', 'Liste Diplome équivalent'), ('demande_equivalence', 'Demande desir équivalence'),
+        ('creation', 'Création'),
+        ('ouverture_equivalence', 'Ouverture equivalence'),
+        ('liste_diplome', 'Liste Diplome équivalent'),
+        ('demande_equivalence', 'Demande desir équivalence'),
         ('equivalence', 'Dossier en équivalence'),
         ('liste_attente_equivalence', 'Dossier en liste attente équivalence'),
         ('ouverture_candidature', 'Ouverture candidature'), ('note_master', 'Note master'),
