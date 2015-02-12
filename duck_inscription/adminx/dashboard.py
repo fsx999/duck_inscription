@@ -43,7 +43,9 @@ class MainDashboard(object):
                 {"type": "qbutton",
                  "title": "Gestion examen",
                  "btns": [
-                     {'title': "Gestion des examens à l'etranger", 'url': 'xadmin:duck_examen_etapeexamen_changelist'},
+                     # {'title': "Gestion des examens à l'etranger", 'url': 'xadmin:duck_examen_etapeexamen_changelist'}, TODO faire la gestion du get
+                     {'title': "Gestion des examens à l'etranger", 'url': '/duck_examen/etapeexamen/?incorporation=0'},
+                     {'title': "Gestion des examens aux dom-tom, handicap et autres ", 'url': '/duck_examen/etapeexamen/?incorporation=1'},
                      {'title': "Gestion des centres", 'url': 'xadmin:duck_examen_examcenter_changelist'},
                      # {'title': "Dates et tarifs", 'url': 'datesandtarifs'},
                      ]},
