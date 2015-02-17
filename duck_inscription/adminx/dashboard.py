@@ -50,7 +50,7 @@ class MainDashboard(object):
                      {'title': "Gestion des examens aux dom-tom, handicap et autres ",
                       'url': '/duck_examen/etapeexamen/?incorporation=1', 'perms': ('examen', 'dom-tom')},
                      {'title': "Gestion des centres", 'url': 'xadmin:duck_examen_examcenter_changelist',
-                      'perms': 'examen'},
+                      'perms': ('examen', )},
                      {'title': "Impressions", 'url': 'xadmin:liste_impression_examen'},
                      ]},
                ]]
