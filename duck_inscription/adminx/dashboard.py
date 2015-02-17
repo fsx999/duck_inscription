@@ -38,7 +38,7 @@ class MainDashboard(object):
                  "title": "Gestion financière",
                  "btns": [
                      {'title': "Gestion des paiements", 'url': 'xadmin:gestion_financiere_annee',
-                      'perms': ('gestion_paiement_etudiant',)},
+                      'groups': ('gestion_paiement_etudiant',)},
                      # {'title': "Dates et tarifs", 'url': 'datesandtarifs'},
                      ]},
                 {"type": "qbutton",
@@ -46,11 +46,11 @@ class MainDashboard(object):
                  "btns": [
                      # {'title': "Gestion des examens à l'etranger", 'url': 'xadmin:duck_examen_etapeexamen_changelist'}, TODO faire la gestion du get
                      {'title': "Gestion des examens à l'etranger", 'url': '/duck_examen/etapeexamen/?incorporation=0',
-                      'perms': ('examen',)},
+                      'groups': ('examen',)},
                      {'title': "Gestion des examens aux dom-tom, handicap et autres ",
-                      'url': '/duck_examen/etapeexamen/?incorporation=1', 'perms': ('examen', 'dom-tom')},
+                      'url': '/duck_examen/etapeexamen/?incorporation=1', 'groups': ('examen', 'dom-tom')},
                      {'title': "Gestion des centres", 'url': 'xadmin:duck_examen_examcenter_changelist',
-                      'perms': ('examen', )},
+                      'groups': ('examen', )},
                      {'title': "Impressions", 'url': 'xadmin:liste_impression_examen'},
                      ]},
                ]]
