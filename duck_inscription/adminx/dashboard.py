@@ -47,11 +47,11 @@ class MainDashboard(object):
                      # {'title': "Gestion des examens à l'etranger", 'url': 'xadmin:duck_examen_etapeexamen_changelist'}, TODO faire la gestion du get
                      {'title': "Gestion des examens à l'etranger", 'url': '/duck_examen/etapeexamen/?incorporation=0',
                       'groups': ('examen',)},
-                     {'title': "Gestion des examens aux dom-tom, handicap et autres ",
+                     {'title': "Gestion des examens aux dom-tom, ... ",
                       'url': '/duck_examen/etapeexamen/?incorporation=1', 'groups': ('examen', 'dom-tom')},
                      {'title': "Gestion des centres", 'url': 'xadmin:duck_examen_examcenter_changelist',
                       'groups': ('examen', )},
-                     {'title': "Impressions", 'url': 'xadmin:liste_impression_examen'},
+                     {'title': "Impressions", 'url': 'xadmin:liste_impression_examen', 'groups': ('examen', 'dom-tom')},
                      ]},
                ]]
     site_title = 'Backoffice'
