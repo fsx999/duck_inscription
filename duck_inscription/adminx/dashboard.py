@@ -45,7 +45,7 @@ class MainDashboard(object):
                  "title": "Gestion examen",
                  "btns": [
                      # {'title': "Gestion des examens à l'etranger", 'url': 'xadmin:duck_examen_etapeexamen_changelist'}, TODO faire la gestion du get
-                     {'title': "Gestion des examens à l'etranger", 'url': '/duck_examen/etapeexamen/?incorporation=0',
+                     {'title': "Gestion des examens à l'etranger", 'url': '/duck_examen/etapeexamen/2014/?incorporation=0',
                       'groups': ('examen',)},
                      {'title': "Gestion des examens aux dom-tom, ... ",
                       'url': '/duck_examen/etapeexamen/?incorporation=1', 'groups': ('examen', 'dom-tom')},
