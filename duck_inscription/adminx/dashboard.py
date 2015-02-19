@@ -53,6 +53,12 @@ class MainDashboard(object):
                       'groups': ('examen', )},
                      {'title': "Impressions", 'url': 'xadmin:liste_impression_examen', 'groups': ('examen', 'dom-tom')},
                      ]},
+                {"type": "qbutton",
+                 "title": "Gestion des emails",
+                 "btns": [
+                     {'title': "Edition des messages", 'url': 'xadmin:mailrobot_mailbody_changelist',
+                      'groups': ('edition_mail',)},
+                     ]},
                ]]
     site_title = 'Backoffice'
     title = 'Accueil'
