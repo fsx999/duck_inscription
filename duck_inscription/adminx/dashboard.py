@@ -52,6 +52,7 @@ class MainDashboard(object):
                      {'title': "Gestion des centres", 'url': 'xadmin:duck_examen_examcenter_changelist',
                       'groups': ('examen', )},
                      {'title': "Impressions", 'url': 'xadmin:liste_impression_examen', 'groups': ('examen', 'dom-tom')},
+                     {'title': "Déroulé", 'url': 'xadmin:duck_examen_deroulementexamenmodel_changelist', 'groups': ('examen', 'dom-tom')},
                      ]},
                ]]
     site_title = 'Backoffice'
