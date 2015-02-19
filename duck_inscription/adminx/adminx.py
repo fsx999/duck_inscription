@@ -4,7 +4,6 @@ from xadmin.views import filter_hook, CommAdminView
 from duck_inscription.xadmin_plugins.topnav import IEDPlugin
 from crispy_forms.bootstrap import TabHolder, Tab
 from django.core.urlresolvers import reverse
-from mailrobot.models import Mail, MailBody, Address, Signature
 from xadmin.plugins.auth import UserAdmin
 from xadmin.layout import Main, Fieldset, Side
 import xadmin
@@ -277,10 +276,6 @@ xadmin.site.register(User, CustomUserAdmin)
 xadmin.site.register(Individu, IndividuXadmin)
 xadmin.site.register(SettingsEtape, SettingsEtapeXadmin)
 xadmin.site.register_plugin(IEDPlugin, CommAdminView)
-xadmin.site.register(MailBody)
-xadmin.site.register(Mail)
-xadmin.site.register(Address)
-xadmin.site.register(Signature)
 xadmin.site.register(CursusEtape)
 xadmin.site.register(SettingAnneeUni)
 xadmin.site.register(Wish, OpiView)
