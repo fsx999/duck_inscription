@@ -27,7 +27,7 @@ class MainDashboard(object):
                  "title": "Scolarité",
                  "btns": [
                      {'title': "Pré-Inscription", 'url': 'inscription'},
-                     {'title': 'Consultation dossier inscription etudiant apogée', 'url': '/django_apogee/individu'},
+                     {'title': 'Consultation dossier inscription etudiant apogée', 'url': 'xadmin:django_apogee_individu_changelist'},
                      {'title': 'Extraction', 'url': 'extraction'}]},
                 {"type": "qbutton",
                  "title": "Informations",
