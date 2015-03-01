@@ -2,8 +2,7 @@
 from __future__ import unicode_literals
 import StringIO
 import os
-from tempfile import TemporaryFile, NamedTemporaryFile
-from PyPDF2 import PdfFileReader, PdfFileWriter, PdfFileMerger
+from PyPDF2 import PdfFileReader, PdfFileWriter
 import datetime
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse
@@ -14,20 +13,17 @@ from django.template.loader import render_to_string
 from django.views.generic import TemplateView, View, UpdateView
 from django.views.generic.edit import FormView
 from floppyforms import ModelChoiceField
-from wkhtmltopdf.views import PDFTemplateResponse, PDFTemplateView
 import xworkflows
 import json
-from django_apogee.models import Etape
 from duck_inscription.forms import WishGradeForm, ListeDiplomeAccesForm, DemandeEquivalenceForm, \
-    ListeAttenteEquivalenceForm, NoteMasterForm, ListeAttenteCandidatureForm, ChoixPaiementDroitForm, DemiAnneeForm, \
+     NoteMasterForm, ListeAttenteCandidatureForm, ChoixPaiementDroitForm, DemiAnneeForm, \
     NbPaiementPedaForm, ValidationPaiementForm, ListeAttenteInscriptionForm, NewAuditeurForm
-from duck_inscription.models import Wish, SettingsEtape, NoteMasterModel, CentreGestionModel, PaiementAllModel, \
-    DossierInscription
+from duck_inscription.models import Wish, SettingsEtape, NoteMasterModel, CentreGestionModel, PaiementAllModel
 from xhtml2pdf import pdf as pisapdf
 from xhtml2pdf import pisa
 from duck_inscription.templatetags.lib_inscription import annee_en_cour
 from django.conf import settings
-from settings import BASE_DIR
+
 
 __author__ = 'paul'
 
@@ -486,7 +482,7 @@ class InscriptionPdfView(TemplateView):
                 context['wish'].droit_universitaire()
                 context['wish'].save()
                 return redirect(context['wish'].get_absolute_url())
-        context['static'] = os.path.join(BASE_DIR+'/duck_inscription/duck_theme_ied/static/images/').replace('\\', '/')
+        context['static'] = os.path.join(settings.BASE_DIR+'/duck_inscription/duck_theme_ied/static/images/').replace('\\', '/')
         return context
 
     def get_template_names(self):
