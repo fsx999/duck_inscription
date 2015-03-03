@@ -54,6 +54,7 @@ class MainDashboard(object):
                      {'title': "Impressions", 'url': 'xadmin:liste_impression_examen', 'groups': ('examen', 'dom-tom')},
                      {'title': "Déroulé", 'url': 'xadmin:duck_examen_deroulementexamenmodel_changelist', 'groups': ('examen', 'dom-tom')},
                      {'title': "Email centre examen", 'url': 'xadmin:envoi_email_center', 'groups': ('examen', )},
+                     {'title': "Recaps envoi", 'url': 'xadmin:duck_examen_recapitulatifexamenmodel_changelist', 'groups': ('examen', )},
                      ]},
                 {"type": "qbutton",
                  "title": "Gestion des emails",
