@@ -61,7 +61,10 @@ class MainDashboard(object):
                  "btns": [
                      {'title': "Edition des messages", 'url': 'xadmin:mailrobot_mailbody_changelist',
                       'groups': ('edition_mail',)},
+                     {'title': "Edition des pièces jointes", 'url': 'xadmin:duck_utils_templatehtmlmodel_changelist',
+                      'groups': ('edition_mail',)},
                      ]},
+
                ]]
     site_title = 'Backoffice'
     title = 'Accueil'
