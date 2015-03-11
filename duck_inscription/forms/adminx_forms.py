@@ -1,7 +1,7 @@
 # coding=utf-8
 from __future__ import unicode_literals
 import floppyforms as forms
-from django_apogee.models import CentreGestion, SitSociale
+from django_apogee.models import SitSociale
 from duck_inscription.models import SettingsEtape, CentreGestionModel, MoyenPaiementModel
 
 
