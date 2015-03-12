@@ -16,6 +16,10 @@ import xadmin
 import datetime
 from duck_inscription.models import SettingsEtape, NoteMasterModel
 from duck_inscription.models import Wish
+try:
+    from foad.utils import make_etudiant_password
+except ImportError:
+    pass
 
 
 class StatistiquePal(views.Dashboard):
@@ -109,7 +113,10 @@ class ExtractionStatistiqueBase(BaseAdminView):
 
         for row, obj in enumerate(queryset, start=2):
             for collumn, cell in enumerate(self.get_structure_excel, start=1):
+                try:
                     ws.cell(row=row, column=collumn).value = eval(cell[1])
+                except NameError:
+                    pass
         return wb
 
     def get(self, request, *args, **kwargs):
@@ -153,7 +160,9 @@ class ExtractionStatApogee(ExtractionStatistiqueBase):
                        ['Deuxiéme prénom', "obj.cod_ind.lib_pr2_ind"],
                        ["Email perso", 'str(obj.cod_ind.get_email(self.annee))'],
                        ["Email Foad", 'str(obj.cod_ind.cod_etu) + \'@foad.iedparis8.net\''],
-                       ["Reinscription:", "'Oui' if obj.is_reins else 'Non'"]]
+                       ["Reinscription:", "'Oui' if obj.is_reins else 'Non'"],
+                       ["Password:", "str(make_etudiant_password(obj.cod_ind.cod_etu))"],
+                       ]
 
     type_stat = 'ordinaire'
     url = '/stats_apogee/'
