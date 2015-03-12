@@ -12,7 +12,10 @@ from xadmin import views
 import xadmin
 from duck_inscription.models import SettingsEtape
 from duck_inscription.models import Wish
-from foad.models import AuditeurLibreApogee
+try:
+    from foad.models import AuditeurLibreApogee
+except ImportError:
+    pass
 
 
 class DossierReception(views.FormAdminView):
