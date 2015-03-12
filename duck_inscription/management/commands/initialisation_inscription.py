@@ -16,7 +16,9 @@ class Command(BaseCommand):
         for annee in AnneeUni.objects.all():
             SettingAnneeUni.objects.get_or_create(cod_anu=annee.cod_anu, anneeuni_ptr=annee)
         print u"création des étapes"
-
+        s =SettingAnneeUni.objects.last()
+        s.inscription=True
+        s.save()
         for etape in Etape.objects.filter(etpgerercge__cod_cmp=settings.COMPOSANTE):
             e = SettingsEtape.objects.get_or_create(cod_etp=etape.cod_etp, etape_ptr=etape)[0]
 
