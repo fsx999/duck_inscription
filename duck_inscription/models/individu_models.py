@@ -44,6 +44,7 @@ class IndividuTransitionLog(django_xworkflows.models.BaseTransitionLog):
     class Meta:
         app_label = 'duck_inscription'
 
+
 @python_2_unicode_compatible
 class Individu(xwf_models.WorkflowEnabled, models.Model):
     state = xwf_models.StateField(IndividuWorkflow)
