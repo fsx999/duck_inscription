@@ -14,6 +14,7 @@ from duck_inscription.templatetags.lib_inscription import annee_en_cour
 from xhtml2pdf import pdf as pisapdf
 from django.contrib import messages
 
+
 class DossierReceptionView(FormView):
     template_name = "duck_inscription/adminx/dossier_reception.html"
     form_class = DossierReceptionForm
