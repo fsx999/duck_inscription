@@ -95,16 +95,3 @@ class ValidationPaiementForm(forms.ModelForm):
         fields = ('id',)
 
 
-class NewAuditeurForm(forms.Form):
-    auditeur = forms.NullBooleanField(
-        label=u"Voullez vous faire une demande de préinscription en tant qu'auditeur libre",
-        widget=forms.Select(
-            choices=(("", "-----"), ("True", "Oui"), ("False", "Non")),
-            attrs={'class': 'required auto'}
-        )
-    )
-
-    def clean_auditeur(self):
-        if self.cleaned_data.get('auditeur', None) is None:
-            raise forms.ValidationError(u'Vous devez choisir')
-        return self.cleaned_data.get('auditeur', None)

@@ -7,8 +7,7 @@ from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.views.generic import FormView, TemplateView, View
 from xworkflows import InvalidTransitionError
-from duck_inscription.forms.adminx_forms import DossierReceptionForm, ImprimerEnMasseForm, ChangementCentreGestionForm, \
-    AuditeurLibreForm
+from duck_inscription.forms.adminx_forms import DossierReceptionForm, ImprimerEnMasseForm, ChangementCentreGestionForm
 from duck_inscription.models import Wish, PaiementAllModel
 from django.conf import settings
 from duck_inscription.templatetags.lib_inscription import annee_en_cour

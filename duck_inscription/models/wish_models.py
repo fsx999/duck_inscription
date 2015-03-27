@@ -143,102 +143,6 @@ class WishParcourTransitionLog(django_xworkflows.models.BaseTransitionLog):
         app_label = 'duck_inscription'
 
 
-# class Step(models.Model):
-# """
-#     le modéle des étapes
-#     """
-#     name = models.CharField(u"Code de l'étape", max_length=15, help_text="le code de l'étape", unique=True)
-#
-#     label = models.CharField(u"Label long", max_length=200, help_text="le nom de l'étape", default="", blank=True)
-#     grade = models.ForeignKey(Grade, verbose_name='Diplome', db_column='grade_id', db_index=True,
-#                               help_text="le diplome de l'étape")
-#     vdi = models.IntegerField(verbose_name="vdi", default='910', blank=True)
-#     vet = models.IntegerField(verbose_name="vet", default='910', blank=True)
-#     formation = models.CharField(max_length=15)
-#     label_formation = models.CharField(verbose_name=u"label formation", max_length=200, default="", blank=True)
-#
-#     debut_equivalence = models.DateField(u"Date du début de l'équivalence", null=True, blank=True)
-#     fin_equivalence = models.DateField(null=True, blank=True)
-#     fin_attente_equivalence = models.DateField(null=True, blank=True, default=datetime.date(2012, 06, 30))
-#
-#     equivalence_obligatoire = models.BooleanField(u"Equivalence obligatoire",
-#                                                   help_text=u"Cochez si l'équivalence ne peut pas être facultative",
-#                                                   default=False)
-#     no_equivalence = models.BooleanField(u"Absence d'équivalence", default=True,
-#                                          help_text=u"Cochez s'il n'y a pas d'équivalence pour l'étape")
-#     candidature = models.BooleanField(default=False)
-#     debut_candidature = models.DateField(u"Date du début de la candidature", null=True, blank=True)
-#     fin_candidature = models.DateField(u"Date de fin de la candidature", null=True, blank=True)
-#     fin_attente_candidature = models.DateField(null=True, blank=True, default=datetime.date(2012, 10, 30))
-#
-#     debut_inscription = models.DateField(u"Date du début de l'inscription", default=datetime.date(2012, 07, 06))
-#     fin_inscription = models.DateField(u"Date de fin de l'inscription", default=datetime.date(2012, 07, 06))
-#     fin_reins = models.DateField(u"Date de fin de réinscription", default=datetime.date(2012, 9, 30))
-#     droit = models.FloatField(u"Droit de l'ied", default=186)
-#     tarif = models.FloatField(u"Tarif de l'ied", default=1596)
-#     nb_paiement = models.IntegerField(u"Nombre paiement", default=3)
-#     demi_tarif = models.BooleanField(u"Demi tarif en cas de réins", default=False)
-#     semestre = models.BooleanField(u"Demie année", default=False)
-
-#     note = models.BooleanField('Note Master', default=False)
-#
-#     limite_etu = models.IntegerField(u"Capacité d'accueil", null=True, blank=True)
-#
-#     def get_tarif_paiement(self, reins=False, semestre=False):
-#         tarif = self.tarif
-#         if self.demi_tarif and (reins or semestre):
-#             tarif /= 2
-#         return tarif
-#
-#     def can_demi_annee(self, reins):
-#         if self.semestre and not reins:
-#             return True
-#         return False
-#
-#     def __unicode__(self):
-#         return self.label
-#
-#
-#     def stat_tarif(self):
-#         # resultat = {}
-#         resultat = dict(reins=Wish.objects.filter(step=self, is_reins=True,
-#                                                   etapes__name='inscription_reception').count())
-#         if self.demi_tarif:
-#             resultat['reins_tarif'] = resultat['reins'] * self.tarif / 2
-#         else:
-#             resultat['reins_tarif'] = resultat['reins'] * self.tarif
-#         resultat['plein'] = Wish.objects.filter(step=self, is_reins=False, demi_annee=False,
-#                                                 etapes__name='inscription_reception').count()
-#         resultat['tarif_plein'] = resultat['plein'] * self.tarif
-#         resultat['demi_annee'] = Wish.objects.filter(step=self, is_reins=False, demi_annee=True,
-#                                                      etapes__name='inscription_reception').count()
-#         if self.semestre:
-#
-#             resultat['tarif_demi_annee'] = resultat['demi_annee'] * self.tarif / 2
-#         else:
-#             resultat['tarif_demi_annee'] = resultat['demi_annee'] * self.tarif
-#         return resultat
-#
-#     def stat_tarif_previsionnel(self):
-#         # resultat = {}
-#         resultat = {'nb_reins': INS_ADM_ETP_IED.inscrits.filter(COD_CGE='IED',
-#                                                                 COD_ETP=self.name).exclude(NBR_INS_ETP=1).count()}
-#         # les reins : les IED qui sont à plus de 1
-#
-#         if self.demi_tarif:
-#             resultat['tarif_reins'] = resultat['nb_reins'] * self.tarif / 2
-#         else:
-#             resultat['tarif_reins'] = resultat['nb_reins'] * self.tarif
-#
-#         resultat['nb_primo'] = INS_ADM_ETP_IED.inscrits.filter(COD_CGE='IED',
-#                                                                COD_ETP=self.name, NBR_INS_ETP=1).count()
-#         resultat['tarif_primo'] = resultat['nb_primo'] * self.tarif
-#         resultat['total'] = resultat['tarif_reins'] + resultat['tarif_primo']
-#
-#         return resultat
-#
-
-
 class Wish(xwf_models.WorkflowEnabled, models.Model):
     code_dossier = models.AutoField('code dossier', primary_key=True)
     individu = models.ForeignKey(Individu, related_name='wishes', null=True)
@@ -385,15 +289,6 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
             nb = 0
         return nb
 
-    # def rang(self):
-    #     rang = self.etape.wish_set.filter(date_validation__lt=self.date_validation,
-    #                               etape='liste_attente_inscription',
-    #                               annee=self.annee).count() - self.place_dispo()
-    #
-    #     if rang < 0:
-    #         rang = 0
-    #     return rang
-
     def save(self, force_insert=False, force_update=False, using=None):
         if not self.code_dossier:
             nb = Wish.objects.count()
@@ -475,12 +370,6 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
     def date_limite_envoi(self):
         # if self.is_reins_formation():
         return self.etape.date_fermeture_reinscription
-        #
-        # elif self.etape.limite_etu:
-        #     date = (self.date_validation or datetime.date.today()) + datetime.timedelta(21)
-        #     return date
-        # else:
-        #     return self.etape.date_fermeture_inscription
 
     def droit_total(self):
         return float(self.droit_univ() + self.tarif_secu())
@@ -515,36 +404,6 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
         verbose_name_plural = "Voeux"
         app_label = "duck_inscription"
 
-        # def get_etapes_dossier(self):
-        #     response = '<div class="well">'
-        #     for etape in self.etapedossier_set.all():
-        #         response += etape.__unicode__() + '<br/>'
-        #     response += '</div>'
-        #     return '%s' % (response,)
-
-        # get_etapes_dossier.short_description = 'Etapes du dossier'
-        # get_etapes_dossier.allow_tags = True
-
-        # def get_pdf(self):
-        #     response = ''
-        #     if not self.is_reins_formation() and not self.step.no_equivalence:
-        #         url = reverse('impression_equivalence', kwargs={'pk': self.id})
-        #         response += '<p><a href="' + url + '" class="btn btn-primary">Imprimer le dossier d\'equivalence</a></p>'
-        #     if not self.is_reins_formation() and self.step.candidature:
-        #         url = reverse('impression_candidature', kwargs={'pk': self.id})
-        #         response += '<p><a href="' + url + '" class="btn btn-primary">Imprimer le dossier de candidature</a></p>'
-        #     try:
-        #         if self.paiementallmodel:
-        #
-        #             url = reverse('impression_inscription', kwargs={'pk': self.id})
-        #             response += '<p><a href="' + url + '" class="btn btn-primary">Imprimer le dossier d\'inscription</a></p>'
-        #     except PaiementAllModel.DoesNotExist:
-        #         pass
-        #     return response
-
-        # get_pdf.short_description = u'Impression des dossiers'
-        # get_pdf.allow_tags = True
-
 
 class NoteMasterModel(models.Model):
     moyenne_general = models.FloatField(null=True, blank=True)
@@ -570,18 +429,6 @@ class ListeDiplomeAces(models.Model):
         app_label = "duck_inscription"
 
 
-#
-#
-# class StudentApogeeValid(models.Model):
-#     step = models.ForeignKey(Step)
-#     student_code = models.CharField(max_length=8)
-#     cod_cge = models.CharField(max_length=3, default=3)
-#
-#     class Meta:
-#         db_table = u'pal_student_apogee_valid'
-#         app_label = "inscription"
-#
-#
 class MoyenPaiementModel(models.Model):
     """
     chéque virement etc

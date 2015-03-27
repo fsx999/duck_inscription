@@ -45,5 +45,5 @@ class EtapeAdmin(admin.ModelAdmin):
 # admin.site.register(SettingsEtape, EtapeAdmin)
 admin.site.register(DiplomeEtape)
 # admin.site.register(Site)
-# # admin.site.register(ListeDiplomeAces)
+admin.site.register(ListeDiplomeAces)
 # admin.site.register(Wish, WishAdmin)
