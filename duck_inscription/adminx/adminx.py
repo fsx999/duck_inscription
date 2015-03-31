@@ -1,16 +1,18 @@
 # coding=utf-8
 from __future__ import unicode_literals
-from xadmin.views import filter_hook, CommAdminView
-from duck_inscription.xadmin_plugins.topnav import IEDPlugin
+
 from crispy_forms.bootstrap import TabHolder, Tab
 from django.core.urlresolvers import reverse
+from django.forms.models import inlineformset_factory
+
+from xadmin.views import filter_hook, CommAdminView
+from duck_theme_ied.xadmin_plugins.topnav import IEDPlugin
 from xadmin.plugins.auth import UserAdmin
 from xadmin.layout import Main, Fieldset, Side
 import xadmin
-from duck_inscription.models import Individu, SettingsEtape, WishWorkflow, SettingAnneeUni, WishTransitionLog
+from duck_inscription.models import Individu, SettingsEtape, WishWorkflow, SettingAnneeUni
 from duck_inscription.models import Wish, SuiviDossierWorkflow, IndividuWorkflow, SettingsUser, CursusEtape
 from xadmin.util import User
-from django.forms.models import inlineformset_factory
 from duck_inscription.adminx.html_string.action_adminx import ACTION
 
 
