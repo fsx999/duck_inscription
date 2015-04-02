@@ -13,6 +13,7 @@ from django_apogee.models import Departement, Pays, SitFam, SitMil, TypHandicap,
 from django_xworkflows import models as xwf_models
 from django.conf import settings
 from duck_inscription.models import SettingAnneeUni
+from duck_inscription.models.auth_models import InscriptionUser
 
 
 class IndividuWorkflow(xwf_models.Workflow):
@@ -57,7 +58,7 @@ class Individu(xwf_models.WorkflowEnabled, models.Model):
         ('M', 'Homme'),
         ('F', 'Femme'),
     )
-    user = models.OneToOneField(User, null=True)
+    user = models.OneToOneField(InscriptionUser, null=True)
     last_name = models.CharField("Nom patronymique", max_length=30, null=True)
     common_name = models.CharField("Nom d'époux", max_length=30, null=True,
                                    blank=True)

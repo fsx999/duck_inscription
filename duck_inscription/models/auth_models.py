@@ -1,11 +1,13 @@
 # coding=utf-8
 from __future__ import unicode_literals
 from django.contrib import auth
+from django.contrib.auth.hashers import make_password, check_password, is_password_usable
 from django.contrib.auth.models import AbstractUser, UserManager, Group, Permission, _user_get_all_permissions
 from django.core import validators
 from django.core.mail import send_mail
 from django.db import models
 from django.utils import timezone
+from django.utils.crypto import salted_hmac
 from django.utils.translation import ugettext_lazy as _
 
 
@@ -32,6 +34,9 @@ class InscriptionUser(models.Model):
                                 validators=[
                                     validators.RegexValidator(r'^[\w.@+-]+$', _('Enter a valid username.'), 'invalid')
                                 ])
+    password = models.CharField(_('password'), max_length=128)
+    last_login = models.DateTimeField(_('last login'), default=timezone.now)
+
     first_name = models.CharField(_('first name'), max_length=30, blank=True)
     last_name = models.CharField(_('last name'), max_length=30, blank=True)
     email = models.EmailField(_('email address'), blank=True)
@@ -129,6 +134,63 @@ class InscriptionUser(models.Model):
         Sends an email to this User.
         """
         send_mail(subject, message, from_email, [self.email], **kwargs)
+
+    def get_username(self):
+        "Return the identifying username for this User"
+        return getattr(self, self.USERNAME_FIELD)
+
+    def __str__(self):
+        return self.get_username()
+
+    def natural_key(self):
+        return (self.get_username(),)
+
+    def is_anonymous(self):
+        """
+        Always returns False. This is a way of comparing User objects to
+        anonymous users.
+        """
+        return False
+
+    def is_authenticated(self):
+        """
+        Always return True. This is a way to tell if the user has been
+        authenticated in templates.
+        """
+        return True
+
+    def set_password(self, raw_password):
+        self.password = make_password(raw_password)
+
+    def check_password(self, raw_password):
+        """
+        Returns a boolean of whether the raw_password was correct. Handles
+        hashing formats behind the scenes.
+        """
+        def setter(raw_password):
+            self.set_password(raw_password)
+            self.save(update_fields=["password"])
+        return check_password(raw_password, self.password, setter)
+
+    def set_unusable_password(self):
+        # Sets a value that will never be a valid hash
+        self.password = make_password(None)
+
+    def has_usable_password(self):
+        return is_password_usable(self.password)
+
+    def get_full_name(self):
+        raise NotImplementedError('subclasses of AbstractBaseUser must provide a get_full_name() method')
+
+    def get_short_name(self):
+        raise NotImplementedError('subclasses of AbstractBaseUser must provide a get_short_name() method.')
+
+    def get_session_auth_hash(self):
+        """
+        Returns an HMAC of the password field.
+        """
+        key_salt = "django.contrib.auth.models.AbstractBaseUser.get_session_auth_hash"
+        return salted_hmac(key_salt, self.password).hexdigest()
 
     class Meta:
         db_table = 'inscription_user'

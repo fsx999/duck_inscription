@@ -1,10 +1,10 @@
 # coding=utf-8
 from __future__ import unicode_literals
 # -*- coding: utf-8 -*-
+from django.contrib.auth import get_user_model
 
 from django.utils.translation import ugettext_lazy as _
 
-from django.contrib.auth.models import User
 from registration.forms import RegistrationFormTermsOfService
 from django.contrib.auth.forms import AuthenticationForm, PasswordResetForm
 import floppyforms as forms
@@ -79,7 +79,7 @@ class EmailRegistrationForm(RegistrationFormTermsOfService):
         Validate that the supplied email address is unique for the
         site.
         """
-        if User.objects.filter(email__iexact=self.cleaned_data['email']):
+        if get_user_model().objects.filter(email__iexact=self.cleaned_data['email']):
             raise forms.ValidationError(
                 _("This email address is already in use. Please supply a different email address."))
         return self.cleaned_data['email']
@@ -108,26 +108,5 @@ class LoginIED(AuthenticationForm):
 
 
 class PasswordRest(PasswordResetForm):
-    # captcha = CaptchaField(label="Veuillez saisir le mot dans l'image",
-    #                        help_text="(respectez les majuscules et les minuscules)")
     email = forms.EmailField(label="Entrez l'adresse e-mail de votre inscription :", max_length=75)
 
-    # class Media:
-    #     js = ("js/password_reset.js",)
-    #
-    # def __init__(self, *args, **kwargs):
-    #     self.helper = FormHelper()
-    #     self.helper.form_action = ""
-    #     self.helper.form_method = 'POST'
-    #     self.helper.form_class = "form-horizontal well"
-    #     self.helper.form_id = "form"
-    #     self.helper.add_input(Submit("Enregistrer", 'Enregistrer', css_class="btn-success register"))
-    #     self.helper.layout = Layout(
-    #         'email',
-    #         'captcha'
-    #     )
-    #
-    #     super(PasswordRest, self).__init__(*args, **kwargs)
-    #     for key in self.fields:
-    #         if self.fields[key].required:
-    #             self.fields[key].widget.attrs['class'] = 'required'
