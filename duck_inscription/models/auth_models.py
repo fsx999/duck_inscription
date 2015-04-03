@@ -59,11 +59,11 @@ class InscriptionUser(models.Model):
                                     blank=True, help_text=_('The groups this user belongs to. A user will '
                                                             'get all permissions granted to each of '
                                                             'his/her group.'),
-                                    related_name="user_inscription_set", related_query_name="user")
+                                    related_name="user_inscription_set", related_query_name="user_inscription")
     user_permissions = models.ManyToManyField(Permission,
                                               verbose_name=_('user permissions'), blank=True,
                                               help_text=_('Specific permissions for this user.'),
-                                              related_name="user_inscription_set", related_query_name="user")
+                                              related_name="user_inscription_set", related_query_name="user_inscription")
 
     def get_group_permissions(self, obj=None):
         """
