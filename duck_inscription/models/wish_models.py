@@ -74,7 +74,7 @@ class SuiviDossierWorkflow(xwf_models.Workflow):
     log_model = 'duck_inscription.WishTransitionLog'
 
     states = (
-        ('inactif', 'Inactif'), ('equivalence_reception', 'Dossier Equivalence receptionné'),
+        ('inactif', 'En attente de reception'), ('equivalence_reception', 'Dossier Equivalence receptionné'),
         ('equivalence_complet', 'Dossier Equivalence complet'),
         ('equivalence_incomplet', 'Dossier Equivalence incomplet'),
         ('equivalence_traite', 'Dossier Equivalence traite'), ('equivalence_refuse', 'Dossier Equivalence refuse'),
@@ -266,6 +266,14 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
     @property
     def transitions_logs(self):
         return TransitionLog.objects.filter(content_id=self.code_dossier).order_by('timestamp')
+
+    @property
+    def transition_etat_dossier(self):
+        reponse = []
+        for transition in self.parcours_dossier.all().order_by('timestamp'):
+            reponse.append('{}'.format(WishWorkflow.states[transition.to_state].title))
+        return reponse
+        # return WishParcourTransitionLog.objects.filter(wish=self).order_by('timestamp')
 
     def valide_liste(self):
         self.date_validation = datetime.datetime.today()

@@ -6,6 +6,11 @@
     <form id="form" class=" form-horizontal well" method="post" novalidate="novalidate">{% csrf_token %}
 <div class="page-header">
         <h1 class="text-center">{% block titre_form %}Voeux{% endblock %}</h1>
+<ol class="breadcrumb">
+{% for log in wish.transition_etat_dossier %}
+<li>{{ log }}</li>
+{% endfor %}
+</ol>
     </div>
 
     {% block contenu %}
