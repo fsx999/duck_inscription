@@ -65,7 +65,8 @@ class WishInline(object):
     extra = 0
     style = 'table'
     fields = ['email', 'annee']
-    readonly_fields = ['code_dossier', 'diplome_acces', 'centre_gestion', 'reins', 'date_validation', 'valide',
+    readonly_fields = ['code_dossier', 'diplome_acces', 'centre_gestion', 'reins', 'date_validation',
+                       'date_liste_inscription',  'valide',
                        'get_transition_log', 'get_suivi_dossier', 'print_dossier_equi']
     exclude = ['annee', 'is_reins']
     can_delete = True
