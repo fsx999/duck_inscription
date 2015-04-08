@@ -221,9 +221,26 @@ class SettingsEtapeXadmin(object):
                                                                                                                    'date_ouverture_candidature',
                                                                                                                    'date_fermeture_candidature',
                                                                                                                    'note_maste',
-                                                                                                                   'document_candidature', )), )),
+                                                                                                                   'document_candidature', )),
+                                                                                                      Tab('Inscription',
+                                                                                                          Fieldset('',
+                                                                                                                   'date_ouverture_inscription',
+                                                                                                                   'date_fermeture_inscription',
+                                                                                                                   'date_fermeture_reinscription',
+                                                                                                                   'droit',
+                                                                                                                   'frais',
+                                                                                                                   'nb_paiement',
+                                                                                                                   'demi_tarif',
+                                                                                                                   'semestre',
+                                                                                                                   'limite_etu'
+                                                                                                                   ))
+                                                                                                      )),
         Side(Fieldset('Settings', 'required_equivalence', 'is_inscription_ouverte'))
     )
+    def get_readonly_fields(self):
+    #     if self.user.is_superuser:
+    #         return []
+        return ['diplome', 'cursus', 'label', 'label_formation', 'cod_etp']
 
 
 class UserSettingsInline(object):

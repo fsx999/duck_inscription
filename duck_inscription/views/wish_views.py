@@ -205,7 +205,7 @@ class EquivalencePdfView(TemplateView):
         return step.document_equivalence
 
     def render_to_response(self, context, **response_kwargs):
-        response = HttpResponse(mimetype='application/pdf')
+        response = HttpResponse(content_type='application/pdf')
         response['Content-Disposition'] = 'attachment; filename=%s_%s.pdf' % (self.etape, context['voeu'].etape.cod_etp)
         try:
             url_doc = self.get_file().file
