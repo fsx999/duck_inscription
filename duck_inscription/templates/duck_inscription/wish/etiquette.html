@@ -13,10 +13,6 @@
         font-family: CCode39;
         font-size: 45px;
     }
-    .normal{
-        text-align: justify;
-        margin: 2cm;
-    }
     .middle {
         border: 2px solid #000000;
         margin-top: 50%;
@@ -38,7 +34,7 @@
 <div id="middleContent" class="middle">
     <div class="etiquette">
     <center>
-    <div class="barcode">*toto e t*</div>
+    <div class="barcode">*{{ voeu.code_dossier }}*</div>
     <div>*{{ voeu.code_dossier }}*</div>
         {% include "duck_inscription/include/adresse_ied.html" with ETAPE=voeu.state.name|capfirst %}
     </center>

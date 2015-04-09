@@ -20,6 +20,7 @@ from django.utils.timezone import now
 from django.conf import settings
 from xhtml2pdf import pdf as pisapdf
 from xhtml2pdf import pisa
+from duck_utils.utils import make_multi_pdf
 
 __author__ = 'paul'
 
@@ -308,17 +309,8 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
             self.is_reins_formation
         super(Wish, self).save(force_insert, force_update, using)
 
-    def do_pdf_equi(self, flux, templates, request, context):
-        pdf = pisapdf.pisaPDF()
-        for template in templates:
-            pdf.addDocument(pisa.CreatePDF(
-                render_to_string(template, context, context_instance=RequestContext(request))))  # on construit le pdf
-            #il faut fusionner la suite
-
-        pdf.addFromString(self.do_pdf(context['url_doc']).getvalue())
-        self.add_decision_equi_pdf(pdf, request, context)
-        pdf.join(flux)
-        return flux
+    def do_pdf_equi(self, templates, request, context, files=[]):
+        return make_multi_pdf(context=context, templates=templates, files=files)
 
     def do_pdf_decision_equi_pdf(self, flux, request, context):
         pdf = pisapdf.pisaPDF()
@@ -344,18 +336,7 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
         pdf.join(flux)
         return flux
 
-    def do_pdf(self, file):
-        """
-        retourne un pdf sans la première page
-        """
-        result = StringIO()
-        output = PdfFileWriter()
-        input1 = PdfFileReader(file)
-        for x in range(1, input1.getNumPages()):
-            output.addPage(input1.getPage(x))
-        output.write(result)
 
-        return result
 
     #
     # def save_auditeur(self):

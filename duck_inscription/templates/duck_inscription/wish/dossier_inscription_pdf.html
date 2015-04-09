@@ -1,39 +1,10 @@
-{% load static lib_inscription %}
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
-<html>
+{% load static from staticfiles %}
+{% load lib_inscription %}
+<!DOCTYPE html>
+<html lang="fr">
 <head>
+    <meta charset="utf-8">
 <style type="text/css">
-{% if wish.can_be_changed %}
-@page {
-margin-top: 2cm;
-margin-left: 2cm;
-margin-right: 1cm;
-margin-bottom: 2cm;
-text-align: justify;
-    @frame footer {
-    -pdf-frame-content: footerContent;
-    bottom: 1cm;
-    margin-left: 1cm;
-    margin-right: 1cm;
-    height: 1cm;
-  }
-}
-{% else %}
-@page {
-margin-top: 2cm;
-margin-left: 2cm;
-margin-right: 1cm;
-margin-bottom: 2cm;
-text-align: justify;
-    @frame footer {
-    -pdf-frame-content: footerContent;
-    bottom: 1cm;
-    margin-left: 1cm;
-    margin-right: 1cm;
-    height: 1cm;
-  }
-}
-{% endif %}
 
 
 .center{
@@ -124,10 +95,10 @@ h3.titre_pdf{
     text-align: left;
 }
 /*n'ouvelle modif'*/
-#logo_p8{
-    zoom:30%;
-    text-align: right;
-}
+{##logo_p8{#}
+{#    zoom:30%;#}
+{#    text-align: right;#}
+{#}#}
 
 h3.entete{
     padding-top: 4px;
@@ -181,12 +152,12 @@ td{
 <body>
     <table>
         <tr>
-            {% if wish.centre_gestion.centre_gestion == 'ied' %}
-            <td><img class="zomm" id="logo_p8" src="{{ static }}logop8.jpg" /></td>
-            {% else %}
-            <td><img id="logo_p8" src="{{ static }}logo_fp.jpg"/></td>
+{#            {% if wish.centre_gestion.centre_gestion == 'ied' %}#}
+{#            <td><img class="zomm" id="logo_p8" src="{% static "images/logop8.jpg" %}" /></td>#}
+{#            {% else %}#}
+            <td><img id="logo_p8" src="{% static "images/logo_fp.jpg" %}"/></td>
             {% endif %}
-            <td class="barcode"><img id="logo_ied" src="{{ static }}/logo-ied.jpg"/></td>
+            <td class="barcode"><img id="logo_ied" src="{% static "images/logo-ied.jpg" %}"/></td>
         </tr>
     </table>
 

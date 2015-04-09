@@ -4,6 +4,7 @@ import StringIO
 import os
 from PyPDF2 import PdfFileReader, PdfFileWriter
 import datetime
+import cStringIO
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse
 
@@ -23,8 +24,8 @@ from xhtml2pdf import pdf as pisapdf
 from xhtml2pdf import pisa
 from duck_inscription.templatetags.lib_inscription import annee_en_cour
 from django.conf import settings
-from wkhtmltopdf.views import PDFTemplateView, PDFResponse
-from duck_utils.utils import make_pdf
+from wkhtmltopdf.views import PDFTemplateView, PDFResponse, PDFTemplateResponse
+from duck_utils.utils import make_pdf, append_pdf, MultiPDFTemplateResponse, remove_page_pdf, num_page
 
 __author__ = 'paul'
 
@@ -167,21 +168,20 @@ class EquivalenceView(TemplateView):
         context['wish'] = wish
         return self.render_to_response(context)
 
-
-class EquivalencePdfView(PDFTemplateView):
-    def get(self, request, *args, **kwargs):
-
-        output = make_pdf("duck_inscription/wish/etiquette.html", {})
-        response = PDFResponse(content=output, filename="toto.pdf")
-        return response
-
-
-# class EquivalencePdfView(TemplateView):
-#     template_name = "duck_inscription/wish/etiquette.html"
-#     etape = "equivalence"  # à surcharger pour candidature
+#
+# class EquivalencePdfView(PDFTemplateView):
+#     template_name = "duck_inscription/wish/equivalence_pdf.html"
+#     templates_name = ["duck_inscription/wish/etiquette.html", "duck_inscription/wish/equivalence_pdf.html"]
+#     response_class = MultiPDFTemplateResponse
+#
+#     def get(self, request, *args, **kwargs):
+#         self.response_class.templates_name = self.templates_name
+#         return super(EquivalencePdfView, self).get(request, *args, **kwargs)
 #
 #     def get_context_data(self, **kwargs):
 #         context = super(EquivalencePdfView, self).get_context_data(**kwargs)
+#         self.response_class.files = [self.do_pdf(self.get_file())]
+#
 #         if self.request.user.is_staff:
 #             context['voeu'] = Wish.objects.get(pk=self.kwargs['pk'])
 #             context['individu'] = context['voeu'].individu
@@ -195,12 +195,6 @@ class EquivalencePdfView(PDFTemplateView):
 #
 #         return context
 #
-#     def get_template_names(self):
-#         tempate_names = super(EquivalencePdfView, self).get_template_names()
-#         tempate_names.append(
-#             'duck_inscription/wish/%s_pdf.html' % self.etape)  # permet d'avoir la meme classe pour candidature
-#         return tempate_names
-#
 #     def get_file(self):
 #         """
 #         Il faut la surcharger pour les candidatures
@@ -212,38 +206,48 @@ class EquivalencePdfView(PDFTemplateView):
 #             step = self.request.user.individu.wishes.get(pk=self.kwargs['pk']).etape
 #
 #         return step.document_equivalence
-#
-#     def render_to_response(self, context, **response_kwargs):
-#         response = HttpResponse(content_type='application/pdf')
-#         response['Content-Disposition'] = 'attachment; filename=%s_%s.pdf' % (self.etape, context['voeu'].etape.cod_etp)
-#         try:
-#             url_doc = self.get_file().file
-#         except Wish.DoesNotExist:
-#             return redirect(self.request.user.individu.get_absolute_url())
-#         context['url_doc'] = url_doc
-#         url_doc.open('r')
-#
-#         context['num_page'] = self._num_page(url_doc)  # on indique le nombre de page pour la page 1
-#
-#         return context['voeu'].do_pdf_equi(flux=response, templates=self.get_template_names(), request=self.request,
-#                                            context=context)
-#
-#     def _num_page(self, url_doc):
-#         return PdfFileReader(url_doc).getNumPages()
-#
-#
-#     def do_pdf(self, file):
-#         """
-#         retourne un pdf sans la première page
-#         """
-#         result = StringIO.StringIO()
-#         output = PdfFileWriter()
-#         input1 = PdfFileReader(file)
-#         for x in range(1, input1.getNumPages()):
-#             output.addPage(input1.getPage(x))
-#         output.write(result)
-#
-#         return result
+
+class EquivalencePdfView(TemplateView):
+    template_name = "duck_inscription/wish/etiquette.html"
+    etape = "equivalence"  # à surcharger pour candidature
+
+    def get_context_data(self, **kwargs):
+        context = super(EquivalencePdfView, self).get_context_data(**kwargs)
+        if self.request.user.is_staff:
+            context['voeu'] = Wish.objects.get(pk=self.kwargs['pk'])
+            context['individu'] = context['voeu'].individu
+        else:
+            context['individu'] = self.request.user.individu
+            context['voeu'] = self.request.user.individu.wishes.get(pk=self.kwargs['pk'])
+        return context
+
+    def get_template_names(self):
+        return  [{'name': self.template_name}, {'name': 'duck_inscription/wish/%s_pdf.html' % self.etape,
+                                                'footer': 'duck_inscription/wish/footer.html'}]
+
+    def get_file(self):
+        """
+        Il faut la surcharger pour les candidatures
+        Doit retourner le l'url du doccument du doccument a fussionner
+        """
+        if self.request.user.is_staff:
+            return Wish.objects.get(pk=self.kwarg['pk']).etape.document_equivalence
+        return self.request.user.individu.wishes.get(pk=self.kwargs['pk']).etape.document_equivalence
+
+
+    def render_to_response(self, context, **response_kwargs):
+        response = HttpResponse(content_type='application/pdf')
+        response['Content-Disposition'] = 'attachment; filename=%s_%s.pdf' % (self.etape, context['voeu'].etape.cod_etp)
+        try:
+            doc_file = self.get_file().file
+        except Wish.DoesNotExist:
+            return redirect(self.request.user.individu.get_absolute_url())
+        context['num_page'] = num_page(doc_file)  # on indique le nombre de page pour la page 1
+        response.write(context['voeu'].do_pdf_equi(templates=self.get_template_names(), request=self.request,
+                                           context=context, files=[remove_page_pdf(doc_file)]))
+        return response
+
+
 
 
 class OuvertureCandidature(TemplateView):
