@@ -238,8 +238,8 @@ class SettingsEtapeXadmin(object):
         Side(Fieldset('Settings', 'required_equivalence', 'is_inscription_ouverte'))
     )
     def get_readonly_fields(self):
-    #     if self.user.is_superuser:
-    #         return []
+        if self.user.is_superuser:
+            return []
         return ['diplome', 'cursus', 'label', 'label_formation', 'cod_etp']
 
 

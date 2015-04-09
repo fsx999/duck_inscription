@@ -1,66 +1,19 @@
 <html>
 <style type="text/css">
-@page {
-    margin-top: 1cm;
-    margin-bottom: 2.5cm;
-    margin-right: 1cm;
-    margin-left: 2.5cm;
-    @frame header {
-        -pdf-frame-content: headerContent;
-        top: 5cm;
-        height: 5cm;
-        margin-left: 2.5cm;
-        margin-right: 1cm;
-    }
-    @frame middle {
-        -pdf-frame-content: middleContent;
-        -pdf-frame-border: 1;
-        padding-left: 1cm;
-        padding-right: 1cm;
-        height: 15cm;
-        bottom: 4cm;
-    }
 
+        @font-face {
+            font-family: "code_bare";
+            src: url(/Users/paulguichon/PycharmProjects/pal2/backoffice/static/font/ConnectCode39.ttf);
+        }
 
-}
-body {
-    text-align: justify;
-    font-size: 25px;
-}
-.header {
-    margin-top: 10cm;
-}
-.middle {
-    text-align: right;
-}
-.barcode {
-    padding-top: 1cm;
-    margin-bottom: 2cm;
-    margin-right: 2cm;
-}
-.normal{
-    text-align: justify;
-    margin-left: 5cm;
-    margin-right: 2cm;
-}
-
-
+        .code_barre {
+            font-family: "code_bare";
+            font-size: 16pt;
+        }
 </style>
 <body>
-
-<div class="header" id="headerContent">
-    Découper l'étiquette ci-dessous et la coller soigneusement sur
-    une enveloppe format A4 dans laquelle vous mettrez le dossier rempli
-    avec les pièces à fournir avant de le poster.
-</div>
-<div id="middleContent" class="middle">
-    <div class="barcode"><pdf:barcode  value="{{ voeu.code_dossier }}" type="code128"  align="right" humanreadable="1" barwidth="2" barheight="40" fontsize="16"/></div>
-    {% if voeu.is_auditeur %}
-        {% include "duck_inscription/include/adresse_ied.html" with ETAPE="Auditeur libre" %}
-    {% else %}
-        {% include "duck_inscription/include/adresse_ied.html" with ETAPE=voeu.state.name|capfirst %}
-    {% endif %}
-</div>
-
+<div>
+<span class="code_barre">*58920140*</span><br/>
+    </div>
 </body>
 </html>
