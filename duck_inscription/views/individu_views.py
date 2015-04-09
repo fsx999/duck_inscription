@@ -50,6 +50,7 @@ class DispatchIndividu(RedirectView):
     def get_redirect_url(self, **kwargs):
         i = IndividuInscription.objects.get_or_create(user=self.request.user)[0]
         i.personal_email = self.request.user.email
+        i.save()
         return self.request.user.individu.get_absolute_url()
 
 

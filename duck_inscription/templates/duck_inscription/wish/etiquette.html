@@ -35,7 +35,8 @@
     <div class="etiquette">
     <center>
     <div class="barcode">*{{ voeu.code_dossier }}*</div>
-    <div>*{{ voeu.code_dossier }}*</div>
+    <div>{{ voeu.code_dossier }}</div>
+        <br/>
         {% include "duck_inscription/include/adresse_ied.html" with ETAPE=voeu.state.name|capfirst %}
     </center>
         </div>

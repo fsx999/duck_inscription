@@ -168,44 +168,6 @@ class EquivalenceView(TemplateView):
         context['wish'] = wish
         return self.render_to_response(context)
 
-#
-# class EquivalencePdfView(PDFTemplateView):
-#     template_name = "duck_inscription/wish/equivalence_pdf.html"
-#     templates_name = ["duck_inscription/wish/etiquette.html", "duck_inscription/wish/equivalence_pdf.html"]
-#     response_class = MultiPDFTemplateResponse
-#
-#     def get(self, request, *args, **kwargs):
-#         self.response_class.templates_name = self.templates_name
-#         return super(EquivalencePdfView, self).get(request, *args, **kwargs)
-#
-#     def get_context_data(self, **kwargs):
-#         context = super(EquivalencePdfView, self).get_context_data(**kwargs)
-#         self.response_class.files = [self.do_pdf(self.get_file())]
-#
-#         if self.request.user.is_staff:
-#             context['voeu'] = Wish.objects.get(pk=self.kwargs['pk'])
-#             context['individu'] = context['voeu'].individu
-#         else:
-#             context['individu'] = self.request.user.individu
-#             context['voeu'] = self.request.user.individu.wishes.get(pk=self.kwargs['pk'])
-#         context['logo_p8'] = "file://" + settings.BASE_DIR + '/duck_theme_ied/static/images/logop8.jpg'
-#         context['url_font'] = settings.BASE_DIR + '/duck_theme_ied/static/font/ConnectCode39.ttf'
-#         context['url_static'] = settings.BASE_DIR + '/duck_theme_ied/static/images/'
-#         context['annee_univ'] = annee_en_cour()
-#
-#         return context
-#
-#     def get_file(self):
-#         """
-#         Il faut la surcharger pour les candidatures
-#         Doit retourner le l'url du doccument du doccument a fussionner
-#         """
-#         if self.request.user.is_staff:
-#             step = Wish.objects.get(pk=self.kwarg['pk']).etape
-#         else:
-#             step = self.request.user.individu.wishes.get(pk=self.kwargs['pk']).etape
-#
-#         return step.document_equivalence
 
 class EquivalencePdfView(TemplateView):
     template_name = "duck_inscription/wish/etiquette.html"
