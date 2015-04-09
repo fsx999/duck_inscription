@@ -193,7 +193,7 @@ class EquivalencePdfView(TemplateView):
         Doit retourner le l'url du doccument du doccument a fussionner
         """
         if self.request.user.is_staff:
-            return Wish.objects.get(pk=self.kwarg['pk']).etape.document_equivalence
+            return Wish.objects.get(pk=self.kwargs['pk']).etape.document_equivalence
         return self.request.user.individu.wishes.get(pk=self.kwargs['pk']).etape.document_equivalence
 
 
