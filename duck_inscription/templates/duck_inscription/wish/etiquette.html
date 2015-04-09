@@ -1,19 +1,49 @@
 <html>
 <style type="text/css">
 
-        @font-face {
-            font-family: "code_bare";
-            src: url(/Users/paulguichon/PycharmProjects/pal2/backoffice/static/font/ConnectCode39.ttf);
-        }
+    body {
+        text-align: justify;
+        font-size: 25px;
+    }
+    .header {
+        margin-top: 10cm;
+    }
 
-        .code_barre {
-            font-family: "code_bare";
-            font-size: 16pt;
-        }
+    .barcode {
+        font-family: CCode39;
+        font-size: 45px;
+    }
+    .normal{
+        text-align: justify;
+        margin: 2cm;
+    }
+    .middle {
+        border: 2px solid #000000;
+        margin-top: 50%;
+    }
+    .etiquette {
+        margin: 2cm;
+
+    }
+
+
 </style>
 <body>
-<div>
-<span class="code_barre">*58920140*</span><br/>
-    </div>
+
+<div class="header" id="headerContent">
+    Découper l'étiquette ci-dessous et la coller soigneusement sur
+    une enveloppe format A4 dans laquelle vous mettrez le dossier rempli
+    avec les pièces à fournir avant de le poster.
+</div>
+<div id="middleContent" class="middle">
+    <div class="etiquette">
+    <center>
+    <div class="barcode">*toto e t*</div>
+    <div>*{{ voeu.code_dossier }}*</div>
+        {% include "duck_inscription/include/adresse_ied.html" with ETAPE=voeu.state.name|capfirst %}
+    </center>
+        </div>
+</div>
+
 </body>
 </html>
