@@ -11,16 +11,9 @@
         }
 
 
-
         .code_bare {
             font-family: CCode39;
             font-size: 35px;
-        }
-
-
-        h3 {
-            padding-bottom: 0;
-            padding-top: 0;
         }
 
 
@@ -52,28 +45,28 @@
     <div>
         <div class="row">
             <div class="col-xs-4"><b>Nom : </b></div>
-            <div class="col-xs-8">{{ individu.last_name|capfirst }}</div>
+            <div class="col-xs-8">{{ voeu.individu.last_name|capfirst }}</div>
         </div>
-        {% if  individu.common_name %}
+        {% if  voeu.individu.common_name %}
             <div class="row">
                 <div class="col-xs-4"><b>Nom d'épouse:</b></div>
-                <div class="col-xs-8">{{ individu.common_name|capfirst }}</div>
+                <div class="col-xs-8">{{ voeu.individu.common_name|capfirst }}</div>
             </div>
         {% endif %}
         <div class="row">
             <div class="col-xs-4"><b>Prénom : </b></div>
-            <div class="col-xs-8">{{ individu.first_name1|capfirst }}</div>
+            <div class="col-xs-8">{{ voeu.individu.first_name1|capfirst }}</div>
         </div>
         <div class="row">
             <div class="col-xs-4"><b>Date de naissance : </b></div>
-            <div class="col-xs-8">{{ individu.birthday|date:"d F Y" }}</div>
+            <div class="col-xs-8">{{ voeu.individu.birthday|date:"d F Y" }}</div>
         </div>
         <div class="row">
             <div class="col-xs-4"><b>Nationalité : </b></div>
-            <div class="col-xs-8">{{ individu.code_pays_nationality.lib_nat|capfirst }}</div>
+            <div class="col-xs-8">{{ voeu.individu.code_pays_nationality.lib_nat|capfirst }}</div>
         </div>
 
-        {% for address in individu.adresses.all %}
+        {% for address in voeu.individu.adresses.all %}
 
             {% if address.type == '1' %}
                 <div class="row">

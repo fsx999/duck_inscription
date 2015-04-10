@@ -20,7 +20,7 @@ from django.utils.timezone import now
 from django.conf import settings
 from xhtml2pdf import pdf as pisapdf
 from xhtml2pdf import pisa
-from duck_utils.utils import make_multi_pdf
+from duck_utils.utils import make_multi_pdf, num_page, remove_page_pdf
 
 __author__ = 'paul'
 
@@ -298,19 +298,28 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
             nb = 0
         return nb
 
-    def save(self, force_insert=False, force_update=False, using=None):
+    def save(self, force_insert=False, force_update=False, using=None, **kwargs):
         if not self.code_dossier:
             nb = Wish.objects.count()
             if nb != 0:
                 self.code_dossier = Wish.objects.all().order_by('-code_dossier')[0].code_dossier + 1
             else:
                 self.code_dossier = 10000000
-        if not self.is_reins:
-            self.is_reins_formation
         super(Wish, self).save(force_insert, force_update, using)
+        if self.is_reins is None:
+            self.is_reins_formation()
 
-    def do_pdf_equi(self, templates, request, context, files=[]):
-        return make_multi_pdf(context=context, templates=templates, files=files)
+
+    def do_pdf_equi(self, request, context):
+        templates = [{'name': "duck_inscription/wish/etiquette.html"},
+                    {'name': 'duck_inscription/wish/equivalence_pdf.html',
+                     'footer': 'duck_inscription/wish/footer.html'}]
+
+        context['voeu'] = self
+        doc_equi = self.etape.document_equivalence.file
+        context['num_page'] = num_page(doc_equi)
+
+        return make_multi_pdf(context=context, templates=templates, files=[remove_page_pdf(doc_equi)])
 
     def do_pdf_decision_equi_pdf(self, flux, request, context):
         pdf = pisapdf.pisaPDF()
@@ -325,16 +334,16 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
                 PDFTemplateResponse(request=request, context=context, template=[template, ]).rendered_content)
             pdf.addFromFileName(self.etape.grille_de_equivalence.file.file.name)
 
-    def do_pdf_candi(self, flux, templates, request, context):
-        pdf = pisapdf.pisaPDF()
-        for template in templates:
-            pdf.addDocument(pisa.CreatePDF(
-                render_to_string(template, context, context_instance=RequestContext(request))))  # on construit le pdf
-            #il faut fusionner la suite
+    def do_pdf_candi(self, request, context):
+        templates = [{'name': "duck_inscription/wish/etiquette.html"},
+                {'name': 'duck_inscription/wish/candidature_pdf.html',
+                 'footer': 'duck_inscription/wish/footer.html'}]
 
-        pdf.addFromString(self.do_pdf(context['url_doc']).getvalue())
-        pdf.join(flux)
-        return flux
+        context['voeu'] = self
+        doc_candi = self.etape.document_candidature.file
+        context['num_page'] = num_page(doc_candi)
+
+        return make_multi_pdf(context=context, templates=templates, files=[remove_page_pdf(doc_candi)])
 
 
 

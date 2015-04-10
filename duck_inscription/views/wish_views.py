@@ -152,7 +152,10 @@ class ListeAttenteEquivalenceView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(ListeAttenteEquivalenceView, self).get_context_data(**kwargs)
-        context['wish'] = self.request.user.individu.wishes.get(pk=self.kwargs['pk'])
+        if self.request.user.is_staff:
+            context['wish'] = Wish.objects.get(pk=self.kwargs['pk'])
+        else:
+            context['wish'] = self.request.user.individu.wishes.get(pk=self.kwargs['pk'])
         return context
 
 
@@ -172,41 +175,22 @@ class EquivalenceView(TemplateView):
 class EquivalencePdfView(TemplateView):
     template_name = "duck_inscription/wish/etiquette.html"
     etape = "equivalence"  # à surcharger pour candidature
-
-    def get_context_data(self, **kwargs):
-        context = super(EquivalencePdfView, self).get_context_data(**kwargs)
-        if self.request.user.is_staff:
-            context['voeu'] = Wish.objects.get(pk=self.kwargs['pk'])
-            context['individu'] = context['voeu'].individu
-        else:
-            context['individu'] = self.request.user.individu
-            context['voeu'] = self.request.user.individu.wishes.get(pk=self.kwargs['pk'])
-        return context
-
-    def get_template_names(self):
-        return  [{'name': self.template_name}, {'name': 'duck_inscription/wish/%s_pdf.html' % self.etape,
-                                                'footer': 'duck_inscription/wish/footer.html'}]
-
-    def get_file(self):
-        """
-        Il faut la surcharger pour les candidatures
-        Doit retourner le l'url du doccument du doccument a fussionner
-        """
-        if self.request.user.is_staff:
-            return Wish.objects.get(pk=self.kwargs['pk']).etape.document_equivalence
-        return self.request.user.individu.wishes.get(pk=self.kwargs['pk']).etape.document_equivalence
-
+    fonction_impression = 'do_pdf_equi'
 
     def render_to_response(self, context, **response_kwargs):
-        response = HttpResponse(content_type='application/pdf')
-        response['Content-Disposition'] = 'attachment; filename=%s_%s.pdf' % (self.etape, context['voeu'].etape.cod_etp)
+
         try:
-            doc_file = self.get_file().file
+            if self.request.user.is_staff:
+                wish = Wish.objects.get(pk=self.kwargs['pk'])
+            else:
+                wish = self.request.user.individu.wishes.get(pk=self.kwargs['pk'])
         except Wish.DoesNotExist:
             return redirect(self.request.user.individu.get_absolute_url())
-        context['num_page'] = num_page(doc_file)  # on indique le nombre de page pour la page 1
-        response.write(context['voeu'].do_pdf_equi(templates=self.get_template_names(), request=self.request,
-                                           context=context, files=[remove_page_pdf(doc_file)]))
+
+        response = HttpResponse(content_type='application/pdf')
+        response['Content-Disposition'] = 'attachment; filename=%s_%s.pdf' % (self.etape, wish.etape.cod_etp)
+
+        response.write(getattr(wish, self.fonction_impression)(request=self.request, context=context))
         return response
 
 
@@ -258,33 +242,8 @@ class CandidatureView(EquivalenceView):
 
 class CandidaturePdfView(EquivalencePdfView):
     etape = "candidature"
+    fonction_impression = 'do_pdf_candi'
 
-    def get_file(self):
-        """
-        Il faut la surcharger pour les candidatures
-        Doit retourner le l'url du doccument du doccument a fussionner
-        """
-        if self.request.user.is_staff:
-            step = Wish.objects.get(pk=self.kwargs['pk']).etape
-        else:
-            step = self.request.user.individu.wishes.get(pk=self.kwargs['pk']).etape
-
-        return step.document_candidature
-
-    def render_to_response(self, context, **response_kwargs):
-        response = HttpResponse(mimetype='application/pdf')
-        response['Content-Disposition'] = 'attachment; filename=%s_%s.pdf' % (self.etape, context['voeu'].etape.cod_etp)
-        try:
-            url_doc = self.get_file().file
-        except Wish.DoesNotExist:
-            return redirect(self.request.user.individu.get_absolute_url())
-        context['url_doc'] = url_doc
-        url_doc.open('r')
-
-        context['num_page'] = self._num_page(url_doc)  # on indique le nombre de page pour la page 1
-
-        return context['voeu'].do_pdf_candi(flux=response, templates=self.get_template_names(), request=self.request,
-                                            context=context)
 
 
 class ListeAttenteCandidatureView(ListeAttenteEquivalenceView):
