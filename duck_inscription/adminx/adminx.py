@@ -163,7 +163,6 @@ class WishInline(object):
 
 
 
-
 class IndividuXadmin(object):
     site_title = 'Consultation des dossiers étudiants'
     show_bookmarks = False
