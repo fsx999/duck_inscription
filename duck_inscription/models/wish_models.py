@@ -346,13 +346,6 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
         return make_multi_pdf(context=context, templates=templates, files=[remove_page_pdf(doc_candi)])
 
 
-
-    #
-    # def save_auditeur(self):
-    #     if self.is_auditeur:
-    #         pass
-    #
-
     def droit_univ(self):
         if self.individu.droit_univ():
             return self.etape.droit

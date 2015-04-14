@@ -161,3 +161,6 @@ class CentreGestionModel(models.Model):
 
     def __str__(self):
         return unicode(self.label)
+
+
+

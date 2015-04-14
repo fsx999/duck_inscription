@@ -10,7 +10,7 @@ from duck_theme_ied.xadmin_plugins.topnav import IEDPlugin
 from xadmin.plugins.auth import UserAdmin
 from xadmin.layout import Main, Fieldset, Side
 import xadmin
-from duck_inscription.models import Individu, SettingsEtape, WishWorkflow, SettingAnneeUni
+from duck_inscription.models import Individu, SettingsEtape, WishWorkflow, SettingAnneeUni, ListeDiplomeAces
 from duck_inscription.models import Wish, SuiviDossierWorkflow, IndividuWorkflow, SettingsUser, CursusEtape
 from xadmin.util import User
 from duck_inscription.adminx.html_string.action_adminx import ACTION
@@ -159,7 +159,9 @@ class WishInline(object):
 
     print_dossier_equi.allow_tags = True
     print_dossier_equi.short_description = 'Impression'
-    # def get_exclude(self):
+
+
+
 
 
 class IndividuXadmin(object):
@@ -202,12 +204,19 @@ class IndividuXadmin(object):
     get_transition_log.allow_tags = True
 
 
+class ListeDiplomeAcesInline(object):
+    model = ListeDiplomeAces
+    extra = 1
+
+
 class SettingsEtapeXadmin(object):
     exclude = ('lib_etp', 'cod_cyc', 'cod_cur', 'annee')
     list_display = ['__unicode__', 'date_ouverture_inscription', 'date_fermeture_inscription',
                     'date_fermeture_reinscription', 'droit', 'frais']
     list_filter = ['cursus']
     quickfilter = ['cursus']
+    inlines = [ListeDiplomeAcesInline]
+
     form_layout = (
         Main(Fieldset('Etape', 'cod_etp', 'diplome', 'cursus', 'label', 'label_formation'), TabHolder(Tab('Equivalence',
                                                                                                           Fieldset('',
