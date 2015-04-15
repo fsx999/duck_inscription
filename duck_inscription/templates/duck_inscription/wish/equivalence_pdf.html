@@ -1,4 +1,4 @@
-{% load static lib_inscription %}
+{% load static lib_inscription duck_utils%}
 <!DOCTYPE html>
 <html>
 <head>
@@ -25,7 +25,7 @@
 <body>
 <div class="container">
     <div class="row">
-        <div class="col-xs-6"><img id="logo_ied" src="{% static "images/logo-ied.jpg" %}"/></div>
+        <div class="col-xs-6"><img id="logo_ied" src="{% static "images/logo-centre.jpg" %}"/></div>
         <div class="col-xs-6">
             <center><span class="code_bare">{{ voeu.code_dossier }}</span><br/>{{ voeu.code_dossier }}</center>
         </div>
@@ -115,9 +115,9 @@
 
         <h4>
             L’équivalence n’est accordée qu’une seule fois, lors de l’accès au cursus de licence, pour l’année
-            {% annee_en_cour %} à l’IED. Si la décision d’équivalence vous accorde la validation d’éléments constitutifs
+            {% annee_en_cour %} {% centre_univ_format %}. Si la décision d’équivalence vous accorde la validation d’éléments constitutifs
             (EC),
-            ces derniers sont acquis pour toute la durée des études en {{ voeu.step.grade }} à l’IED
+            ces derniers sont acquis pour toute la durée des études en {{ voeu.etape.label_formation }} {% centre_univ_format %}
         </h4>
 
     </div>

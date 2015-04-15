@@ -4,47 +4,56 @@
 
         <div class="col-lg-8">
             <div class="well">
-    <legend style="text-align: center">Demande d'équivalence en {{ wish.etape.label_formation }}</legend>
-    <div class="form-horizontal">
+                <legend style="text-align: center">Demande d'équivalence en {{ wish.etape.label_formation }}</legend>
+                <div class="form-horizontal">
 
-    {% if wish.valide %}
+                    {% if wish.valide %}
 
-        <p>Votre vœu a bien été validé, vous devez <strong>imprimer</strong> votre dossier
-            et y suivre les indications indiquées avant de nous l'envoyer <strong>complet</strong>.</p>
+                        <p>Votre vœu a bien été validé, vous devez <strong>imprimer</strong> votre dossier
+                            et y suivre les indications indiquées avant de nous l'envoyer <strong>complet</strong>.</p>
 
-        <div class="alert alert-info">À l'issue de ce traitement, vous obtiendrez une réponse par
-            courrier electronique et serez orienté automatiquement vers l'étape suivante de votre inscription.</div>
-        <div class="form-group">
-        <div class="text-center">
-        <a href="{% url 'equivalence_pdf' wish.pk %}" class="btn btn-primary">Imprimer votre dossier d'équivalence</a>
+                        <div class="alert alert-info">À l'issue de ce traitement, vous obtiendrez une réponse par
+                            courrier electronique et serez orienté automatiquement vers l'étape suivante de votre
+                            inscription.
+                        </div>
+                        <div class="form-group">
+                            <div class="text-center">
+                                <a href="{% url 'equivalence_pdf' wish.pk %}" class="btn btn-primary">Imprimer votre
+                                    dossier d'équivalence</a>
+                            </div>
+                        </div>
+                    {% else %}
+
+                        <p>Vous allez faire une validation de vos études en {{ wish.etape.label_formation }}.
+                            À ce stade, la validation (ci-dessous) de ce vœu est <strong>définitive</strong> et aucune
+                            modification ne pourra y être apportée.</p>
+                        <div class="alert alert-info"><strong>Validez</strong> votre vœu afin de pouvoir imprimer votre
+                            dossier de demande d'équivalence pour son envoi définitif.
+                        </div>
+                        <div class="text-center">
+                            <a href="{% url 'delete_wish' pk=wish.pk %}" class="btn btn-danger">Supprimer le vœu</a>
+                            <a href="{% url 'equivalence' wish.pk %}?valide=ok" class="btn btn-success">Valider votre
+                                vœu</a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
         </div>
+        <div class="col-lg-4">
+            <div class="well">
+                <legend style="text-align: center">Suivi du dossier</legend>
+
+                <ul>
+                    {% if wish.transitions_logs %}
+                        {% for log in wish.transitions_logs %}
+                            <li>{{ log }}</li>
+                        {% endfor %}
+                    {% else %}
+                        <li>{{ wish.suivi_dossier.title }}</li>
+                    {% endif %}
+
+                </ul>
+            </div>
         </div>
-    {% else %}
-
-    <p>Vous allez faire une validation de vos études en {{ wish.etape.label_formation }}.
-    À ce stade, la validation (ci-dessous) de ce vœu est <strong>définitive</strong> et aucune modification ne pourra y être apportée.</p>
-    <div class="alert alert-info"><strong>Validez</strong> votre vœu afin de pouvoir imprimer votre dossier de demande d'équivalence pour son envoi définitif.</div>
-    <div class="text-center">
-        <a href="{% url 'delete_wish' pk=wish.pk %}" class="btn btn-danger">Supprimer le vœu</a>
-        <a href="{% url 'equivalence' wish.pk%}?valide=ok" class="btn btn-success">Valider votre vœu</a>
     </div>
-{% endif %}</div>
-    </div>
-
-</div>
-    <div class="col-lg-4"><div class="well">
-    <legend style="text-align: center">Suivi du dossier</legend>
-
-    <ul>
-    {% if wish.transitions_logs %}
-    {% for log in wish.transitions_logs %}
-        <li>{{ log }}</li>
-        {% endfor %}
-        {% else %}
-        <li>{{ wish.suivi_dossier.title }}</li>
-    {% endif %}
-
-    </ul>
-    </div></div>
-</div>
 {% endblock %}

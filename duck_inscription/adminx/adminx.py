@@ -72,6 +72,11 @@ class WishInline(object):
     can_delete = True
     hidden_menu = True
 
+    def queryset(self):
+        queryset = super(WishInline, self).queryset()
+
+        return queryset.filter(annee__inscription=True)
+
     @filter_hook
     def get_readonly_fields(self):
         if self.request.user.is_superuser:
@@ -159,8 +164,6 @@ class WishInline(object):
 
     print_dossier_equi.allow_tags = True
     print_dossier_equi.short_description = 'Impression'
-
-
 
 
 class IndividuXadmin(object):

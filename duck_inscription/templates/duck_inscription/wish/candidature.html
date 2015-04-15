@@ -1,27 +1,57 @@
 {% extends "duck_inscription/wish/base_wish.html" %}
 {% block contenu %}
-    <div class="well">
-        <legend style="text-align: center">Demande de candidature en {{ wish.etape.label }}</legend>
-        <div class="form-horizontal">
-            {% if wish.valide %}
 
-                <p>Votre vœu a bien été validé, vous devez <strong>imprimer</strong> votre dossier
-                    et y suivre les indications indiquées avant de nous l'envoyer <strong>complet</strong>.</p>
-                <div class="alert alert-info">À l'issue de ce traitement, vous obtiendrez une réponse par
-                    courrier electronique et serez orienté automatiquement vers l'étape suivante de votre inscription.</div>
-                <div class="form-actions">
-                    <a href="{% url 'candidature_pdf' wish.pk %}" class="btn btn-primary">Imprimer votre dossier de candidature</a>
+    <div class="row">
+
+        <div class="col-lg-8">
+            <div class="well">
+                <legend style="text-align: center">Demande de candidature en {{ wish.etape.label }}</legend>
+                <div class="form-horizontal">
+
+                    {% if wish.valide %}
+                        <p>Votre vœu a bien été validé, vous devez <strong>imprimer</strong> votre dossier
+                            et y suivre les indications indiquées avant de nous l'envoyer <strong>complet</strong>.</p>
+                        <div class="alert alert-info">À l'issue de ce traitement, vous obtiendrez une réponse par
+                            courrier electronique et serez orienté automatiquement vers l'étape suivante de votre
+                            inscription.
+                        </div>
+                        <div class="form-actions">
+                            <a href="{% url 'candidature_pdf' wish.pk %}" class="btn btn-primary">Imprimer votre dossier
+                                de candidature</a>
+                        </div>
+                    {% else %}
+
+                        <p>Vous allez faire une validation de vos études en {{ wish.etape.label_formation }}.
+                            À ce stade, la validation (ci-dessous) de ce vœu est <strong>définitive</strong> et aucune
+                            modification ne pourra y être apportée.</p>
+                        <div class="alert alert-info"><strong>Validez</strong> votre vœu afin de pouvoir imprimer votre
+                            dossier de demande de candidature pour son envoi définitif.
+                        </div>
+                        <div class="form-actions">
+                            <a href="{% url 'delete_wish' pk=wish.pk %}" class="btn btn-danger">Supprimer le vœu</a>
+                            <a href="{% url 'candidature' wish.pk %}?valide=ok" class="btn btn-success">Valider votre
+                                vœu</a>
+                        </div>
+                    {% endif %}
                 </div>
-            {% else %}
-                {#    <h3 class="page-header" >Votre orientation pédagogique :</h3>#}
-                <p>Vous allez faire une validation de vos études en {{ wish.etape.label_formation }}.
-                    À ce stade, la validation (ci-dessous) de ce vœu est <strong>définitive</strong> et aucune modification ne pourra y être apportée.</p>
-                <div class="alert alert-info"><strong>Validez</strong> votre vœu afin de pouvoir imprimer votre dossier de demande de candidature pour son envoi définitif.</div>
-                <div class="form-actions">
-                    <a href="{% url 'delete_wish' pk=wish.pk %}" class="btn btn-danger">Supprimer le vœu</a>
-                    <a href="{% url 'candidature' wish.pk%}?valide=ok" class="btn btn-success">Valider votre vœu</a>
-                </div>
-            {% endif %}
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="well">
+                <legend style="text-align: center">Suivi du dossier</legend>
+
+                <ul>
+                    {% if wish.transitions_logs %}
+                        {% for log in wish.transitions_logs %}
+                            <li>{{ log }}</li>
+                        {% endfor %}
+                    {% else %}
+                        <li>{{ wish.suivi_dossier.title }}</li>
+                    {% endif %}
+
+                </ul>
+            </div>
         </div>
     </div>
+
 {% endblock %}

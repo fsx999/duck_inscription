@@ -1,4 +1,4 @@
-{% load static lib_inscription %}
+{% load static lib_inscription duck_utils %}
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -24,7 +24,7 @@
 <body>
 <div class="container">
     <div class="row">
-        <div class="col-xs-6"><img id="logo_ied" src="{% static "images/logo-ied.jpg" %}"/></div>
+        <div class="col-xs-6"><img id="logo_ied" src="{% static "images/logo-centre.jpg" %}"/></div>
         <div class="col-xs-6">
             <center><span class="code_bare">{{ voeu.code_dossier }}</span><br/>{{ voeu.code_dossier }}</center>
         </div>
@@ -106,7 +106,7 @@
     <br/>
 
     <div class="well">
-        DOSSIER A ENVOYER À L’IED POUR RECEPTION AU PLUS TARD LE
+        DOSSIER A ENVOYER {% centre_univ_format %} POUR RECEPTION AU PLUS TARD LE
         : {{ voeu.etape.date_fermeture_candidature|date:'d/m/Y' }} <br>
     </div>
     <div class="row">

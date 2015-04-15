@@ -11,6 +11,7 @@ from xadmin import views
 import xadmin
 from duck_inscription.models import SettingsEtape
 from duck_inscription.models import Wish
+from duck_utils.utils import get_email_envoi
 
 
 class DossierReception(views.FormAdminView):
@@ -181,7 +182,8 @@ class EquivalenceView(views.FormAdminView):
 
     def _envoi_email(self, wish, template):
         context = {'site': Site.objects.get(id=settings.SITE_ID_IED), 'wish': wish, 'motif': self.motif}
-        email = wish.individu.user.email if not settings.DEBUG else 'paul.guichon@iedparis8.net'
+
+        email = get_email_envoi(wish.individu.user.email)
         mail = template.make_message(context=context, recipients=[email])
         mail.send()
 
@@ -295,7 +297,7 @@ class CandidatureView(views.FormAdminView):
 
     def _envoi_email(self, wish, template):
         context = {'site': Site.objects.get(id=settings.SITE_ID_IED), 'wish': wish, 'motif': self.motif}
-        email = wish.individu.user.email if not settings.DEBUG else 'paul.guichon@iedparis8.net'
+        email = get_email_envoi(wish.individu.user.email)
         mail = template.make_message(context=context, recipients=[email])
         mail.send()
 
@@ -420,7 +422,7 @@ class DossierInscriptionView(views.FormAdminView):
 
     def _envoi_email(self, wish, template):
         context = {'site': Site.objects.get(id=settings.SITE_ID_IED), 'wish': wish, 'motif': self.motif}
-        email = wish.individu.user.email if not settings.DEBUG else 'paul.guichon@iedparis8.net'
+        email = get_email_envoi(wish.individu.user.email)
         mail = template.make_message(context=context, recipients=[email])
         mail.send()
 

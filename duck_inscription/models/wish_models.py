@@ -20,7 +20,7 @@ from django.utils.timezone import now
 from django.conf import settings
 from xhtml2pdf import pdf as pisapdf
 from xhtml2pdf import pisa
-from duck_utils.utils import make_multi_pdf, num_page, remove_page_pdf
+from duck_utils.utils import make_multi_pdf, num_page, remove_page_pdf, get_email_envoi
 
 __author__ = 'paul'
 
@@ -30,8 +30,8 @@ class WishWorkflow(xwf_models.Workflow):
     states = (
         ('creation', 'Création'),
         ('ouverture_equivalence', 'Ouverture equivalence'),
-        ('liste_diplome', 'Liste Diplome équivalent'),
-        ('demande_equivalence', 'Demande desir équivalence'),
+        ('liste_diplome', 'Liste diplome équivalent'),
+        ('demande_equivalence', 'Demande équivalence'),
         ('equivalence', 'Dossier en équivalence'),
         ('liste_attente_equivalence', 'Dossier en liste attente équivalence'),
         ('ouverture_candidature', 'Ouverture candidature'), ('note_master', 'Note master'),
@@ -256,17 +256,19 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
             raise Exception(u"Etape inconnu")
         site = settings.INSCRIPTION_URL
         template = Mail.objects.get(name='email_reception')
-        if settings.DEBUG:
-            email_destination = ("paul.guichon@iedparis8.net", "stefan.ciobotaru@iedparis8.net")
-        else:
-            email_destination = (self.individu.personal_email,)
+        email = [get_email_envoi(self.individu.user.email)]
 
-        mail = template.make_message(context={'site': site, 'etape': etape}, recipients=email_destination)
+        mail = template.make_message(context={'site': site, 'etape': etape}, recipients=email)
         mail.send()
 
     @property
     def transitions_logs(self):
-        return TransitionLog.objects.filter(content_id=self.code_dossier).order_by('timestamp')
+        reponse = []
+        for transition in self.etape_dossier.all().order_by('timestamp'):
+            print type(transition.timestamp)
+            reponse.append('{} {}'.format(SuiviDossierWorkflow.states[transition.to_state].title,
+                           transition.timestamp.strftime('le %d-%m-%Y à %H:%M ')))
+        return reponse
 
     @property
     def transition_etat_dossier(self):
@@ -305,6 +307,7 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
                 self.code_dossier = Wish.objects.all().order_by('-code_dossier')[0].code_dossier + 1
             else:
                 self.code_dossier = 10000000
+
         super(Wish, self).save(force_insert, force_update, using)
         if self.is_reins is None:
             self.is_reins_formation()

@@ -1,10 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-import StringIO
 import os
-from PyPDF2 import PdfFileReader, PdfFileWriter
 import datetime
-import cStringIO
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse
 
@@ -19,13 +16,11 @@ import json
 from duck_inscription.forms import WishGradeForm, ListeDiplomeAccesForm, DemandeEquivalenceForm, \
      NoteMasterForm, ListeAttenteCandidatureForm, ChoixPaiementDroitForm, DemiAnneeForm, \
     NbPaiementPedaForm, ValidationPaiementForm, ListeAttenteInscriptionForm
-from duck_inscription.models import Wish, SettingsEtape, NoteMasterModel, CentreGestionModel, PaiementAllModel
+from duck_inscription.models import Wish, SettingsEtape, NoteMasterModel, CentreGestionModel, PaiementAllModel,\
+    SettingAnneeUni
 from xhtml2pdf import pdf as pisapdf
 from xhtml2pdf import pisa
-from duck_inscription.templatetags.lib_inscription import annee_en_cour
 from django.conf import settings
-from wkhtmltopdf.views import PDFTemplateView, PDFResponse, PDFTemplateResponse
-from duck_utils.utils import make_pdf, append_pdf, MultiPDFTemplateResponse, remove_page_pdf, num_page
 
 __author__ = 'paul'
 
@@ -37,10 +32,10 @@ class NewWishView(FormView):
     def form_valid(self, form):
         etape = form.cleaned_data['etape']
         individu = self.request.user.individu
-
+        annee = SettingAnneeUni.objects.filter(inscription=True).last()
         if not individu.wishes.filter(etape=etape).count() == 0:
             return redirect(reverse("accueil"))
-        wish = Wish.objects.get_or_create(etape=etape, individu=individu)[0]
+        wish = Wish.objects.get_or_create(etape=etape, individu=individu, annee=annee)[0]
         wish.save()
         wish.ouverture_equivalence()
         return redirect(wish.get_absolute_url())
@@ -49,10 +44,7 @@ class NewWishView(FormView):
 class StepView(TemplateView):
     def get(self, request, *args, **kwargs):
         if self.request.GET.get("diplome", "") != "":
-            step_wish = []
-            for wish in self.request.user.individu.wishes.all():
-                for step in wish.etape.diplome.settingsetape_set.exclude(date_ouverture_candidature__isnull=False):
-                    step_wish.append(step.pk)
+            step_wish = [wish.etape.pk for wish in self.request.user.individu.wishes.all()]
 
             etape = ModelChoiceField(
                 queryset=SettingsEtape.objects.filter(diplome=self.request.GET.get("diplome")).exclude(
