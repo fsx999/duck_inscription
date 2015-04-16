@@ -17,7 +17,6 @@ def user_passes_test(test_func):
         def _wrapped_view(request, *args, **kwargs):
             if request.path_info in ["/individu/recapitulatif/modif_individu",
                                      "/individu/recapitulatif/modif_adresse"]:
-                print request.user.get_absolute_url(), reverse('recap')
                 if request.user.individu.get_absolute_url() != reverse('recap'):
                     return redirect(request.user.individu.get_absolute_url())
                 else:
