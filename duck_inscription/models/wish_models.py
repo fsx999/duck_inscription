@@ -253,7 +253,7 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
         elif self.state.name == u"auditeur":
             etape = u"d'auditeur"
         else:
-            raise Exception(u"Etape inconnu")
+            raise NameError(u"Etape inconnu")
         site = settings.INSCRIPTION_URL
         template = Mail.objects.get(name='email_reception')
         email = [get_email_envoi(self.individu.user.email)]

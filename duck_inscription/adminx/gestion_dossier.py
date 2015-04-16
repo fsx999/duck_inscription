@@ -49,6 +49,9 @@ class DossierReception(views.FormAdminView):
             except ValueError:
                 msg = u'Numéro dossier non valide'
                 self.message_user(msg, 'error')
+            except NameError:
+                msg = u'Numéro dossier non valide'
+                self.message_user(msg, 'error')
             return HttpResponseRedirect(self.get_redirect_url())
         return self.get_response()
 

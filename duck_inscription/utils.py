@@ -47,8 +47,6 @@ def user_verif_etape_and_login(function=None):
     return actual_decorator
 
 
-
-
 def wish_passes_test(test_func):
     """
     decorateur copier de django et modifié
