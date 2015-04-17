@@ -74,7 +74,6 @@ class WishInline(object):
 
     def queryset(self):
         queryset = super(WishInline, self).queryset()
-
         return queryset.filter(annee__inscription=True)
 
     @filter_hook
