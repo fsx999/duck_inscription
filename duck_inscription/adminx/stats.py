@@ -121,7 +121,7 @@ class ExtractionStatistiqueBase(BaseAdminView):
 
     def get(self, request, *args, **kwargs):
         self.set_attr_queryset(**kwargs)
-        response = HttpResponse(save_virtual_workbook(self.create_workbook()), mimetype='application/vnd.ms-excel')
+        response = HttpResponse(save_virtual_workbook(self.create_workbook()), contentype='application/vnd.ms-excel')
         date = datetime.datetime.today().strftime('%d-%m-%Y')
         response['Content-Disposition'] = 'attachment; filename=%s_%s.xlsx' % ('extraction', date)
         return response
@@ -173,7 +173,7 @@ class ExtractionStatApogee(ExtractionStatistiqueBase):
     def get(self, request, *args, **kwargs):
         self.set_attr_queryset(**kwargs)
         try:
-            response = HttpResponse(save_virtual_workbook(self.create_workbook()), mimetype='application/vnd.ms-excel')
+            response = HttpResponse(save_virtual_workbook(self.create_workbook()), contentype='application/vnd.ms-excel')
         except DatabaseError:
             messages.error(request, 'Connection à apogée impossible')
             return redirect('xadmin:stat_apogee')
@@ -286,7 +286,7 @@ class ExtrationPalView(BaseAdminView):
             except NoteMasterModel.DoesNotExist:
                 pass
 
-        response = HttpResponse(mimetype='application/vnd.ms-excel')
+        response = HttpResponse(contentype='application/vnd.ms-excel')
         date = datetime.datetime.today().strftime('%d-%m-%Y')
         response['Content-Disposition'] = 'attachment; filename=%s_%s.xls' % ('extraction', date)
         wb.save(response)
