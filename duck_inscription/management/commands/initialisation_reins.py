@@ -28,6 +28,6 @@ class Command(BaseCommand):
             # individu.student_code = ind.cod_etu
             # individu.sex = ind.cod_sex_etu
             # individu.birthday = ind.date_nai_ind
-            individu.ine = ind.ind()
+            individu.ine = ind.ine()
             individu.save()
         print InscriptionUser.objects.count()
