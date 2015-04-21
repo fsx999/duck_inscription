@@ -18,6 +18,7 @@ class Command(BaseCommand):
             i, create = InscriptionUser.objects.get_or_create(username=cod_etu, email=email_ied(ind))
             if create:
                 i.set_password(make_etudiant_password(cod_etu))
+                i.save()
             individu = Individu.objects.get_or_create(user=i, personal_email=i.email)[0]
             individu.last_name = ind.lib_nom_pat_ind
             individu.common_name = ind.lib_nom_usu_ind

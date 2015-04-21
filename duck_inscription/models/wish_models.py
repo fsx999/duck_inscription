@@ -276,7 +276,6 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
         for transition in self.parcours_dossier.all().order_by('timestamp'):
             reponse.append('{}'.format(WishWorkflow.states[transition.to_state].title))
         return reponse
-        # return WishParcourTransitionLog.objects.filter(wish=self).order_by('timestamp')
 
     def valide_liste(self):
         self.date_validation = datetime.datetime.today()
