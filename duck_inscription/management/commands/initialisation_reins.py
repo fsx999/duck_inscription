@@ -15,18 +15,19 @@ class Command(BaseCommand):
         for ins in InsAdmEtp.inscrits.all():
             ind = ins.cod_ind
             cod_etu = ind.cod_etu
-            i, create = InscriptionUser.objects.get_or_create(username=cod_etu, email=email_ied(ind))
+            # i, create = InscriptionUser.objects.get_or_create(username=cod_etu, email=email_ied(ind))
 
-            i.set_password(make_etudiant_password(cod_etu))
-            i.save()
-            individu = Individu.objects.get_or_create(user=i, personal_email=i.email)[0]
-            individu.last_name = ind.lib_nom_pat_ind
-            individu.common_name = ind.lib_nom_usu_ind
-            individu.first_name1 = ind.lib_pr1_ind
-            individu.first_name2 = ind.lib_pr2_ind
-            individu.first_name3 = ind.lib_pr3_ind
-            individu.student_code = ind.cod_etu
-            individu.sex = ind.cod_sex_etu
-            individu.birthday = ind.date_nai_ind
+            # i.set_password(make_etudiant_password(cod_etu))
+            # i.save()
+            individu = Individu.objects.get(student_code=cod_etu)
+            # individu.last_name = ind.lib_nom_pat_ind
+            # individu.common_name = ind.lib_nom_usu_ind
+            # individu.first_name1 = ind.lib_pr1_ind
+            # individu.first_name2 = ind.lib_pr2_ind
+            # individu.first_name3 = ind.lib_pr3_ind
+            # individu.student_code = ind.cod_etu
+            # individu.sex = ind.cod_sex_etu
+            # individu.birthday = ind.date_nai_ind
+            individu.ine = ind.ind()
             individu.save()
         print InscriptionUser.objects.count()
