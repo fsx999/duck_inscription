@@ -19,7 +19,8 @@ class Command(BaseCommand):
 
             # i.set_password(make_etudiant_password(cod_etu))
             # i.save()
-            individu = Individu.objects.get(student_code=cod_etu)
+            try:
+                individu = Individu.objects.get(student_code=cod_etu)
             # individu.last_name = ind.lib_nom_pat_ind
             # individu.common_name = ind.lib_nom_usu_ind
             # individu.first_name1 = ind.lib_pr1_ind
@@ -28,6 +29,8 @@ class Command(BaseCommand):
             # individu.student_code = ind.cod_etu
             # individu.sex = ind.cod_sex_etu
             # individu.birthday = ind.date_nai_ind
-            individu.ine = ind.ine()
-            individu.save()
+                individu.ine = ind.ine()
+                individu.save()
+            except Exception:
+                print cod_etu
         print InscriptionUser.objects.count()
