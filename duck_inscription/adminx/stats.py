@@ -16,6 +16,7 @@ import xadmin
 import datetime
 from duck_inscription.models import SettingsEtape, NoteMasterModel
 from duck_inscription.models import Wish
+
 try:
     from foad.utils import make_etudiant_password
 except ImportError:
