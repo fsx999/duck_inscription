@@ -236,7 +236,7 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
         diplomes = self.etape.cursus.settingsetape_set.all().values_list('pk', flat=True)
         if self.individu.student_code:
             self.is_reins = InsAdmEtp.objects.filter(cod_ind__cod_etu=self.individu.student_code,
-                                                     cod_etp__in=diplomes).count() != 0
+                                                     cod_etp__in=diplomes, cod_anu=2014).count() != 0
         else:
             self.is_reins = False
         self.save()
