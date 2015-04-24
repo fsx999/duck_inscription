@@ -305,9 +305,6 @@ class CandidatureView(views.FormAdminView):
         mail.send()
 
 
-
-
-
 class DossierInscriptionView(views.FormAdminView):
     form = InscriptionForm
     title = 'Dossier Inscription'
