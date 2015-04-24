@@ -83,7 +83,7 @@
                 remplaceoption("year");
             }
 
-            $("#id_diplome_acces").change(function(element){
+            $(document).on('change', "#id_diplome_acces", function(element){
                 var date = $("#id_annee_obtention");
                 if (date.val()){
                    $("#form").validate().element("#id_annee_obtention");
@@ -159,7 +159,8 @@
                                 bac: function(){
                                     return  $('#id_diplome_acces').val();
                                 }
-                            }
+                            },
+                            depends: 'diplome_acces'
                         },
                         required:true
                     }
