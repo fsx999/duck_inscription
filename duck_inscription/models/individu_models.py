@@ -48,6 +48,9 @@ class IndividuTransitionLog(django_xworkflows.models.BaseTransitionLog):
 
 @python_2_unicode_compatible
 class Individu(xwf_models.WorkflowEnabled, models.Model):
+    """
+    Gére les informations factuelles d'un individu
+    """
     state = xwf_models.StateField(IndividuWorkflow)
     code_opi = models.IntegerField(unique=True, null=True)
     """
@@ -156,6 +159,9 @@ class Individu(xwf_models.WorkflowEnabled, models.Model):
         return u"%s %s %s %s" % (self.last_name, self.common_name, self.first_name1, self.first_name2)
 
     def numeros_telephones(self):
+        """
+        :return un paragraphe html avec les numéros de téléphones
+        """
         html_reponse = "<p>"
         for adresse in self.adresses.all():
             html_reponse += "{}<br>".format(adresse.listed_number)
@@ -165,19 +171,23 @@ class Individu(xwf_models.WorkflowEnabled, models.Model):
     numeros_telephones.allow_tags = True
 
     def p28(self):
+        """
+        test l'age de l'individu
+        :return True si individu > 28 ans sinon False
+        """
         e = (date.today() - self.birthday)
         if e.days / 365 > 28:
             return True
         return False
 
-    def save(self, force_insert=False, force_update=False, using=None):
+    def save(self, force_insert=False, force_update=False, using=None, **kwargs):
         if not self.code_opi:
             individus = Individu.objects.filter(code_opi__isnull=False).order_by('-code_opi')
             if len(individus) > 0:
                 self.code_opi = individus[0].code_opi + 1
             else:
                 self.code_opi = 7700000
-        return super(Individu, self).save(force_insert, force_update, using)
+        return super(Individu, self).save(force_insert, force_update, using, **kwargs)
 
     @models.permalink
     def get_absolute_url(self):
@@ -185,14 +195,25 @@ class Individu(xwf_models.WorkflowEnabled, models.Model):
 
     @property
     def transitions_logs(self):
+        """
+        :return les transistions de l'individu
+        """
         return TransitionLog.objects.filter(content_id=self.id).order_by('timestamp')
 
     def droit_univ(self):
+        """
+        test si l'individu est exonéré ou pas
+        :return True si l'individu doit payer sinon False
+        """
         if self.dossier_inscription.situation_sociale.pk != 'NO':
             return False
         return True
 
     def need_secu(self):
+        """
+        Test si l'individu doit payer la sécu
+        :return True si oui False sinon
+        """
         if self.p28() or self.dossier_inscription.affiliation_parent or\
                 self.dossier_inscription.non_affiliation or self.dossier_inscription.situation_sociale.pk != 'NO':
             return False
@@ -200,11 +221,17 @@ class Individu(xwf_models.WorkflowEnabled, models.Model):
             return True
 
     def is_ancien_p8(self):
+        """
+        Test si l'individu posséde un numéro étudiant
+        """
         if self.student_code:
             return u'Oui'
         return u'Non'
 
     def lieu_naissance(self):
+        """
+        :return le lieu de naissance formaté
+        """
         chaine = u''
         if self.code_departement_birth:
             chaine += u'Département : %s, ' % self.code_departement_birth
@@ -214,6 +241,9 @@ class Individu(xwf_models.WorkflowEnabled, models.Model):
         return chaine
 
     def sex_display(self):
+        """
+        :return le label du sexe
+        """
         if self.sex == 'M':
             return unicode('Homme')
         else:
