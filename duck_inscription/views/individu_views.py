@@ -8,6 +8,7 @@ from django.shortcuts import redirect
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import RedirectView, FormView, View, UpdateView, TemplateView
 from extra_views import InlineFormSetView
+from floppyforms import ModelChoiceField
 from xworkflows import InvalidTransitionError
 import xworkflows
 from duck_inscription.forms.individu_forms import CodeEtudiantForm, InfoPersoForm, AdresseForm, AdresseBaseFormSet, \
@@ -46,7 +47,21 @@ def test_username(request):
     return HttpResponse('false')
 
 
+class BacOuxEquView(TemplateView):
+    def get(self, request, *args, **kwargs):
+        if self.request.GET.get("annee", "") != "":
+            bac = ModelChoiceField(
+                queryset = BacOuxEqu.objects.filter(
+                    daa_fin_vld_bac__gte=self.request.GET.get("annee")).order_by('lib_bac')
+                          | BacOuxEqu.objects.filter(daa_deb_vld_bac__lte=self.request.GET.get("annee"), daa_fin_vld_bac='').order_by('lib_bac'))
+            return HttpResponse(
+                bac.widget.render(name='diplome_acces', value='', attrs={'id': 'id_diplome_acces', 'class': "required"}))
+
+        return HttpResponse('echec')
+
 class DispatchIndividu(RedirectView):
+    permanent = True
+
     def get_redirect_url(self, **kwargs):
         i = IndividuInscription.objects.get_or_create(user=self.request.user)[0]
         i.personal_email = self.request.user.email

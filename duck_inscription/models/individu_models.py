@@ -138,12 +138,13 @@ class Individu(xwf_models.WorkflowEnabled, models.Model):
     )
 
     type_hebergement_annuel = models.ForeignKey(TypHebergement, null=True, blank=True, )
-    diplome_acces = models.ForeignKey(BacOuxEqu, null=True, blank=True, )
+
     annee_obtention = models.CharField(u"Année d'obtention",
                                        choices=[(unicode(i), i) for i in range(1900, date.today().year+1)],
                                        max_length=4, null=True,
                                        blank=True,
                                        help_text=u"Année d'obtention du baccalauréat ou équivalent")
+    diplome_acces = models.ForeignKey(BacOuxEqu, null=True, blank=True, )
     opi_save = models.IntegerField(null=True, blank=True)
     year = models.ForeignKey(AnneeUni, null=True, blank=True)
 

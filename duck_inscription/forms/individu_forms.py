@@ -209,19 +209,20 @@ class InfoPersoForm(forms.ModelForm):
 
     type_handicap = forms.ModelChoiceField(label=u"Handicap ", queryset=TypHandicap.objects.all(), required=False,
                                            empty_label=u"Aucun handicap")
-    diplome_acces = forms.ModelChoiceField(label=u"Baccalauréat ou équivalent ", queryset=BacOuxEqu.objects.all())
+
     annee_obtention = forms.ChoiceField(choices=[(u'', u'-------')] + [(unicode(i), unicode(i)) for i in
                                                                        range(datetime.today().year - 70,
                                                                              datetime.today().year + 1)],
                                         label=u"Année d'obtention",
                                         help_text=u"(Année d'obtention du baccalauréat ou équivalent", required=True)
+    diplome_acces = forms.ModelChoiceField(label=u"Baccalauréat ou équivalent ", queryset=BacOuxEqu.objects.all().order_by('lib_bac'))
 
     class Meta:
         model = Individu
         fields = (
         'last_name', 'common_name', 'first_name1', 'first_name2', 'first_name3', 'birthday', 'code_pays_birth',
         'code_departement_birth', 'town_birth', 'code_pays_nationality', 'sex', 'valid_ine', 'ine', 'family_status',
-        'situation_militaire', 'type_handicap', 'diplome_acces', 'annee_obtention')
+        'situation_militaire', 'type_handicap', 'annee_obtention', 'diplome_acces')
 
     def __init__(self, *args, **kwargs):
         readonly = kwargs.pop('readonly', False)

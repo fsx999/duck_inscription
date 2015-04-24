@@ -17,7 +17,37 @@
         </div>
 {% endblock %}
 {% block form_script %}
+    <script>
+     $(document).ready(function(){
+        function show_hide(){
+            $("#div_id_diplome_acces").toggle($('#id_annee_obtention').val()!="");
+            if($('#id_annee_obtention').val()==""){
+                $("#id_diplome_acces").html('');
+            }
+        }
+        function get_bac(value){//ajax pour récuper les steps
+            $.get("{% url 'liste_bac' %}", {'annee':value},function(data){
+                if (data == 'echec'){
+					$("#div_id_diplome_acces").hide();
+					$("#id_diplome_acces").html('');
+				}
+				else {
+					$("#div_id_diplome_acces").show();
+					$("#id_diplome_acces").replaceWith(data);
+				}
+            });
+        }
+        show_hide();
+         if($('#id_annee_obtention').val()==""){
+             get_bac($("#id_annee_obtention").val());
+         }
 
+        $("#id_annee_obtention").change(function(element){
+            show_hide();
+            get_bac($(this).val());
+        });
+    });
+    </script>
     <script>
 
         $(document).ready(function(){
