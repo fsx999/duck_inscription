@@ -168,10 +168,10 @@ class WishInline(object):
 class IndividuXadmin(object):
     site_title = 'Consultation des dossiers étudiants'
     show_bookmarks = False
-    fields = ('code_opi', 'last_name', 'first_name1', 'birthday', 'personal_email', 'state', 'user')
+    fields = ('code_opi', 'last_name', 'first_name1', 'birthday', 'personal_email', 'state', 'user', 'get_url')
     readonly_fields = (
         'user', 'student_code', 'code_opi', 'last_name', 'first_name1', 'birthday', 'personal_email',
-        'numeros_telephones', 'get_transition_log')
+        'numeros_telephones', 'get_transition_log', 'get_url')
     list_display = ('__unicode__', 'last_name')
     list_per_page = 10
     search_fields = ('last_name', 'first_name1', 'common_name', 'student_code', 'code_opi', 'wishes__code_dossier')
@@ -179,6 +179,10 @@ class IndividuXadmin(object):
     list_select_related = None
     inlines = [WishInline]
     hidden_menu = True
+
+    def get_url(self, obj):
+        response = '<a href="{}">{}</a>'
+        return response.format(obj.get_absolute_url(), obj.get_absolute_url())
 
     def has_add_permission(self):
         return False
