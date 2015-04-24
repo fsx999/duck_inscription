@@ -17,7 +17,7 @@
         {% for wish in wishes %}
         <p>
             <span>
-            <a href="{{ wish.get_absolute_url }}">{{ wish.name_url }}</a> {{ wish.suivi_dossier.title }}
+            <a href="{{ wish.get_absolute_url }}">{{ wish.name_url }}</a> Cliquer pour connaitre l'état de votre dossier
                 </span>
             {% if not wish.valide %}
                 <span class="pull-right">
