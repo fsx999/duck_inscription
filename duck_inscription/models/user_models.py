@@ -9,7 +9,7 @@ from django.conf import settings
 class SettingsUser(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, related_name='setting_user')
     etapes = models.ManyToManyField(SettingsEtape, related_name='etapes')
-    property = models.ManyToManyField(Property, null=True, blank=True)
+    property = models.ManyToManyField(Property, blank=True)
 
     class Meta:
         app_label = 'duck_inscription'

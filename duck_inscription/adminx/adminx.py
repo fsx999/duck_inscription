@@ -65,16 +65,29 @@ class WishInline(object):
     extra = 0
     style = 'table'
     fields = ['email', 'annee']
-    readonly_fields = ['code_dossier', 'diplome_acces', 'centre_gestion', 'reins', 'date_validation',
-                       'date_liste_inscription',  'valide',
-                       'get_transition_log', 'get_suivi_dossier', 'print_dossier_equi']
-    exclude = ['annee', 'is_reins']
+    readonly_fields = ['code_dossier',
+                       'get_transition_log', 'get_suivi_dossier', 'print_dossier_equi', 'actions']
+    exclude = ['annee', 'is_reins', 'is_auditeur', 'diplome_acces', 'centre_gestion', 'reins', 'date_validation',
+               'valide', 'date_liste_inscription', 'suivi_dossier', 'code_dossier']
     can_delete = True
     hidden_menu = True
 
     def queryset(self):
         queryset = super(WishInline, self).queryset()
         return queryset.filter(annee__inscription=True)
+
+    def help_superuser(self, obj):
+        reponse = ''
+        reponse += 'code_dossier : {} <br>'.format(obj.code_dossier)
+        reponse += 'valide : {} <br>'.format(obj.valide)
+        reponse += 'is_reins : {} <br>'.format(obj.is_reins)
+        reponse += 'diplome acces : {} <br>'.format(obj.diplome_acces)
+        reponse += 'centre gestion : {} <br>'.format(obj.centre_gestion)
+        reponse += 'date validation : {} <br>'.format(obj.date_validation)
+        reponse += 'date liste attente inscription : {} <br>'.format(obj.date_liste_inscription)
+        reponse += 'centre gestion : {} <br>'.format(obj.centre_gestion)
+        return reponse
+    help_superuser.allow_tags = True
 
     @filter_hook
     def get_readonly_fields(self):
@@ -181,8 +194,10 @@ class IndividuXadmin(object):
     hidden_menu = True
 
     def get_url(self, obj):
-        response = '<a href="{}">{}</a>'
+        response = '<a href="{}" target="_blank">{}</a>'
         return response.format(obj.get_absolute_url(), obj.get_absolute_url())
+    get_url.short_description = 'voir sur le site'
+    get_url.allow_tags = True
 
     def has_add_permission(self):
         return False

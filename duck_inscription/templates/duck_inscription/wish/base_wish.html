@@ -18,6 +18,10 @@
     {% endblock %}
 </form>
     {% block form_script %}{% endblock %}
+{% if wish.individu.pk %}
+<a href="{% url 'accueil' wish.individu.pk %}" class="btn btn-primary">Retour à l'accueil</a>
+{% elif individu.pk %}
+    <a href="{% url 'accueil' individu.pk %}" class="btn btn-primary">Retour à l'accueil</a>
+{% endif %}
 
-<a href="{% url 'accueil' %}" class="btn btn-primary">Retour à l'accueil</a>
 {% endblock %}

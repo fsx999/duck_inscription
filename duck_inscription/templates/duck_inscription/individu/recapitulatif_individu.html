@@ -7,7 +7,7 @@
         {% include "duck_inscription/individu/include/read_only_form.html" with form=individu %}
         <div class="form-group">
             <div class="col-sm-offset-3 col-sm-8">
-                <a class="btn btn-primary" href="{% url 'recap' "modif_individu" %}">Modifier votre état-civil</a>
+                <a class="btn btn-primary" href="{% url 'recap' ind.pk "modif_individu" %}">Modifier votre état-civil</a>
             </div>
         </div>
     </form>
@@ -34,7 +34,7 @@
         {% endfor %}
         <div class="form-group">
             <div class="col-sm-offset-3 col-sm-8">
-                <a class="btn btn-primary" href="{% url 'recap' "modif_adresse" %}">Modifier l'adresse</a>
+                <a class="btn btn-primary" href="{% url 'recap' ind.pk "modif_adresse" %}">Modifier l'adresse</a>
             </div>
         </div>
 

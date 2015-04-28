@@ -14,41 +14,88 @@ from floppyforms import ModelChoiceField
 import xworkflows
 import json
 from duck_inscription.forms import WishGradeForm, ListeDiplomeAccesForm, DemandeEquivalenceForm, \
-     NoteMasterForm, ListeAttenteCandidatureForm, ChoixPaiementDroitForm, DemiAnneeForm, \
+    NoteMasterForm, ListeAttenteCandidatureForm, ChoixPaiementDroitForm, DemiAnneeForm, \
     NbPaiementPedaForm, ValidationPaiementForm, ListeAttenteInscriptionForm
-from duck_inscription.models import Wish, SettingsEtape, NoteMasterModel, CentreGestionModel, PaiementAllModel,\
+from duck_inscription.models import Wish, SettingsEtape, NoteMasterModel, CentreGestionModel, PaiementAllModel, \
     SettingAnneeUni
 from xhtml2pdf import pdf as pisapdf
 from xhtml2pdf import pisa
 from django.conf import settings
+from duck_inscription.views import IndividuMixin
 
 __author__ = 'paul'
 
 
-class NewWishView(FormView):
+class WishIndividuMixin(object):
+    """
+    recupere le voeu à partir du pk si user = staff, ou bien à partir de l'user
+    """
+
+    @property
+    def individu(self):
+        """
+        :return: l'individu en fonction du pk de l'url (en fonction des droits)
+        """
+        individu = getattr(self, '_individu', None)
+        if not individu:
+            self._individu = self.wish.individu
+            return self._individu
+        return individu
+
+    @property
+    def wish(self):
+        """
+        :return: le voeu en fonction du pk de l'url (en fonction des droits)
+        """
+        wish = getattr(self, '_wish', None)
+        if not wish:
+            if self.request.user.is_staff:
+                self._wish = Wish.objects.get(pk=self.kwargs['pk'])
+            else:
+                self._wish = self.request.user.individu.wishes.get(pk=self.kwargs['pk'])
+            return self._wish
+        return wish
+
+
+class NewWishView(FormView, IndividuMixin):
+    """
+    permet de créer un voeu
+    """
     template_name = "duck_inscription/wish/new_wish.html"
     form_class = WishGradeForm
 
+    def get_context_data(self, **kwargs):
+        context = super(NewWishView, self).get_context_data(**kwargs)
+        context['individu'] = self.individu
+        return context
+
     def form_valid(self, form):
         etape = form.cleaned_data['etape']
-        individu = self.request.user.individu
+        individu = self.individu
         annee = SettingAnneeUni.objects.filter(inscription=True).last()
-        if not individu.wishes.filter(etape=etape).count() == 0:
-            return redirect(reverse("accueil"))
+        if not individu.wishes.filter(etape=etape).count() == 0:  # verifi qu'un voeu sur l'étape n'existe pas
+            return redirect(reverse("accueil", kwargs={'pk': individu.pk}))
         wish = Wish.objects.get_or_create(etape=etape, individu=individu, annee=annee)[0]
         wish.save()
         wish.ouverture_equivalence()
         return redirect(wish.get_absolute_url())
 
 
-class StepView(TemplateView):
+class StepView(TemplateView, IndividuMixin):
+    """
+    la vue qui retourne un widget contenant les etapes d'un diplome
+    """
     def get(self, request, *args, **kwargs):
         if self.request.GET.get("diplome", "") != "":
-            step_wish = [wish.etape.pk for wish in self.request.user.individu.wishes.all()]
-
+            step_wish = [wish.etape for wish in self.individu.wishes.all()]
+            liste_pk = []
+            for step in step_wish:
+                # liste etapes des diplomes déjà utilisé
+                liste_pk.extend(step.cursus.settingsetape_set.values_list('pk', flat=True))
+            # les étapes moins les étapes des diplomes déjà utilisés
             etape = ModelChoiceField(
                 queryset=SettingsEtape.objects.filter(diplome=self.request.GET.get("diplome")).exclude(
-                    pk__in=step_wish).exclude(is_inscription_ouverte=False).order_by('label'), )
+                    pk__in=liste_pk).exclude(is_inscription_ouverte=False).order_by('label'), )  #
             return HttpResponse(
                 etape.widget.render(name='etape', value='', attrs={'id': 'id_etape', 'class': "required"}))
 
@@ -56,42 +103,58 @@ class StepView(TemplateView):
 
 
 class DeleteWish(View):
+    """
+    suppression du voeu
+    """
     def get(self, request, *args, **kwargs):
-        self.request.user.individu.wishes.filter(pk=kwargs.get('pk', None)).delete()
-        return redirect(reverse("accueil"))
+        if self.request.user.is_staff:
+            wish = Wish.objects.get(pk=kwargs.get('pk', None))
+        else:
+            wish = self.request.user.individu.wishes.get(pk=kwargs.get('pk', None))
+        individu = wish.individu
+        wish.delete()
+        return redirect(reverse("accueil", kwargs={'pk': individu.pk}))
 
 
-class OuvertureEquivalence(TemplateView):
+class OuvertureEquivalence(TemplateView, WishIndividuMixin):
+    """
+    Ouverture des équivalences
+    """
     template_name = "duck_inscription/wish/ouverture_equivalence.html"
 
     def get_context_data(self, **kwargs):
         context = super(OuvertureEquivalence, self).get_context_data(**kwargs)
-        context['date'] = self.request.user.individu.wishes.get(pk=self.kwargs['pk']).etape.date_ouverture_equivalence
+        context['individu'] = self.individu
+        context['date'] = self.wish.etape.date_ouverture_equivalence
         return context
 
     def get(self, request, *args, **kwargs):
-        wish = self.request.user.individu.wishes.get(pk=self.kwargs['pk'])
+        wish = self.wish
         try:
-            wish.liste_diplome()
+            wish.liste_diplome()  # si l'étape est ouverte, la transition s'effectue
             return redirect(wish.get_absolute_url())
         except xworkflows.base.ForbiddenTransition:
+            # la transition n'est pas autorisé (étape non ouverte) on affiche le template
             return super(OuvertureEquivalence, self).get(request, *args, **kwargs)
 
 
-class ListeDiplomeAccesView(FormView):
+class ListeDiplomeAccesView(FormView, WishIndividuMixin):
+    """
+
+    """
     template_name = "duck_inscription/wish/liste_diplome_acces.html"
     form_class = ListeDiplomeAccesForm
 
     def get_context_data(self, **kwargs):
         context = super(ListeDiplomeAccesView, self).get_context_data(**kwargs)
         try:
-            context['wish'] = self.request.user.individu.wishes.get(pk=self.kwargs['pk'])
+            context['wish'] = self.wish
         except Wish.DoesNotExist:
-            return redirect(reverse("accueil"))
+            return redirect(reverse("accueil", kwargs={'pk': self.individu.pk}))
         return context
 
     def get_form(self, form_class):
-        wish = self.request.user.individu.wishes.get(pk=self.kwargs['pk'])
+        wish = self.wish
         return form_class(step=wish.etape, **self.get_form_kwargs())
 
     def get(self, request, *args, **kwargs):
@@ -99,7 +162,7 @@ class ListeDiplomeAccesView(FormView):
         try:
             form = self.get_form(form_class)
         except Wish.DoesNotExist:
-            return redirect(reverse("accueil"))
+            return redirect(reverse("accueil", kwargs={'pk': self.individu.pk}))
         return self.render_to_response(self.get_context_data(form=form))
 
     def post(self, request, *args, **kwargs):
@@ -107,7 +170,7 @@ class ListeDiplomeAccesView(FormView):
         try:
             form = self.get_form(form_class)
         except Wish.DoesNotExist:
-            return redirect(reverse("home"))
+            return redirect(reverse("accueil", kwargs={'pk': self.individu.pk}))
         if form.is_valid():
             return self.form_valid(form)
         else:
@@ -118,44 +181,45 @@ class ListeDiplomeAccesView(FormView):
 
     def form_valid(self, form):
         data = form.cleaned_data
-        wish = self.request.user.individu.wishes.get(pk=self.kwargs['pk'])
+        wish = self.wish
         wish.diplome_acces = data['liste_diplome']
         wish.demande_equivalence()
         return redirect(wish.get_absolute_url())
 
 
-class DemandeEquivalenceView(FormView):
+class DemandeEquivalenceView(FormView, WishIndividuMixin):
     template_name = "duck_inscription/wish/demande_equivalence.html"
     form_class = DemandeEquivalenceForm
 
+    def get_context_data(self, **kwargs):
+        context = super(DemandeEquivalenceView, self).get_context_data(**kwargs)
+        context['wish'] = self.wish
+        return context
+
     def form_valid(self, form):
         data = form.cleaned_data
-        wish = self.request.user.individu.wishes.get(pk=self.kwargs['pk'])
+        wish = self.wish
         if json.loads(data['demande_equivalence'].lower()):
             wish.equivalence()
         else:
             wish.ouverture_candidature()
-        # wish.dispatch()
         return redirect(wish.get_absolute_url())
 
 
-class ListeAttenteEquivalenceView(TemplateView):
+class ListeAttenteEquivalenceView(TemplateView, WishIndividuMixin):
     template_name = 'duck_inscription/wish/liste_attente_equivalence.html'
 
     def get_context_data(self, **kwargs):
         context = super(ListeAttenteEquivalenceView, self).get_context_data(**kwargs)
-        if self.request.user.is_staff:
-            context['wish'] = Wish.objects.get(pk=self.kwargs['pk'])
-        else:
-            context['wish'] = self.request.user.individu.wishes.get(pk=self.kwargs['pk'])
+        context['wish'] = self.wish
         return context
 
 
-class EquivalenceView(TemplateView):
+class EquivalenceView(TemplateView, WishIndividuMixin):
     template_name = "duck_inscription/wish/equivalence.html"
 
     def get(self, request, *args, **kwargs):
-        wish = request.user.individu.wishes.get(pk=self.kwargs['pk'])
+        wish = self.wish
         if request.GET.get("valide", False):
             wish.valide = True
             wish.save()
@@ -164,7 +228,7 @@ class EquivalenceView(TemplateView):
         return self.render_to_response(context)
 
 
-class EquivalencePdfView(TemplateView):
+class EquivalencePdfView(TemplateView, WishIndividuMixin):
     template_name = "duck_inscription/wish/etiquette.html"
     etape = "equivalence"  # à surcharger pour candidature
     fonction_impression = 'do_pdf_equi'
@@ -172,12 +236,9 @@ class EquivalencePdfView(TemplateView):
     def render_to_response(self, context, **response_kwargs):
 
         try:
-            if self.request.user.is_staff:
-                wish = Wish.objects.get(pk=self.kwargs['pk'])
-            else:
-                wish = self.request.user.individu.wishes.get(pk=self.kwargs['pk'])
+            wish = self.wish
         except Wish.DoesNotExist:
-            return redirect(self.request.user.individu.get_absolute_url())
+            return redirect(self.individu.get_absolute_url())
 
         response = HttpResponse(content_type='application/pdf')
         response['Content-Disposition'] = 'attachment; filename=%s_%s.pdf' % (self.etape, wish.etape.cod_etp)
@@ -186,21 +247,15 @@ class EquivalencePdfView(TemplateView):
         return response
 
 
-
-
-class OuvertureCandidature(TemplateView):
+class OuvertureCandidature(TemplateView, WishIndividuMixin):
     template_name = "duck_inscription/wish/ouverture_candidature.html"
 
     def get_context_data(self, **kwargs):
         context = super(OuvertureCandidature, self).get_context_data(**kwargs)
-        try:
-            context['wish'] = self.wish
-        except AttributeError:
-            context['wish'] = self.request.user.individu.wishes.get(pk=self.kwargs['pk'])
+        context['wish'] = self.wish
         return context
 
     def get(self, request, *args, **kwargs):
-        self.wish = self.request.user.individu.wishes.get(pk=self.kwargs['pk'])
         try:
             self.wish.note_master()
             return redirect(self.wish.get_absolute_url())
@@ -208,12 +263,12 @@ class OuvertureCandidature(TemplateView):
             return super(OuvertureCandidature, self).get(request, *args, **kwargs)
 
 
-class NoteMasterView(FormView):
+class NoteMasterView(FormView, WishIndividuMixin):
     form_class = NoteMasterForm
     template_name = "duck_inscription/wish/note_master.html"
 
     def form_valid(self, form):
-        wish = self.request.user.individu.wishes.get(pk=self.kwargs['pk'])
+        wish = self.wish
         try:
             if getattr(wish, 'notemastermodel', None):
                 form.instance.pk = wish.notemastermodel.pk
@@ -237,7 +292,6 @@ class CandidaturePdfView(EquivalencePdfView):
     fonction_impression = 'do_pdf_candi'
 
 
-
 class ListeAttenteCandidatureView(ListeAttenteEquivalenceView):
     template_name = 'duck_inscription/wish/liste_attente_candidature.html'
     form_class = ListeAttenteCandidatureForm
@@ -246,12 +300,12 @@ class ListeAttenteCandidatureView(ListeAttenteEquivalenceView):
         return super(ListeAttenteEquivalenceView, self).get(request, *args, **kwargs)
 
 
-class OuverturePaiementView(TemplateView):
+class OuverturePaiementView(TemplateView, WishIndividuMixin):
     template_name = "duck_inscription/wish/ouverture_paiement.html"
 
     def get_context_data(self, **kwargs):
         context = super(OuverturePaiementView, self).get_context_data(**kwargs)
-        context['wish'] = self.request.user.individu.wishes.get(pk=self.kwargs['pk'])
+        context['wish'] = self.wish
         return context
 
     def get(self, request, *args, **kwargs):
@@ -368,6 +422,7 @@ class ListeAttenteInscriptionView(FormView):
         self.wish = context['wish'] = self.request.user.individu.wishes.get(pk=self.kwargs['pk'])
         return context
 
+
 # ##le dossier d'inscription
 
 
@@ -401,14 +456,14 @@ class InscriptionPdfView(TemplateView):
         if context['wish'].centre_gestion.centre_gestion == 'ied':
             context['paiement_frais'] = context['wish'].paiementallmodel
             try:
-                context['tarif_versement_frais'] = context['wish'].frais_peda() / context['paiement_frais'].nb_paiement_frais
+                context['tarif_versement_frais'] = context['wish'].frais_peda() / context[
+                    'paiement_frais'].nb_paiement_frais
             except ZeroDivisionError:
-                #context['wish'].paiementmodel_set.all().delete()
-
                 context['wish'].droit_universitaire()
                 context['wish'].save()
                 return redirect(context['wish'].get_absolute_url())
-        context['static'] = os.path.join(settings.BASE_DIR+'/duck_inscription/duck_theme_ied/static/images/').replace('\\', '/')
+        context['static'] = os.path.join(settings.BASE_DIR + '/duck_inscription/duck_theme_ied/static/images/').replace(
+            '\\', '/')
         return context
 
     def get_template_names(self):
@@ -459,5 +514,3 @@ class InscriptionPdfView(TemplateView):
 
         pdf.join(response)
         return response
-
-

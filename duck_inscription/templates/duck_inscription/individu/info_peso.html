@@ -10,7 +10,7 @@
         <div class="form-group">
         <div class="col-sm-offset-3 col-sm-10">
             {% if not individu.student_code %}
-                <a id="id_reset" class="btn btn-primary" href="{% url "individu" %}?revenir=ok">Revenir</a>
+                <a id="id_reset" class="btn btn-primary" href="{% url "individu" individu.pk        %}?revenir=ok">Revenir</a>
             {% endif %}
                 <input id="submit-id-verifier" class="btn btn-primary btn btn-success" type="submit" value="Suite" name="Verifier">
         </div>

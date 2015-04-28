@@ -8,8 +8,8 @@ from duck_inscription.views import NewWishView, StepView, ListeDiplomeAccesView,
     ChoixIedFpView, DroitView, InscriptionView, ListeAttenteInscriptionView, InscriptionPdfView
 
 
-urlpatterns = patterns('', url(r'^nouveau_voeu/$', login_required(NewWishView.as_view()), name='new_wish'),
-                       url(r'^liste_etape/$', login_required(StepView.as_view()), name="liste_etape"),
+urlpatterns = patterns('', url(r'^nouveau_voeu/(?P<pk>\d+)$', login_required(NewWishView.as_view()), name='new_wish'),
+                       url(r'^liste_etape/(?P<pk>\d+)/$', login_required(StepView.as_view()), name="liste_etape"),
                        url(r'^supprimer_voeu/(?P<pk>\d+)/$', login_required(DeleteWish.as_view()), name="delete_wish"),
                        url(r'^liste_diplome/(?P<pk>\d+)/$', wish_verif_etape_and_login(ListeDiplomeAccesView.as_view()),
                            name="liste_diplome"), url(r'^demande_equivalence/(?P<pk>\d+)/$',
@@ -24,11 +24,6 @@ urlpatterns = patterns('', url(r'^nouveau_voeu/$', login_required(NewWishView.as
                        url(r'^liste_attente_equivalence/(?P<pk>\d+)/$',
                            wish_verif_etape_and_login(ListeAttenteEquivalenceView.as_view()),
                            name="liste_attente_equivalence"),
-                       # url(r'^fin_liste_attente_equivalence/$',
-                       #
-                       # TemplateView.as_view(template_name='wish/fin_liste_attente_equivalence.html'),
-                       #                            name="fin_liste_attente_equivalence"),
-                       #
                        url(r'^ouverture_candidature/(?P<pk>\d+)/$',
                            wish_verif_etape_and_login(OuvertureCandidature.as_view()), name="ouverture_candidature"),
                        url(r'^note_master/(?P<pk>\d+)/$', wish_verif_etape_and_login(NoteMasterView.as_view()),
@@ -45,7 +40,7 @@ urlpatterns = patterns('', url(r'^nouveau_voeu/$', login_required(NewWishView.as
                            wish_verif_etape_and_login(OuverturePaiementView.as_view()), name="ouverture_inscription"),
                        url(r'^choix_ied_fp/(?P<pk>\d+)/$', wish_verif_etape_and_login(ChoixIedFpView.as_view()),
                                                   name="choix_ied_fp"),
-                      url(r'^droit_univ/(?P<pk>\d+)/$',
+                       url(r'^droit_univ/(?P<pk>\d+)/$',
                                                   wish_verif_etape_and_login(DroitView.as_view()),
                                                   name="droit_univ"),
                       url(r'^inscription/(?P<pk>\d+)/$', wish_verif_etape_and_login(InscriptionView.as_view()),

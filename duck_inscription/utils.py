@@ -15,9 +15,12 @@ def user_passes_test(test_func):
     def decorator(view_func):
         @wraps(view_func, assigned=available_attrs(view_func))
         def _wrapped_view(request, *args, **kwargs):
-            if request.path_info in ["/individu/recapitulatif/modif_individu",
-                                     "/individu/recapitulatif/modif_adresse"]:
-                if request.user.individu.get_absolute_url() != reverse('recap'):
+            pk = kwargs.get('pk', '')
+            if request.user.is_staff:
+                return view_func(request, *args, **kwargs)
+            if request.path_info in ["/individu/recapitulatif/{}/modif_individu".format(pk),
+                                     "/individu/recapitulatif/{}/modif_adresse".format(pk)]:
+                if request.user.individu.get_absolute_url() != reverse('recap', kwargs={'pk': pk}):
                     return redirect(request.user.individu.get_absolute_url())
                 else:
                     return view_func(request, *args, **kwargs)
@@ -56,8 +59,9 @@ def wish_passes_test(test_func):
     def decorator(view_func):
         @wraps(view_func, assigned=available_attrs(view_func))
         def _wrapped_view(request, *args, **kwargs):
-            if test_func(request.user) and request.user.individu.get_absolute_url() == reverse(
-                    'accueil'):  # l'individu est bien authentifié et il a fini
+            if request.user.is_staff:
+                return view_func(request, *args, **kwargs)
+            if test_func(request.user) and request.user.individu.get_absolute_url() == reverse('accueil', kwargs={'pk': request.user.individu.pk}):  # l'individu est bien authentifié et il a fini
                 try:  # si l'étudiant à un voeu
                     wish = request.user.individu.wishes.get(pk=kwargs['pk'])
                     if request.path_info == wish.get_absolute_url():  # c'est la bonne url

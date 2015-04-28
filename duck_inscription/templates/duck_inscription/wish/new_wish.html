@@ -23,7 +23,7 @@
             }
         }
         function get_step(value){//ajax pour récuper les steps
-            $.get("{% url 'liste_etape' %}", {'diplome':value},function(data){
+            $.get("{% url 'liste_etape' individu.pk %}", {'diplome':value},function(data){
                 if (data == 'echec'){
 					$("#div_id_step").hide();
 					$("#id_etape").html('');

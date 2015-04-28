@@ -16,20 +16,41 @@ from duck_inscription.forms.individu_forms import CodeEtudiantForm, InfoPersoFor
     SituationAnneePrecedenteForm, EtablissementSituationAnneePrecedenteForm, EtablissementDernierDiplomeForm, \
     TestAutreEtablissementForm, AutreEtablissementForm, SituationSocialeForm, SecuriteSocialeForm, NumSecuForm, \
     ValidationForm
-from duck_inscription.models.individu_models import Individu as IndividuInscription, AdresseIndividu, DossierInscription
+from duck_inscription.models.individu_models import Individu as IndividuInscription, AdresseIndividu, DossierInscription, \
+    Individu
 from django_apogee.models import Individu as IndividuApogee
 from django_apogee.models import BacOuxEqu
 from duck_inscription.utils import verif_ine
 
 
-class AccueilView(TemplateView):
+class IndividuMixin(object):
+    """
+    mixin pour avoir une fonction pour récupére l'individu avec le pk si staff sinon avec request
+    """
+    @property
+    def individu(self):
+        individu = getattr(self, '_individu', None)
+        if not individu:
+            if self.request.user.is_staff:
+                self._individu = Individu.objects.get(pk=self.kwargs['pk'])
+            else:
+                self._individu = self.request.user.individu
+            return self._individu
+        return individu
+
+
+class AccueilView(TemplateView, IndividuMixin):
+    """
+    Accueil
+    """
     template_name = "duck_inscription/home/accueil.html"
 
     def get_context_data(self, **kwargs):
         context = super(AccueilView, self).get_context_data(**kwargs)
-        context['wishes'] = self.request.user.individu.wishes.all()
-        context['auditeur'] = self.request.user.individu.wishes.filter(is_auditeur=True).count()
+        context['wishes'] = self.individu.wishes.all()
+        context['individu'] = self.individu
         return context
+
 
 
 @login_required
@@ -38,7 +59,6 @@ def test_username(request):
     if request.method == 'GET':
         cod_etu = request.GET.get("cod_etu", "")
         date_naissance = request.GET.get("date_naissance", "")
-        print cod_etu, date_naissance
         try:
             if IndividuApogee.objects.filter(cod_etu=cod_etu, date_nai_ind=date_naissance).count() != 0:
                 return HttpResponse('true')
@@ -69,22 +89,23 @@ class DispatchIndividu(RedirectView):
         return self.request.user.individu.get_absolute_url()
 
 
-class CodeEtuManquant(FormView):
+class CodeEtuManquant(FormView, IndividuMixin):
     form_class = CodeEtudiantForm
     template_name = "duck_inscription/individu/code_etudiant.html"
     premiere_connection = False  # parametre pour le code etudiant manquant si individu n'a pas pas renseigné
 
     def get_success_url(self):
-        return self.request.user.individu.get_absolute_url()
+        return self.individu.get_absolute_url()
 
     def get_context_data(self, **kwargs):
         context = super(CodeEtuManquant, self).get_context_data(**kwargs)
         context['premiere_connection'] = self.premiere_connection
+        context['individu'] = self.individu
         return context
 
     def form_valid(self, form):
         data = form.cleaned_data
-        individu = self.request.user.individu
+        individu = self.individu
         individu.student_code = data['code_etu']
         ia = IndividuApogee.objects.get(cod_etu=individu.student_code)
         individu.last_name = ia.lib_nom_pat_ind
@@ -101,8 +122,11 @@ class CodeEtuManquant(FormView):
 
 
 @login_required()
-def not_inscrit_universite(request):
-    individu = request.user.individu
+def not_inscrit_universite(request, pk):
+    if request.user.is_staff:
+        individu = Individu.objects.get(pk=pk)
+    else:
+        individu = request.user.individu
     try:
         individu.modif_individu()
     except InvalidTransitionError:
@@ -136,32 +160,32 @@ class BacTestView(View):
         return HttpResponse(message)
 
 
-class InfoPersoView(UpdateView):
+class InfoPersoView(UpdateView, IndividuMixin):
     form_class = InfoPersoForm
     template_name = "duck_inscription/individu/info_peso.html"
 # 2895018275V
 
     def get_context_data(self, **kwargs):
         context = super(InfoPersoView, self).get_context_data(**kwargs)
-        context['individu'] = self.request.user.individu
+        context['individu'] = self.individu
         return context
 
     def get_object(self, queryset=None):
-        return self.request.user.individu
+        return self.individu
 
     def get_success_url(self):
-        return self.request.user.individu.get_absolute_url()
+        return self.individu.get_absolute_url()
 
     def get_form_kwargs(self):
         kwargs = super(InfoPersoView, self).get_form_kwargs()
 
-        if self.request.user.individu.student_code:
+        if self.individu.student_code:
             kwargs.update({'readonly': True})
         return kwargs
 
     def get(self, request, *args, **kwargs):
         revenir = request.GET.get('revenir', None)
-        individu = request.user.individu
+        individu = self.individu
         if revenir == "ok" and individu.student_code is None:
             individu.first_connection()
             return redirect(individu.get_absolute_url())
@@ -170,7 +194,7 @@ class InfoPersoView(UpdateView):
 
     def form_valid(self, form):
         data = form.cleaned_data
-        individu = self.request.user.individu
+        individu = self.individu
         birthday = data['birthday']
         gt0 = GMT0()
         arg = {'tzinfo': gt0}
@@ -192,19 +216,8 @@ class InfoPersoView(UpdateView):
         individu.save()
         return redirect(self.get_success_url())
 
-    # def get_initial(self):
-    #     initial = super(InfoPersoView, self).get_initial()
-    #     individu = self.request.user.individu
-    #     if self.request.user.individu.student_code:
-    #         return initial.update({
-    #             'last_name': individu.last_name,
-    #             'first_name1': individu.first_name1,
-    #             'birthday': individu.birthday,
-    #             'ine': individu.ine,
-    #         })
 
-
-class AdresseIndividuView(InlineFormSetView):
+class AdresseIndividuView(InlineFormSetView, IndividuMixin):
     form_class = AdresseForm
     formset_class = AdresseBaseFormSet
     extra = 2
@@ -216,46 +229,42 @@ class AdresseIndividuView(InlineFormSetView):
     can_delete = False
 
     def get_initial(self):
-        return [{'type_hebergement': self.request.user.individu.type_hebergement_annuel}]
-
-    # def get_formset_kwargs(self):
-    #     kwargs = super(AdresseIndividuView, self).get_formset_kwargs()
-    #     kwargs['initial'] = [{'type_hebergement': self.request.user.individu.type_hebergement_annuel}]
-    #     return kwargs
+        return [{'type_hebergement': self.individu.type_hebergement_annuel}]
 
     def formset_valid(self, formset):
         try:
-            self.request.user.individu.type_hebergement_annuel = formset.cleaned_data[0]['type_hebergement']
+            self.individu.type_hebergement_annuel = formset.cleaned_data[0]['type_hebergement']
         except KeyError:
-            return redirect(self.request.user.individu.get_absolute_url())
-        self.request.user.individu.save()
+            return redirect(self.individu.get_absolute_url())
+        self.individu.save()
         return super(AdresseIndividuView, self).formset_valid(formset)
 
     def get_queryset(self):
-        individu = self.request.user.individu
+        individu = self.individu
         return AdresseIndividu.objects.filter(individu=individu).order_by('type')
 
     def get_success_url(self):
-        self.request.user.individu.recap()
-        return self.request.user.individu.get_absolute_url()
+        self.individu.recap()
+        return self.individu.get_absolute_url()
 
     def get_object(self, queryset=None):
-        return self.request.user.individu
+        return self.individu
 
 
-class RecapitulatifIndividuView(FormView):
+class RecapitulatifIndividuView(FormView, IndividuMixin):
     template_name = "duck_inscription/individu/recapitulatif_individu.html"
     form_class = RecapitulatifIndividuForm
 
     def get_success_url(self):
-        return self.request.user.individu.get_absolute_url()
+        return self.individu.get_absolute_url()
 
     def get_context_data(self, **kwargs):
 
         context = super(RecapitulatifIndividuView, self).get_context_data(**kwargs)
-        context['individu'] = InfoPersoForm(instance=self.request.user.individu)
-        adresses = self.request.user.individu.adresses.all().order_by('type')
-        context['type_hebergement_annuel'] = self.request.user.individu.type_hebergement_annuel
+        context['individu'] = InfoPersoForm(instance=self.individu)
+        context['ind'] = self.individu
+        adresses = self.individu.adresses.all().order_by('type')
+        context['type_hebergement_annuel'] = self.individu.type_hebergement_annuel
         context['adresses'] = []
         for adresse in adresses:
             # context['adresses'].append(AdresseFormReadOnly(instance=adresse))
@@ -270,14 +279,14 @@ class RecapitulatifIndividuView(FormView):
     def get(self, request, *args, **kwargs):
         if self.kwargs.get('option', None) in ['modif_adresse', 'modif_individu']:
 
-            getattr(self.request.user.individu, self.kwargs['option'])()
+            getattr(self.individu, self.kwargs['option'])()
 
             return redirect(self.get_success_url())
 
         return super(RecapitulatifIndividuView, self).get(request, *args, **kwargs)
 
     def form_valid(self, form):
-        self.request.user.individu.accueil()
+        self.individu.accueil()
         return redirect(self.get_success_url())
 
 

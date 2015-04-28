@@ -17,7 +17,7 @@
         {% for wish in wishes %}
         <p>
             <span>
-            <a href="{{ wish.get_absolute_url }}">{{ wish.name_url }}</a> Cliquer pour connaitre l'état de votre dossier
+            <a href="{{ wish.get_absolute_url }}">{{ wish.name_url }}</a>
                 </span>
             {% if not wish.valide %}
                 <span class="pull-right">
@@ -31,7 +31,7 @@
         {% endif %}
     {% if not wishes|length_is:"13" %}
 <div class="well">
-<a class="btn btn-primary" href="{% url 'new_wish' %}">Ajouter un vœu</a>
+<a class="btn btn-primary" href="{% url 'new_wish' individu.pk %}">Ajouter un vœu</a>
 </div>
     {% endif %}
 {#    {% if not auditeur %}#}

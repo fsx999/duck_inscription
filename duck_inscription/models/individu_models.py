@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 from datetime import date, datetime
 from django.contrib.auth.models import User
+from django.core.urlresolvers import reverse
 from django.utils.encoding import python_2_unicode_compatible
 from django.db import models, IntegrityError
 import unicodedata
@@ -70,7 +71,7 @@ class Individu(xwf_models.WorkflowEnabled, models.Model):
                                    blank=True)
     first_name3 = models.CharField("Troisième prénom", max_length=30, null=True,
                                    blank=True)
-    student_code = models.IntegerField("Code étudiant", max_length=8, null=True,
+    student_code = models.IntegerField("Code étudiant", null=True,
                                        blank=True, default=None)
     personal_email = models.EmailField("Email", unique=True, null=True)
     personal_email_save = models.EmailField("Email", null=True, blank=True)
@@ -189,9 +190,8 @@ class Individu(xwf_models.WorkflowEnabled, models.Model):
                 self.code_opi = 7700000
         return super(Individu, self).save(force_insert, force_update, using, **kwargs)
 
-    @models.permalink
     def get_absolute_url(self):
-        return self.state.name,
+        return reverse(self.state.name, kwargs={'pk': self.pk})
 
     @property
     def transitions_logs(self):
@@ -250,12 +250,18 @@ class Individu(xwf_models.WorkflowEnabled, models.Model):
             return unicode('Femme')
 
     def dep_or_pays(self):
+        """
+        :return: le code à utiliser pour le champs opi dep ou pays
+        """
         if self.code_pays_birth_id in ['100', 100, u"100"]:
             return self.code_departement_birth_id, 'D'
         else:
             return self.code_pays_birth_id, 'P'
 
     def get_tel(self):
+        """
+        :return :type String le téléphone pour l'appel téléphonique
+        """
         w = self.adresses.filter(type='1')
         if len(w):
             return unicode(w[0].listed_number)
@@ -263,6 +269,10 @@ class Individu(xwf_models.WorkflowEnabled, models.Model):
             return u'Aucun téléphone'
 
     def save_opi(self):
+        """
+        effectue la remontee opi
+        TODO à refactoriser
+        """
         db = 'oracle_test' if settings.DEBUG else 'oracle'
         premier_universite_fr_id = self.dossier_inscription.premier_universite_fr_id
         ine = self.ine[:-1] if self.ine else ""
