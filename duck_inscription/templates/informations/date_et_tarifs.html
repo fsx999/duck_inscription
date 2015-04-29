@@ -1,0 +1,38 @@
+{% extends "xadmin/base_site.html" %}
+{% block nav_title %}Dates et Tarifs{% endblock %}
+{% block content %}
+    <table class="table table-bordered table-striped">
+        <thead>
+        <tr>
+            <th>Nom d'etape:</th>
+            <th>Ouverture Equivalence</th>
+            <th>Fermeture Equivalence</th>
+            <th>Ouverture Candidature</th>
+            <th>Fermeture Candidature</th>
+            <th>Ouverture Inscription</th>
+            <th>Fermeture inscription</th>
+            <th>Fermeture reinscription</th>
+            <th>Droits</th>
+            <th>Frais IED</th>
+
+        </tr>
+        </thead>
+        <tbody>
+        {% for etape in etapes %}
+
+        <tr>
+            <td>{{ etape.label }}</td>
+            <td>{{ etape.date_ouverture_equivalence|date:"d/m/Y"|default_if_none:"" }}</td>
+            <td>{{ etape.date_fermeture_equivalence|date:"d/m/Y"|default_if_none:"" }}</td>
+            <td>{{ etape.date_ouverture_candidature|date:"d/m/Y"|default_if_none:"" }}</td>
+            <td>{{ etape.date_fermeture_candidature|date:"d/m/Y"|default_if_none:"" }}</td>
+            <td>{{ etape.date_ouverture_inscription|date:"d/m/Y"|default_if_none:"" }}</td>
+            <td>{{ etape.date_fermeture_inscription|date:"d/m/Y"|default_if_none:"" }}</td>
+            <td>{{ etape.date_fermeture_reinscription|date:"d/m/Y"|default_if_none:"" }}</td>
+            <td>{{ etape.droit|floatformat:"-2"|default_if_none:""}}</td>
+            <td>{{ etape.frais|floatformat:"-2"|default_if_none:""}}</td>
+        </tr>
+       {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

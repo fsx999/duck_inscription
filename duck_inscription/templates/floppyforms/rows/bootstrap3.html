@@ -1,0 +1,30 @@
+{% load floppyforms lib_inscription %}{% block row %}{% for field in fields %}
+<div class="form-group{% if field.errors %} has-error{% endif %}" {% if field|id %}id="div_{{ field|id }}"{% endif %}>
+    {% with classes=field.css_classes label=label|default:field.label help_text=help_text|default:field.help_text %}
+    {% block label %}{% if field|id %}<label class="col-sm-3 control-label" for="{{ field|id }}">{% endif %}{{ label }}{% if label|last not in ".:!?" %}:{% endif %}{% if field|id %}</label>{% endif %}{% endblock %}
+    {% block field %}
+{#        <div class="controls {{ classes }} field-{{ field.name }}">#}
+        <div class="col-sm-6">
+            {% block widget %}{% if 'readonly' not in field.field.widget.attrs  %}
+
+                            {% formfield field %}
+
+                        {% else %}
+
+                            <p class="form-control-static"> {{form.instance|human_readable:field.name}}</p>
+                            <input id="{{ field|id }}" type="hidden" readonly="readonly" name="{{ field.html_name }}"
+                                   value=
+                                    "{{field.value}}">
+                        {% endif %}
+            {% endblock %}
+
+            {% block errors %}{% include "floppyforms/errors3.html" with errors=field.errors %}{% endblock %}
+            {% block help_text %}{% if field.help_text %}
+                <p class="help-block">{{ field.help_text|safe }}</p>
+            {% endif %}{% endblock %}
+            {% block hidden_fields %}{% for field in hidden_fields %}{{ field.as_hidden }}{% endfor %}{% endblock %}
+        </div><!--- .controls -->
+    {% endblock %}
+    {% endwith %}
+</div><!--- .control-group{% if field.errors %}.error{% endif %} -->
+{% endfor %}{% endblock %}
