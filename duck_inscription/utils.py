@@ -15,6 +15,8 @@ def user_passes_test(test_func):
     def decorator(view_func):
         @wraps(view_func, assigned=available_attrs(view_func))
         def _wrapped_view(request, *args, **kwargs):
+            if request.user.is_anonymous():
+                return redirect('/')
             pk = kwargs.get('pk', '')
             if request.user.is_staff:
                 return view_func(request, *args, **kwargs)
@@ -27,8 +29,7 @@ def user_passes_test(test_func):
             if test_func(request.user) and request.path_info == request.user.individu.get_absolute_url():
                 return view_func(request, *args, **kwargs)
 
-            if request.user.is_anonymous():
-                return redirect_to_login(reverse('auth_login'))
+
             return redirect(request.user.individu.get_absolute_url())
 
         return _wrapped_view
@@ -59,6 +60,8 @@ def wish_passes_test(test_func):
     def decorator(view_func):
         @wraps(view_func, assigned=available_attrs(view_func))
         def _wrapped_view(request, *args, **kwargs):
+            if request.user.is_anonymous():
+                return redirect('/')
             if request.user.is_staff:
                 return view_func(request, *args, **kwargs)
             if test_func(request.user) and request.user.individu.get_absolute_url() == reverse('accueil', kwargs={'pk': request.user.individu.pk}):  # l'individu est bien authentifié et il a fini
@@ -73,8 +76,7 @@ def wish_passes_test(test_func):
                         return redirect(reverse('accueil'), kwargs={'pk': request.user.individu.pk})
                 return view_func(request, *args, **kwargs)
 
-            if request.user.is_anonymous():
-                return redirect_to_login(reverse('accueil'), kwargs={'pk': request.user.individu.pk})
+
             return redirect(reverse('accueil'), kwargs={'pk': request.user.individu.pk})
 
         return _wrapped_view

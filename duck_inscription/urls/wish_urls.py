@@ -24,6 +24,10 @@ urlpatterns = patterns('', url(r'^nouveau_voeu/(?P<pk>\d+)$', login_required(New
                        url(r'^liste_attente_equivalence/(?P<pk>\d+)/$',
                            wish_verif_etape_and_login(ListeAttenteEquivalenceView.as_view()),
                            name="liste_attente_equivalence"),
+                       url(r'^liste_attente_equivalence/(?P<pk>\d+)/$',
+                           wish_verif_etape_and_login(ListeAttenteEquivalenceView.as_view()),
+                           name="mis_liste_attente_equi"),
+
                        url(r'^ouverture_candidature/(?P<pk>\d+)/$',
                            wish_verif_etape_and_login(OuvertureCandidature.as_view()), name="ouverture_candidature"),
                        url(r'^note_master/(?P<pk>\d+)/$', wish_verif_etape_and_login(NoteMasterView.as_view()),
@@ -36,6 +40,10 @@ urlpatterns = patterns('', url(r'^nouveau_voeu/(?P<pk>\d+)$', login_required(New
                                                         wish_verif_etape_and_login(
                                                             ListeAttenteCandidatureView.as_view()),
                                                         name="liste_attente_candidature"),
+                       url(r'^liste_attente_candidature/(?P<pk>\d+)/$',
+                                                        wish_verif_etape_and_login(
+                                                            ListeAttenteCandidatureView.as_view()),
+                                                        name="mis_liste_attente_candi"),
                        url(r'^ouverture_inscription/(?P<pk>\d+)/$',
                            wish_verif_etape_and_login(OuverturePaiementView.as_view()), name="ouverture_inscription"),
                        url(r'^choix_ied_fp/(?P<pk>\d+)/$', wish_verif_etape_and_login(ChoixIedFpView.as_view()),

@@ -15,7 +15,7 @@ import xworkflows
 import json
 from duck_inscription.forms import WishGradeForm, ListeDiplomeAccesForm, DemandeEquivalenceForm, \
     NoteMasterForm, ListeAttenteCandidatureForm, ChoixPaiementDroitForm, DemiAnneeForm, \
-    NbPaiementPedaForm, ValidationPaiementForm, ListeAttenteInscriptionForm
+    NbPaiementPedaForm, ValidationPaiementForm, ListeAttenteInscriptionForm, ListeAttenteEquivalenceForm
 from duck_inscription.models import Wish, SettingsEtape, NoteMasterModel, CentreGestionModel, PaiementAllModel, \
     SettingAnneeUni
 from xhtml2pdf import pdf as pisapdf
@@ -206,13 +206,25 @@ class DemandeEquivalenceView(FormView, WishIndividuMixin):
         return redirect(wish.get_absolute_url())
 
 
-class ListeAttenteEquivalenceView(TemplateView, WishIndividuMixin):
+class ListeAttenteEquivalenceView(FormView, WishIndividuMixin):
     template_name = 'duck_inscription/wish/liste_attente_equivalence.html'
+    form_class = ListeAttenteEquivalenceForm
 
     def get_context_data(self, **kwargs):
         context = super(ListeAttenteEquivalenceView, self).get_context_data(**kwargs)
         context['wish'] = self.wish
         return context
+
+    def form_valid(self, form):
+        wish = self.wish
+        demande_attente = form.cleaned_data['demande_attente']
+        if demande_attente == 'O':
+            wish.mis_liste_attente_equi()
+        elif demande_attente == 'N':
+            individu = wish.individu
+            wish.delete()
+            return redirect(reverse('accueil', kwargs={'pk': individu.pk}))
+        return redirect(wish.get_absolute_url())
 
 
 class EquivalenceView(TemplateView, WishIndividuMixin):
@@ -287,6 +299,7 @@ class CandidatureView(EquivalenceView):
     template_name = "duck_inscription/wish/candidature.html"
 
 
+
 class CandidaturePdfView(EquivalencePdfView):
     etape = "candidature"
     fonction_impression = 'do_pdf_candi'
@@ -296,9 +309,16 @@ class ListeAttenteCandidatureView(ListeAttenteEquivalenceView):
     template_name = 'duck_inscription/wish/liste_attente_candidature.html'
     form_class = ListeAttenteCandidatureForm
 
-    def get(self, request, *args, **kwargs):
-        return super(ListeAttenteEquivalenceView, self).get(request, *args, **kwargs)
-
+    def form_valid(self, form):
+        wish = self.wish
+        demande_attente = form.cleaned_data['demande_attente']
+        if demande_attente == 'O':
+            wish.mis_liste_attente_candi()
+        elif demande_attente == 'N':
+            individu = wish.individu
+            wish.delete()
+            return redirect(reverse('accueil', kwargs={'pk': individu.pk}))
+        return redirect(wish.get_absolute_url())
 
 class OuverturePaiementView(TemplateView, WishIndividuMixin):
     template_name = "duck_inscription/wish/ouverture_paiement.html"
