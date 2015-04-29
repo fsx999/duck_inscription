@@ -28,7 +28,7 @@ def user_passes_test(test_func):
                 return view_func(request, *args, **kwargs)
 
             if request.user.is_anonymous():
-                return redirect_to_login(reverse('accueil'))
+                return redirect_to_login(reverse('auth_login'))
             return redirect(request.user.individu.get_absolute_url())
 
         return _wrapped_view
@@ -69,13 +69,13 @@ def wish_passes_test(test_func):
                     else:
                         return redirect(wish.get_absolute_url())
                 except (Wish.DoesNotExist, KeyError), e:  # il n'a pas de voeux
-                    if request.path_info != reverse("new_wish"):
-                        return redirect(reverse('accueil'))
+                    if request.path_info != reverse("new_wish", kwargs={'pk': request.user.individu.pk}):
+                        return redirect(reverse('accueil'), kwargs={'pk': request.user.individu.pk})
                 return view_func(request, *args, **kwargs)
 
             if request.user.is_anonymous():
-                return redirect_to_login(reverse('accueil'))
-            return redirect(reverse('accueil'))
+                return redirect_to_login(reverse('accueil'), kwargs={'pk': request.user.individu.pk})
+            return redirect(reverse('accueil'), kwargs={'pk': request.user.individu.pk})
 
         return _wrapped_view
 
