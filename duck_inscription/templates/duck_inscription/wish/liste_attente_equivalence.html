@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load floppyforms%}
 {% block content %}
-    {% if not wish.state.is_mis_liste_attente_candi %}
+    {% if not wish.state.is_mis_liste_attente_equi%}
 <form id="form" class=" form-horizontal well" method="post" novalidate="novalidate">{% csrf_token %}
 <legend style="text-align: center">Liste d'attente</legend>
     <p>L'accès à votre voeu  de formation <b>{{ wish.etape.label }}</b>

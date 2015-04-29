@@ -219,6 +219,7 @@ class ListeAttenteEquivalenceView(FormView, WishIndividuMixin):
         wish = self.wish
         demande_attente = form.cleaned_data['demande_attente']
         if demande_attente == 'O':
+            print "coucou"
             wish.mis_liste_attente_equi()
         elif demande_attente == 'N':
             individu = wish.individu
