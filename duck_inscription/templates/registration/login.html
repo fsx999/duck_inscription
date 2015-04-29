@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% load lib_inscription floppyforms %}
+{% load static from staticfiles %}
+{% block javascript %}
+    <script src="{% static "browser-detection/browser-detection.js" %}" type="text/javascript"></script>
+    <script type="text/javascript">
+        <!--
+
+        var notSupportedBrowsers = [
+            {'os': 'Any', 'browser': 'MSIE', 'version': 'Any'},
+            {'os': 'Any', 'browser': 'Firefox', 'version': 20},
+            {'os': 'Any', 'browser': 'Chrome', 'version': 9}
+        ];
+        var displayPoweredBy = false;
+        var supportedBrowsers = [
+            { 'cssClass': 'firefox', 'name': 'Mozilla Firefox', 'downloadUrl': 'http://www.getfirefox.com/' },
+            { 'cssClass': 'chrome', 'name': 'Google Chrome', 'downloadUrl': 'http://www.google.com/chrome/' }
+        ];
+        var noticeLang = 'custom';
+        var noticeLangCustom = {
+            "title": "Navigateur incompatible detecté",
+            "notice": "Votre navigateur est imcompatible avec notre site. Pour pouvoir utiliser notre site correctement, vous devez utiliser la dernière version d'un des navigateurs ci-dessous.",
+            "selectBrowser": "Utilisez les liens ci dessous pour télécharger ou mettre à jour un des navigateurs.",
+            "remindMeLater": "Pas maintenant, mais me le rappeler plus tard",
+            "neverRemindAgain": "Non, ne plus jamais me le rappeler" };
+        // -->
+    </script>
+{% endblock %}
+{% block extra_css %}
+    <link rel="stylesheet" type="text/css" media="screen"
+          href="{% static "browser-detection/browser-detection.css" %}"/>
+{% endblock %}
+{% block content %}
+
+    <div class="well">
+        <p>Bienvenue sur le site de préinscription en ligne de l'Institut
+            d'Enseignement à Distance (IED) de Paris 8.</p>
+
+        <p>Cet espace vous accompagnera lors des différentes étapes (équivalence,
+            candidature, impression du dossier d'inscription ou de réinscription)
+            nécessaires à votre préinscription administrative pour <strong>l'année
+                universitaire {% annee_en_cour %}</strong>.</p>
+
+        <p>S'il s'agit de votre première visite, vous devez créer votre compte en
+            cliquant sur le lien ci-dessous.</p>
+
+        <div class="alert alert-info">
+            Il est <strong>obligatoire</strong> de disposer d'un compte personnel pour poursuivre la
+            procédure de préinscription administrative.
+        </div>
+        <div class="alert alert-danger">
+            Si vous étiez inscrit(e) à l'IED pour <strong>l'année en cours</strong>, veuillez utiliser vos identifiants et mot de passe de la plateforme pour vous connecter.<br>
+            Vous <strong>ne devez pas</strong> créer de compte.
+        </div>
+        <a class="btn btn-primary" href="{% url 'registration_register' %}">Créer mon compte personnel</a>
+
+
+    </div>
+    <hr/>
+    <div class="well">
+
+
+        <p>Vous disposez déjà d'un compte personnel pour <strong>l'année universitaire
+            {% annee_en_cour %}</strong> à l'IED Paris 8, renseignez les informations demandées
+            ci-dessous
+            (identifiant et mot de passe) pour accéder à votre espace afin de vous
+            préinscrire puis de gérer et de suivre l'état de votre préinscription
+            administrative.</p>
+
+        <form class="well form-horizontal" method="post" action="{% url 'auth_login' %}?next={% url 'dispatch' %}#bottom">{% csrf_token %}
+
+            {% form form %}
+            <a name="bottom"></a>
+
+            <input type="submit" value="Accéder à mon espace" class="btn btn-primary"/>
+
+            <br/>
+
+        </form>
+        <a href="{% url "auth_password_reset" %}">Vous avez oublié votre identifiant / mot de passe ?</a>
+
+    </div>
+
+    <div class="well">
+        <a href="https://preins.iedparis8.net/infospsycho/">
+            Des études de psychologie: Pour qui ? Pourquoi ?
+        </a>
+
+        <p>
+            Présentation du cursus et de ses débouchés à l'intention des futurs étudiants de psychologie.
+        </p>
+    </div>
+
+{% endblock %}

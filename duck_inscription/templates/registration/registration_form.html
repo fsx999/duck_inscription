@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+{% load floppyforms %}
+{% block content %}
+
+<form id="form_registration" class=" form-horizontal well" method="post" action="{% url 'registration_register' %}" novalidate="novalidate">
+{% csrf_token %}
+<div id="e1s1" class="slide">
+  {% include  'text/condition_utilisation.html' %}
+    {% formrow form.tos %}
+    <div class="form-group" id="top">
+        <div class="col-sm-offset-3 col-sm-8">
+
+            <a href="/" class="btn btn-default">Retour</a>
+            <a name="accept" href="#top" id="bouton_enregistrement" class="btn btn-success">Continuer</a>
+        </div>
+    </div>
+</div>
+<div class="register">
+{% formrow form.username %}
+{% formrow form.password1 %}
+{% formrow form.password2 %}
+{% formrow form.email %}
+{% formrow form.email1 %}
+{#{% formrow form.captcha %}#}
+
+
+     <div class="form-group">
+            <div class="col-sm-offset-3 col-sm-8">
+        <a href="/" class="btn btn-default">Retour</a>
+        <input id="submit-id-enregistrer" class="btn btn-primary btn-success register" type="submit" value="Enregistrer" name="Enregistrer" style="display: inline-block;">
+            </div>
+    </div>
+  </div>
+</form>
+{{ form.media }}
+<script type="text/javascript">
+$(document).ready(function() {
+	if ($("#id_tos:checked").length != 0){
+		$('.register').show();
+		$('#e1s1').hide();
+	}
+	else{
+        $('#e1s1').show();
+		$('.register').hide();
+	}
+	$('#bouton_enregistrement').click(function(){
+		if($("#id_tos:checked").length != 0){
+			$('#e1s1').hide();
+			$('.register').show();
+		}
+		else{
+			//$("#erreur_validation").html("Vous devez accepter les conditions ci-dessus.");
+            $('#div_id_tos').addClass("has-error");
+            if($("#error_id_tos").length==0){
+                $('#div_id_tos > .col-sm-6').append('<p class="help-block" id="error_id_tos">Vous devez accepter les conditions ci-dessus.</p>');
+                $("#error_id_tos").show();
+            }
+		}
+	});
+    $('#id_tos').click(function(){
+       if($('#id_tos:checked').val()=='on'){
+            $('#error_id_tos').remove();
+       }
+    });
+
+    $.validator.addMethod(
+        "regex",
+        function(value, element, regexp) {
+            var check = false;
+            return this.optional(element) || regexp.test(value);
+        },
+        "Ce champ ne doit contenir que des lettres, des chiffres et des underscores ( _ )."
+    );
+
+    $("#form_registration").validate({
+        rules: {
+            username:{
+                required:true,
+                remote:{% url 'test_user' %},
+                minlength:5,
+                regex:/^\w+$/
+            },
+            password1:{
+                minlength:4,
+                required: true
+            },
+            password2:{
+                equalTo:"#id_password1"
+
+            },
+            email:{
+                required:true,
+                email:true,
+                remote:{% url 'test_email' %}
+            },
+            email1:{
+                equalTo:"#id_email"
+            }
+        },
+        messages:{
+            username:{
+                remote:jQuery.validator.format("Cet identifiant est déjà utilisé")
+            },
+            email:{
+                remote:jQuery.validator.format("Cet email est déjà utilisé")
+            }
+        }
+
+    });
+
+});
+$(document).ready(function (){
+    $('#id_captcha_0').hide();
+});
+</script>
+{% endblock %}
