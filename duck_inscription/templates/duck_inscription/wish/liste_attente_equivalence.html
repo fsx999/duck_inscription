@@ -1,20 +1,22 @@
 {% extends "base.html" %}
-{% load floppyforms%}
+{% load floppyforms %}
 {% block content %}
-    {% if not wish.state.is_mis_liste_attente_equi%}
-<form id="form" class=" form-horizontal well" method="post" novalidate="novalidate">{% csrf_token %}
-<legend style="text-align: center">Liste d'attente</legend>
-    <p>L'accès à votre voeu  de formation <b>{{ wish.etape.label }}</b>
-            nécessite le passage par l'étape de l'équivalence. <br/>
+    {% if not wish.state.is_mis_liste_attente_equi %}
+        <form id="form" class=" form-horizontal well" method="post" novalidate="novalidate">{% csrf_token %}
+            <legend style="text-align: center">Liste d'attente</legend>
+            <p>L'accès à votre voeu de formation <b>{{ wish.etape.label }}</b>
+                nécessite le passage par l'étape de l'équivalence. <br/>
 
-             Cette procédure étant fermées depuis le <b>{{ wish.etape.date_fermeture_candidature|date:'d/m/Y' }}</b></p>
-        {% form form %}
-        <div class="form-group">
-            <div class="col-sm-offset-3 col-sm-8">
-                    <input id="submit-id-verifier" class="btn btn-primary btn btn-success" type="submit" value="Valider" name="valide">
+                Cette procédure étant fermées depuis le <b>{{ wish.etape.date_fermeture_candidature|date:'d/m/Y' }}</b>
+            </p>
+            {% form form %}
+            <div class="form-group">
+                <div class="col-sm-offset-3 col-sm-8">
+                    <input id="submit-id-verifier" class="btn btn-primary btn btn-success" type="submit" value="Valider"
+                           name="valide">
+                </div>
             </div>
-        </div>
-       </form>
+        </form>
     {% else %}
         <p>Vous êtes sur une liste d'attente d'accès.</p>
         <p>Un e-mail vous informera de la suite accordée à votre dossier d'équivalence.</p>
