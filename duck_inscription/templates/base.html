@@ -68,10 +68,17 @@
             <div class="container-fluid">
             <div class="collapse navbar-collapse">
                     {% if user.is_authenticated and request.resolver_match.kwargs.pk %}
-                    <div class="navbar-header active">
-                        <a href="{% url "accueil" request.resolver_match.kwargs.pk %}" class="navbar-brand active"><i class="glyphicon glyphicon-home"></i> Accueil</a>
-                    </div>
+                        <div class="navbar-header active">
+                        {% if wish.pk %}
+                             <a href="{% url "accueil" wish.individu.pk  %}" class="navbar-brand active"><i class="glyphicon glyphicon-home"></i> Accueil</a>
+                        {% elif individu.pk %}
+                             <a href="{% url "accueil" individu.pk  %}" class="navbar-brand active"><i class="glyphicon glyphicon-home"></i> Accueil</a>
+                        {% endif %}
+
+
+
                     {% endif %}
+                    </div>
                     <ul class="nav navbar-nav">
                         <li class="active "></li>
                         <li class="divider-vertical"></li>
