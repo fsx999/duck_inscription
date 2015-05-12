@@ -149,6 +149,7 @@ class CodeEtudiantForm(forms.Form):
         data = self.cleaned_data.get("code_etu", "")
         try:
             if len(Individu.objects.filter(cod_etu=data)) == 0:
+                print "coucou"
                 raise forms.ValidationError("Vous devez rentrer un code étudiant valide", code='invalide')
         except ValueError:
             raise forms.ValidationError("Vous devez rentrer un code étudiant valide", code='invalide')
