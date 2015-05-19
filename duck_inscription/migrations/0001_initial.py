@@ -173,7 +173,7 @@ class Migration(migrations.Migration):
                 'db_table': 'inscription_user',
             },
             managers=[
-                (b'objects', django.contrib.auth.models.UserManager()),
+                ('objects', django.contrib.auth.models.UserManager()),
             ],
         ),
         migrations.CreateModel(
