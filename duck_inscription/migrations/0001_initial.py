@@ -12,7 +12,7 @@ import django_xworkflows.models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('contenttypes', '0002_remove_content_type_name'),
+        ('contenttypes', '0001_initial'),
         ('auth', '0006_require_contenttypes_0002'),
         ('duck_utils', '0001_initial'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
