@@ -172,9 +172,6 @@ class Migration(migrations.Migration):
             options={
                 'db_table': 'inscription_user',
             },
-            managers=[
-                ('objects', django.contrib.auth.models.UserManager()),
-            ],
         ),
         migrations.CreateModel(
             name='ListeDiplomeAces',
