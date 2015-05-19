@@ -4,13 +4,15 @@ from __future__ import unicode_literals
 import autocomplete_light
 import django
 from django.conf import settings
+from django.forms.utils import ErrorList
 from django.utils import formats, six
 import re
 from django_apogee.models import Individu, Departement, Pays, SitFam, SitMil, TypHandicap, BacOuxEqu, TypHebergement, \
     ComBdi, MentionBac, CatSocPfl, DomaineActPfl, QuotiteTra, SituationSise, MtfNonAflSso, RegimeParent, TypeDiplomeExt, \
     SitSociale
-from duck_inscription.models import AdresseIndividu, DossierInscription
+from duck_inscription.models import AdresseIndividu, DossierInscription, SettingAnneeUni
 from django_apogee.models import Etablissement, TypEtb, BacOuxEqu
+from duck_inscription.templatetags.lib_inscription import annee_en_cour
 
 RE_DATE = re.compile(r'(\d{4})-(\d\d?)-(\d\d?)$')
 import floppyforms as forms
@@ -346,32 +348,44 @@ class GenericEtablissement(forms.ModelForm):
 
 class PremiereInscriptionForm(forms.ModelForm):
     premier_universite_fr = forms.ModelChoiceField(label=u"Première université française ou établissement supérieur:",
-                                                   queryset=Etablissement.objects.filter(cod_tpe='00'), required=False,
+                                                   queryset=Etablissement.objects.filter(cod_tpe='00'),
+                                                   required=False,
+                                                   empty_label='Jamais',
                                                    widget=forms.Select(attrs={"value_toggle": '!',
                                                                               'toggle_field': 'annee_premiere_inscription_universite_fr'}),
                                                    help_text=u"Choisir l'université Paris 8 s'il s'agit de votre première inscription dans l'enseignement supérieur français", )
     annee_premiere_inscription_p8 = forms.ChoiceField(
         label=u"Année de la première inscription à l'université Paris 8 :", choices=ANNEE_P8, required=False,
-        help_text=u"Depuis 2000. Choisir 2014/2015  s'il s'agit de votre première inscription à l'université Paris 8")
+        help_text=u"Depuis 2000. Choisir {}  s'il s'agit de votre première inscription à l'université Paris 8")
     annee_premiere_inscription_universite_fr = forms.ChoiceField(
         label=u"Année de votre première inscription dans une université française :", choices=ANNEE_INSCRIPTION,
-        help_text=u"Choisir 2014/2015 s'il s'agit de votre première inscription dans une université française.",
+        help_text=u"Choisir {} s'il s'agit de votre première inscription dans une université française.",
         required=False)
     annee_premiere_inscription_enseignement_sup_fr = forms.ChoiceField(
         label=u"Année de votre première inscription dans l'enseignement supérieur français :",
-        help_text=u"Choisir 2014/2015 s'il s'agit de votre première inscription dans l'enseignement supérieur français",
+        help_text=u"Choisir {} s'il s'agit de votre première inscription dans l'enseignement supérieur français",
         choices=ANNEE_INSCRIPTION, required=False)
 
     annee_derniere_inscription_universite_hors_p8 = forms.ChoiceField(
         label=u"Année de votre dernière inscription dans une université française hors Paris 8 :",
         help_text=u"Si votre dernière université n'est pas Paris 8", choices=ANNEE_INSCRIPTION, required=False)
 
+    def __init__(self, data=None, files=None, auto_id='id_%s', prefix=None, initial=None, error_class=ErrorList,
+                 label_suffix=None, empty_permitted=False, instance=None):
+        super(PremiereInscriptionForm, self).__init__(data, files, auto_id, prefix, initial, error_class, label_suffix,
+                                                      empty_permitted, instance)
+        annee_univ =  annee_en_cour()
+        for name in ['annee_premiere_inscription_p8', 'annee_premiere_inscription_universite_fr',
+                     'annee_premiere_inscription_enseignement_sup_fr']:
+            self.fields[name].help_text = self.fields[name].help_text.format(annee_univ)
+
+
     def clean_annee_premiere_inscription_enseignement_sup_fr(self):
         data = self.cleaned_data['annee_premiere_inscription_enseignement_sup_fr']
         if data != u'' and self.instance.individu.annee_obtention > data:
             raise forms.ValidationError(u"Vous avez choisi une date inférieure à celle de votre bac")
         if data == u'':
-            data = 2013
+            data = SettingAnneeUni.objects.annee_inscription_en_cours.cod_anu
         return data
 
     def clean_annee_premiere_inscription_p8(self):
@@ -379,7 +393,7 @@ class PremiereInscriptionForm(forms.ModelForm):
         if data != u'' and self.instance.individu.annee_obtention > data:
             raise forms.ValidationError(u"Vous avez choisi une date inférieure à celle de votre bac")
         if data == u'':
-            data = 2013
+            data = SettingAnneeUni.objects.annee_inscription_en_cours.cod_anu
         return data
 
     def clean_annee_premiere_inscription_universite_fr(self):
@@ -387,7 +401,7 @@ class PremiereInscriptionForm(forms.ModelForm):
         if data != u'' and self.instance.individu.annee_obtention > data:
             raise forms.ValidationError(u"Vous avez choisi une date inférieure à celle de votre bac")
         if data == u'':
-            data = 2013
+            data = SettingAnneeUni.objects.annee_inscription_en_cours.cod_anu
         return data
 
     def clean_premier_universite_fr(self):
