@@ -2,7 +2,8 @@
 from __future__ import unicode_literals
 import floppyforms as forms
 from django_apogee.models import SitSociale
-from duck_inscription.models import SettingsEtape, CentreGestionModel, MoyenPaiementModel
+from duck_inscription.models import SettingsEtape, CentreGestionModel
+from duck_inscription_payzen.models import MoyenPaiementModel
 
 
 class DossierReceptionForm(forms.Form):

@@ -8,7 +8,8 @@ from django.shortcuts import redirect
 from django.views.generic import FormView, TemplateView, View
 from xworkflows import InvalidTransitionError
 from duck_inscription.forms.adminx_forms import DossierReceptionForm, ImprimerEnMasseForm, ChangementCentreGestionForm
-from duck_inscription.models import Wish, PaiementAllModel
+from duck_inscription.models import Wish
+from duck_inscription_payzen.models import PaiementAllModel
 from django.conf import settings
 from duck_inscription.templatetags.lib_inscription import annee_en_cour
 from xhtml2pdf import pdf as pisapdf

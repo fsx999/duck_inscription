@@ -31,8 +31,7 @@
         {% block css %} {% endblock %}
         {% block extra_css %}
         {% endblock %}
-
-
+    
         {% block javascript %}{% endblock %}
    <!--[if lt IE 9]>
       <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
@@ -63,18 +62,18 @@
      <div class="container white ">
          {% block entete %}
              {% include 'include/header.html' %}
-
         <div class="navbar navbar-inverse">
             <div class="container-fluid">
             <div class="collapse navbar-collapse">
-                    {% if user.is_authenticated and request.resolver_match.kwargs.pk %}
+                    {% if user.is_authenticated  %}
                         <div class="navbar-header active">
                         {% if wish.pk %}
                              <a href="{% url "accueil" wish.individu.pk  %}" class="navbar-brand active"><i class="glyphicon glyphicon-home"></i> Accueil</a>
                         {% elif individu.pk %}
                              <a href="{% url "accueil" individu.pk  %}" class="navbar-brand active"><i class="glyphicon glyphicon-home"></i> Accueil</a>
+                        {% elif user.individu.pk %}
+                            <a href="{% url "accueil" user.individu.pk  %}" class="navbar-brand active"><i class="glyphicon glyphicon-home"></i> Accueil</a>
                         {% endif %}
-
 </div>
 
                     {% endif %}

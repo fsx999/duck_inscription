@@ -73,7 +73,7 @@ def wish_passes_test(test_func):
                         return redirect(wish.get_absolute_url())
                 except (Wish.DoesNotExist, KeyError), e:  # il n'a pas de voeux
                     if request.path_info != reverse("new_wish", kwargs={'pk': request.user.individu.pk}):
-                        return redirect(reverse('accueil'), kwargs={'pk': request.user.individu.pk})
+                        return redirect(reverse('accueil', kwargs={'pk': request.user.individu.pk}))
                 return view_func(request, *args, **kwargs)
 
 

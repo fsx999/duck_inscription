@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import floppyforms as forms
-from duck_inscription.models import DiplomeEtape, SettingsEtape, ListeDiplomeAces, NoteMasterModel, PaiementAllModel
+from duck_inscription.models import DiplomeEtape, SettingsEtape, ListeDiplomeAces, NoteMasterModel
 
 
 __author__ = 'paul'
@@ -57,41 +57,7 @@ class ListeAttenteInscriptionForm(forms.Form):
                                         label=u"Voulez-vous être mis en liste d'attente ?")
 
 
-class ChoixPaiementDroitForm(forms.ModelForm):
-
-    class Meta:
-        model = PaiementAllModel
-        fields = ('moyen_paiement',)
 
 
-class DemiAnneeForm(forms.ModelForm):
-    demi_annee = forms.BooleanField(widget=forms.Select(choices=(('', '----'),
-                                                                 ('1', "Je m'inscris à un semestre"),
-                                                                 ('0', "Je m'inscris à une année entière")),),
-                                    required=False)
-
-    class Meta:
-        model = PaiementAllModel
-        fields = ('demi_annee',)
-
-
-class NbPaiementPedaForm(forms.ModelForm):
-
-    def __init__(self, *args, **kwargs):
-        super(NbPaiementPedaForm, self).__init__(*args, **kwargs)
-        choices = [('', '-----')] + [(x + 1, x + 1) for x in range(self.instance.wish.etape.nb_paiement)]
-        self.fields['nb_paiement_frais'] = forms.ChoiceField(choices=choices, label=u"Nombre de paiements")
-
-    class Meta:
-        model = PaiementAllModel
-        fields = ('nb_paiement_frais',)
-
-
-class ValidationPaiementForm(forms.ModelForm):
-    valider = forms.CharField()
-
-    class Meta:
-        model = PaiementAllModel
-        fields = ('id',)
 
 

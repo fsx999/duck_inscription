@@ -1,18 +1,43 @@
 {% load static lib_inscription %}
+{#<!DOCTYPE html>#}
+{#<html lang="fr">#}
+{#<head>#}
+{#    <meta charset="utf-8">#}
+{#    <link rel="stylesheet" href="{% static "bootstrap3/css/bootstrap.css" %}">#}
+{#    <script src="{% static "bootstrap3/js/bootstrap.js" %}"></script>#}
+{#</head>#}
+{#<body>#}
+{#    <table class="table">#}
+{#        <tr>#}
+{#            <td>Dossier généré le {% now "SHORT_DATETIME_FORMAT" %}</td>#}
+{#            <td><p class="text-right">1/{{ num_page }}</p></td>#}
+{#        </tr>#}
+{#    </table>#}
+{##}
+{#</body>#}
+{#</html>#}
 <!DOCTYPE html>
-<html lang="fr">
-<head>
+<html><head>
     <meta charset="utf-8">
-    <link rel="stylesheet" href="{% static "bootstrap3/css/bootstrap.css" %}">
-    <script src="{% static "bootstrap3/js/bootstrap.js" %}"></script>
-</head>
-<body>
-    <table class="table">
-        <tr>
-            <td>Dossier généré le {% now "SHORT_DATETIME_FORMAT" %}</td>
-            <td><p class="text-right">1/{{ num_page }}</p></td>
-        </tr>
-    </table>
-
-</body>
-</html>
+    <script>
+  function subst() {
+    var vars={};
+    var x = window.location.search.substring(1).split('&');
+    for (var i in x) {var z=x[i].split('=',2);vars[z[0]] = unescape(z[1]);}
+    x=['frompage','topage','page'];
+    for (var i in x) {
+      var y = document.getElementsByClassName(x[i]);
+      for (var j=0; j<y.length; ++j) y[j].textContent = vars[x[i]];
+    }
+  }
+  </script></head><body  onload="subst()">
+<br/>
+  <table style="border-bottom: 1px solid black; width: 100%">
+    <tr>
+        <td style="text-align:left">Dossier généré le : {% now 'd/m/Y' %}</td>
+      <td style="text-align:right">
+          Page <span class="page"></span> of <span class="topage"></span>
+      </td>
+    </tr>
+  </table>
+  </body></html>

@@ -4,524 +4,479 @@
 <html lang="fr">
 <head>
     <meta charset="utf-8">
-<style type="text/css">
+    <link rel="stylesheet" href="{% static "bootstrap3/css/bootstrap.css" %}">
+    <script src="{% static "bootstrap3/js/bootstrap.js" %}"></script>
+    <style type="text/css">
 
+        div.break {
+            page-break-after: always
+        }
 
-.center{
-    text-align: center;
-}
-.strong{
-    font-weight: bold;
-}
+        .barcode {
+            font-family: CCode39;
+            font-size: 35px;
+        }
 
-img{
-    zoom:60%;
-    }
+        .center {
+            text-align: center;
+        }
 
-.info tr{
-    padding-top:3pt;
-}
-.barcode{
-    margin-bottom:10pt;
-    text-align: right;
-    }
+        .strong {
+            font-weight: bold;
+        }
 
-body{
-    margin-bottom:0;
-    margin-left:0;
-    margin-right:0;
-    margin-top:0;
-    padding-bottom:0;
-    padding-left:0;
-    padding-right:0;
-    padding-top:0;
-    font-size: 12px;
-    text-align: justify;
-    
-    }
-h3{
-    padding-bottom:0;
-    padding-top:0;
-    }
-br{
-    padding-bottom:0;
-    padding-top:0;
-    }
+        img {
+            zoom: 60%;
+        }
 
-.titre_pdf{
-    text-align: center;
+        .info tr {
+            padding-top: 3pt;
+        }
 
-    margin-bottom:0;
-    margin-left:0;
-    margin-right:0;
-    margin-top:0;
-    padding-bottom:0;
-    padding-left:0;
-    padding-right:0;
-    padding-top:0;
+        .photo {
+            text-align: center;
+            width: 110px;
+            height: 150px;
+            margin-bottom: 10px;
+            border: solid 1px #101010;
 
-    }
-h2.titre_pdf{
-    text-align: center;
+        }
+        .padding{
+            padding: 5px;
+        }
+        .fields {
+            text-align: left;
+        }
 
-    }
-h3.titre_pdf{
-    text-align: center;
-    }
+        h3.entete {
+            background-color: #777777;
+            text-align: center;
+            font-style: italic;
+        }
 
-.photo {
-    text-align: center;
-    width: 110px;
-    padding-bottom: 45px;
-    padding-left: 0px;
-    margin-bottom: 10px;
-    border-top-style:medium;
-    border-top-width:1px;
-    border-top-color:#000000;
+        .font_gris {
+            background-color: #97a2b0;
+        }
 
-    border-bottom-style:medium;
-    border-bottom-width:1px;
-    border-bottom-color:#000000;
+        .table_border {
+            border: solid 1px #000000;
+        }
 
-    border-left-style:medium;
-    border-left-color:black;
-    border-left-width: 1px;
+        td {
+            padding-left: 5px;
+        }
 
-    border-right-style:medium;
-    border-right-color:black;
-    border-right-width: 1px;
-}
-.fields{
-    text-align: left;
-}
-/*n'ouvelle modif'*/
-{##logo_p8{#}
-{#    zoom:30%;#}
-{#    text-align: right;#}
-{#}#}
+        .zomm {
+            zoom: 30%;
+        }
 
-h3.entete{
-    padding-top: 4px;
-    line-height: 15px;
-    background-color: #777777;
-    text-align: center;
-    font-style: italic;
-}
-
-.font_gris{
-    background-color: #97a2b0;
-}
-table{
-    margin-bottom: 10px;
-}
-.padding{
-    padding-top: 10px;
-    padding-left: 10px;
-    padding-bottom: 10px;
-    padding-right: 10px;
-}
-.margin10{
-  padding-left: 5px;
-}
-.table_border{
-    border-top-style:medium;
-    border-top-width:1px;
-    border-top-color:#000000;
-    border-bottom-style:medium;
-    border-bottom-width:1px;
-    border-bottom-color:#000000;
-    border-left-style:medium;
-    border-left-width:1px;
-    border-left-color:#000000;
-    border-right-style:medium;
-    border-right-width:1px;
-    border-right-color:#000000;
-
-}
-
-td{
-    padding-left: 5px;
-}
-.zomm{
- zoom: 30%;
-}
-</style>
+        .entete h4 {
+            padding: 5px;
+        }
+    </style>
 
 </head>
 
 <body>
-    <table>
-        <tr>
-{#            {% if wish.centre_gestion.centre_gestion == 'ied' %}#}
-{#            <td><img class="zomm" id="logo_p8" src="{% static "images/logop8.jpg" %}" /></td>#}
-{#            {% else %}#}
-            <td><img id="logo_p8" src="{% static "images/logo_fp.jpg" %}"/></td>
-            {% endif %}
-            <td class="barcode"><img id="logo_ied" src="{% static "images/logo-ied.jpg" %}"/></td>
+<div class="container">
+    <div class="row">
+        <div class="col-xs-6">
+            {% if wish.centre_gestion.centre_gestion == 'ied' %}
+                <img class="zomm" id="logo_p8" src="{% static "images/logop8.jpg" %}"/>
+            {% else %}
+                <img id="logo_p8" src="{% static "images/logo_fp.jpg" %}"/>
+            {% endif %}</div>
+        <div class="col-xs-6"><span class="pull-right"><img id="logo_ied"
+                                                            src="{% static "images/logo-ied.jpg" %}"/></span>
+        </div>
+    </div>
+    <h4 class="center">{% if wish.is_reins_formation %} DOSSIER DE RÉINSCRIPTION {% else %}DOSSIER
+        D'INSCRIPTION{% endif %} {% annee_en_cour %} <br>
+        En {{ wish.etape.label }}
+    </h4>
+
+
+    <div class="row">
+        <div class="col-xs-6">
+            <center><span class="barcode">{{ individu.code_opi }}</span>
+                <br/>{{ individu.code_opi }}</center>
+            <br/>
+            <center><span class="barcode">*{{ wish.code_dossier }}*</span><br/>{{ wish.code_dossier }}</center>
+        </div>
+        <div class="col-xs-4  col-xs-offset-2">
+            <div class="photo"></div>
+            <br/>
+
+            <div class="center">PHOTO</div>
+        </div>
+    </div>
+
+
+    <div class="center strong">
+        Tout dossier incomplet et illisible ne sera pas traité.<br>
+    </div>
+
+    <div class="entete">
+        <h4 class="bg-primary">Données personnelles de l’étudiant</h4>
+    </div>
+    <table class="info table table-bordered">
+
+        <tr class="fields">
+            <td class="font_gris"><b>N° de carte d’étudiant de Paris 8
+                :</b> {{ individu.student_code|default:"Jamais inscrit" }}</td>
+            <td><b>N° INE (ou BEA) :</b> {{ individu.ine|default:"Non renseigné" }}</td>
         </tr>
     </table>
 
-
-  <div id="footerContent">
-    Page <pdf:pagenumber />
-  </div>
-
-<h2 class="titre_pdf">{% if wish.is_reins_formation %} DOSSIER DE RÉINSCRIPTION {% else %}DOSSIER D'INSCRIPTION{% endif %} {% annee_en_cour %}</h2>
-<h2 class="titre_pdf">En {{ wish.etape.label }}</h2>
-
-<table>
-    <tr>
-        <td >
-        <table >
-            <tr >
-                <td><pdf:barcode  value="{{ individu.code_opi }}" type="code128"  align="left" align="baseline" humanreadable="1" barwidth="2" barheight="40" fontsize="16" /></td>
-            </tr>
-            <tr >
-                <td><pdf:barcode  value="{{ wish.code_dossier }}" type="code128"  align="left" align="baseline" humanreadable="1" barwidth="2" barheight="40" fontsize="16" /></td>
-            </tr>
-        </table>
-        </td>
-        <td class="photo" ><u><br/>PHOTO</u></td>
-    </tr>
-</table>
-<div class="center strong">
-    Tout dossier incomplet et illisible ne sera pas traité.<br>
-</div>
-
-<h3 class="entete">Données personnelles de l’étudiant</h3>
-
-<table class="info table_border">
-
-        <tr class="fields">
-        <td class="font_gris"><b>N° de carte d’étudiant de Paris 8 :</b> {{ individu.student_code|default:"Jamais inscrit"  }}</td>
-        <td><b>N° INE (ou BEA) :</b> {{ individu.ine|default:"Non renseigné"  }}</td>
-    </tr>
-</table>
-
-<table class="info">
-    <tr class="fields">
-        <td><b>Nom :</b></td>
-        <td>{{ individu.last_name|capfirst|default:"Anomalie" }}</td>
-    </tr>
-
-    <tr class="fields">
-        <td>Nom d'usage : {{ individu.common_name|capfirst|default:"Non renseigné"  }} </td>
-        <td>Sexe : {{ individu.sex_display }}</td>
-    </tr>
-    <tr class="fields">
-        <td><b>Prénom : </b>{{ individu.first_name1|capfirst|default:"Non renseigné"  }}</td>
-        <td>Prénom 2 : {{ individu.first_name2|capfirst|default:"Non renseigné"  }}</td>
-    </tr>
-    <tr class="fields">
-        <td>Prénom 3 : {{ individu.first_name3|capfirst|default:"Non renseigné"  }}</td>
-        <td>Date de naissance : {{ individu.birthday|default:"Anomalie" }}</td>
-    </tr>
-
-    <tr class="fields">
-        <td>Lieu de naissance :</td><td> {{ individu.lieu_naissance|default:"Anomalie" }} </td>
-    </tr>
-    <tr class="fields">
-        <td>Nationalité : {{ individu.code_pays_nationality.lib_nat }}</td>
-    </tr>
-    <tr class="fields">
-        <td>Handicap : </td>
-        <td>{{ individu.type_handicap|default:"Non renseigné" }}</td>
-    </tr>
-    <tr class="fields">
-        <td>Situation familiale pour l’année universitaire : </td><td>{{ individu.family_status|default:"Anomalie" }} </td>
-    </tr>
-    <tr class="fields">
-        <td>Situation militaire pour l’année universitaire : </td><td>{{ individu.situation_militaire|default:"Non renseignée" }}</td>
-    </tr>
-</table>
+    <div class="row">
+        <div class="col-xs-6">Nom :</div>
+        <div class="col-xs-6">{{ individu.last_name|capfirst|default:"Anomalie" }}</div>
+    </div>
+    <div class="row">
+        <div class="col-xs-6">Nom d'usage :</div>
+        <div class="col-xs-6">{{ individu.common_name|capfirst|default:"Non renseigné" }}</div>
+    </div>
+    <div class="row">
+        <div class="col-xs-6">Sexe :</div>
+        <div class="col-xs-6">{{ individu.sex_display }}</div>
+    </div>
+    <div class="row">
+        <div class="col-xs-6">Prénom :</div>
+        <div class="col-xs-6">{{ individu.first_name1|capfirst|default:"Non renseigné" }}</div>
+    </div>
+    <div class="row">
+        <div class="col-xs-6">Prénom 2 :</div>
+        <div class="col-xs-6">{{ individu.first_name2|capfirst|default:"Non renseigné" }}</div>
+    </div>
+    <div class="row">
+        <div class="col-xs-6">Prénom 3 :</div>
+        <div class="col-xs-6">{{ individu.first_name3|capfirst|default:"Non renseigné" }}</div>
+    </div>
+    <div class="row">
+        <div class="col-xs-6">Date de naissance :</div>
+        <div class="col-xs-6">{{ individu.birthday|default:"Anomalie" }}</div>
+    </div>
+    <div class="row">
+        <div class="col-xs-6">Lieu de naissance :</div>
+        <div class="col-xs-6">{{ individu.lieu_naissance|default:"Anomalie" }}</div>
+    </div>
+    <div class="row">
+        <div class="col-xs-6">Nationalité :</div>
+        <div class="col-xs-6">{{ individu.code_pays_nationality.lib_nat }}</div>
+    </div>
+    <div class="row">
+        <div class="col-xs-6">Handicap :</div>
+        <div class="col-xs-6">{{ individu.type_handicap|default:"Non renseigné" }}</div>
+    </div>
+    <div class="row">
+        <div class="col-xs-6">Situation familiale pour l’année universitaire :</div>
+        <div class="col-xs-6">{{ individu.family_status|default:"Anomalie" }}</div>
+    </div>
+    <div class="row">
+        <div class="col-xs-6">Situation militaire pour l’année universitaire :</div>
+        <div class="col-xs-6">{{ individu.family_status|default:"Anomalie" }}</div>
+    </div>
+    <div class="row">
+        <div class="col-xs-6">Situation familiale pour l’année universitaire :</div>
+        <div class="col-xs-6">{{ individu.situation_militaire|default:"Non renseignée" }}</div>
+    </div>
 
 
-<br>
-<div class="margin10">
-    <b>Votre scolarité dans l’enseignement supérieur FRANÇAIS :</b>
-</div>
-<table class="info">
-    <tr class="fields">
-        <td>L’année de votre 1ère inscription dans l’enseignement supérieur français  : </td>
-        <td>{{ individu.dossier_inscription.annee_premiere_inscription_enseignement_sup_fr|default:"Jamais inscrit"  }}</td>
-    </tr>
-    <tr class="fields">
-        <td>L’année de votre 1ère inscription dans une université française : </td>
-        <td>{{ individu.dossier_inscription.annee_premiere_inscription_universite_fr|default:"Jamais inscrit"  }}</td>
-    </tr>
-    <tr class="fields">
-        <td>Le nom de l’établissement et son code: </td>
-        <td>{{ individu.dossier_inscription.premier_universite_fr|default:"Jamais inscrit"  }}
-            {% if individu.dossier_inscription.premier_universite_fr %}{{ individu.dossier_inscription.premier_universite_fr.cod_etb  }}{% endif %}
-        </td>
-    </tr>
-    <tr class="fields">
-        <td>Avez-vous déjà été inscrit à Paris 8 depuis 2000 ? </td>
-        <td>{{ individu.is_ancien_p8 }}</td>
-    </tr>
-    <tr class="fields">
-        <td> Année de votre 1ère inscription à Paris 8 ?</td>
-        <td>{{ individu.dossier_inscription.annee_premiere_inscription_p8|default:"Jamais inscrit"  }}</td>
-    </tr>
-{% if individu.dossier_inscription.annee_derniere_inscription_universite_hors_p8 %}
-    <tr class="fields">
-        <td> Ma dernière inscription à l'université n'était pas Paris 8, voici son année </td>
-        <td>{{ individu.dossier_inscription.annee_derniere_inscription_universite_hors_p8|default:"Jamais inscrit"  }}</td>
-    </tr>
-{% endif %}
-</table>
+    <hr>
 
-<h3 class="entete">Baccalauréat ou équivalence</h3>
+    <div class="margin10">
+        <b>Votre scolarité dans l’enseignement supérieur FRANÇAIS :</b>
+    </div>
 
-<table class="info">
-    <tr class="fields">
-        <td><b>Type de BAC ou l'équivalent : </b></td>
-        <td>{{ individu.dossier_inscription.bac|default:"Anomalie" }}</td>
-    </tr>
-    <tr class="fields">
-        <td><b>Année de l'obtention du bac ou de l'équivalent : </b></td>
-        <td>{{ individu.dossier_inscription.annee_bac|default:"Anomalie" }}</td>
-    </tr>
-    <tr class="fields">
-        <td><b>Mention du bac : </b></td>
-        <td>{{ individu.dossier_inscription.mention_bac|default:"Non renseignée" }}</td>
-    </tr>
-    <tr class="fields">
-        <td><b>Etablissement  : </b></td>
-        <td>{{ individu.dossier_inscription.etablissement_bac|default:"Anomalie" }}</td>
-    </tr>
-    <tr class="fields">
-        <td><b>Code de l'établissement : </b></td>
-        <td>{{ individu.dossier_inscription.etablissement_bac.cod_etb|default:"Anomalie" }}</td>
-    </tr>
-</table>
-<h3 class="entete">Adresses et coordonnées de l’étudiant</h3>
+    <div class="row">
+        <div class="col-xs-6">L’année de votre 1ère inscription dans l’enseignement supérieur français :</div>
+        <div class="col-xs-6">{{ individu.dossier_inscription.annee_premiere_inscription_enseignement_sup_fr|default:"Jamais inscrit" }}</div>
+    </div>
+    <div class="row">
+        <div class="col-xs-6">L’année de votre 1ère inscription dans une université française :</div>
+        <div class="col-xs-6">{{ individu.dossier_inscription.annee_premiere_inscription_universite_fr|default:"Jamais inscrit" }}</div>
+    </div>
+    <div class="row">
+        <div class="col-xs-6">Le nom de l’établissement et son code :</div>
+        <div class="col-xs-6">{{ individu.dossier_inscription.premier_universite_fr|default:"Jamais inscrit" }}
+            {% if individu.dossier_inscription.premier_universite_fr %}
+                {{ individu.dossier_inscription.premier_universite_fr.cod_etb }}{% endif %}
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xs-6">Avez-vous déjà été inscrit à Paris 8 depuis 2000 ?</div>
+        <div class="col-xs-6">{{ individu.is_ancien_p8 }}</div>
+    </div>
+    <div class="row">
+        <div class="col-xs-6">Année de votre 1ère inscription à Paris 8 ?</div>
+        <div class="col-xs-6">{{ individu.dossier_inscription.annee_premiere_inscription_p8|default:"Jamais inscrit" }}</div>
+    </div>
+    {% if individu.dossier_inscription.annee_derniere_inscription_universite_hors_p8 %}
+        <div class="row">
+            <div class="col-xs-6"> Ma dernière inscription à l'université n'était pas Paris 8, voici son année</div>
+            <div class="col-xs-6">{{ individu.dossier_inscription.annee_derniere_inscription_universite_hors_p8|default:"Jamais inscrit" }}</div>
+        </div>
+    {% endif %}
+    <div class="entete">
+        <h4 class="bg-primary">Baccalauréat ou équivalence</h4>
+    </div>
+    <div class="row">
+        <div class="col-xs-6">Type de BAC ou l'équivalent :</div>
+        <div class="col-xs-6">{{ individu.dossier_inscription.bac|default:"Anomalie" }}</div>
+    </div>
+    <div class="row">
+        <div class="col-xs-6">Année de l'obtention du bac ou de l'équivalent :</div>
+        <div class="col-xs-6">{{ individu.dossier_inscription.annee_bac|default:"Anomalie" }}</div>
+    </div>
+    <div class="row">
+        <div class="col-xs-6">Mention du bac :</div>
+        <div class="col-xs-6">{{ individu.dossier_inscription.mention_bac|default:"Non renseignée" }}</div>
+    </div>
+    <div class="row">
+        <div class="col-xs-6">Etablissement :</div>
+        <div class="col-xs-6">{{ individu.dossier_inscription.etablissement_bac|default:"Anomalie" }}</div>
+    </div>
+    <div class="row">
+        <div class="col-xs-6">Code de l'établissement :</div>
+        <div class="col-xs-6">{{ individu.dossier_inscription.etablissement_bac.cod_etb|default:"Anomalie" }}</div>
+    </div>
 
-<table class="info">
+    <div class="entete">
+        <h4 class="bg-primary">Adresses et coordonnées de l’étudiant</h4>
+    </div>
     {% for address in individu.adresses.all %}
-        <tr class="fields">
-            {% if address.type == '1' %}
-            <td valign="top"><b>Adresse pour l'année en cours :</b> </td>
-            {% else %}
-            <td valign="top"><b>Adresse Fixe :</b> </td>
+        <div class="row">
+            <div class="col-xs-6">
+                {% if address.type == '1' %} Adresse pour l'année en cours :{% else %}Adresse Fixe :{% endif %}
+            </div>
+            <div class="col-xs-6">
+                {% if address.label_adr_1 %}
+                    {{ address.label_adr_1 }}
+                {% endif %}
+                {% if  address.label_adr_2 %}
+                    {{ address.label_adr_2 }}
+                {% endif %}
+                {% if  address.label_adr_3 %}
+                    {{ address.label_adr_3 }}
+                {% endif %}
+                {% if  address.label_adr_etr %}
+                    {{ address.label_adr_etr }}
+                {% endif %}
 
-            {% endif %}
-            <td valign="top">
-            {% if address.label_adr_1 %}
-            {{ address.label_adr_1  }}
-            {% endif %}
-            {% if  address.label_adr_2 %}
-            {{ address.label_adr_2  }}
-            {% endif %}
-            {% if  address.label_adr_3 %}
-            {{ address.label_adr_3  }}
-            {% endif %}
-            {% if  address.label_adr_etr %}
-            {{ address.label_adr_etr  }}
-            {% endif %}
+                {% if  address.com_bdi %}
+                    {{ address.com_bdi.cod_bdi }}
+                {% endif %}
+                {% if  address.com_bdi %}
+                    {{ address.com_bdi.lib_ach }}
+                {% endif %}
+                {% if  address.code_pays %}
+                    {{ address.code_pays }}
+                {% endif %}</div>
+        </div>
+        <div class="row">
+            <div class="col-xs-6">Téléphone :</div>
+            <div class="col-xs-6">{{ address.listed_number }}</div>
+        </div>
 
-            {% if  address.com_bdi %}
-            {{ address.com_bdi.cod_bdi  }}
-            {% endif %}
-            {% if  address.com_bdi %}
-            {{ address.com_bdi.lib_ach  }}
-            {% endif %}
-            {% if  address.code_pays %}
-            {{ address.code_pays  }}
-            {% endif %}
-            </td>
-        </tr>
-
-        <tr class="fields">
-            <td><b>Téléphone :</b></td>
-            <td>{{ address.listed_number }}</td>
-        </tr>
 
     {% endfor %}
+    <div class="row">
+        <div class="col-xs-6">Votre mode d'hébergement pour l’année en cours :</div>
+        <div class="col-xs-6">{{ individu.type_hebergement_annuel|default:"Anomalie" }}</div>
+    </div>
+    <div class="row">
+        <div class="col-xs-6">Courriel personnel :</div>
+        <div class="col-xs-6">{{ individu.personal_email|default:"Anomalie" }}</div>
+    </div>
 
-    <tr class="fields">
-        <td><b>Votre mode d'hébergement pour l’année en cours : </b></td>
-        <td>{{ individu.type_hebergement_annuel|default:"Anomalie" }}</td>
-    </tr>
-    <tr class="fields">
-        <td><b>Courriel personnel :</b></td>
-        <td>{{ individu.personal_email|default:"Anomalie" }}</td>
-    </tr>
+    <div class="entete">
+        <h4 class="bg-primary">Inscription administrative annuelle</h4>
+    </div>
+    <div class="row">
+        <div class="col-xs-6">Votre activité professionnelle :</div>
+        <div class="col-xs-6">{{ individu.dossier_inscription.cat_soc_etu|default:"Anomalie" }}</div>
+    </div>
+    <div class="row">
+        <div class="col-xs-6">L'activité professionnelle du chef de famille :</div>
+        <div class="col-xs-6">{{ individu.dossier_inscription.cat_soc_chef_famille|default:"Non renseigné" }}</div>
+    </div>
+    <div class="row">
+        <div class="col-xs-6">L'activité professionnelle de l'autre parent :</div>
+        <div class="col-xs-6">{{ individu.dossier_inscription.cat_soc_autre_parent|default:"Non renseigné" }}</div>
+    </div>
+    <div class="row">
+        <div class="col-xs-6">Sportif de haut niveau :</div>
+        <div class="col-xs-6">{{ individu.dossier_inscription.sportif_haut_niveau|yesno:"Oui,Non" }}</div>
+    </div>
+    <div class="row">
+        <div class="col-xs-6">Votre quotité de travail :</div>
+        <div class="col-xs-6">{{ individu.dossier_inscription.quotite_travail|default:"Ne travaille pas" }}</div>
+    </div>
 
-</table>
-    <h3 class="entete">inscription administrative annuelle</h3>
+    <div class="entete">
+        <h4 class="bg-primary">Parcours de l’étudiant</h4>
+    </div>
 
-<table class="info">
-
-    <tr class="fields">
-        <td><b>Votre activité professionnelle :</b></td>
-        <td>{{ individu.dossier_inscription.cat_soc_etu|default:"Anomalie" }}</td>
-    </tr>
-    <tr class="fields">
-        <td><b>L'activité professionnelle du chef de famille : </b></td>
-        <td>{{ individu.dossier_inscription.cat_soc_chef_famille|default:"Non renseigné" }}</td>
-    </tr>
-    <tr class="fields">
-        <td><b>L'activité professionnelle de l'autre parent : </b></td>
-        <td>{{ individu.dossier_inscription.cat_soc_autre_parent|default:"Non renseigné" }}</td>
-    </tr>
-    <tr class="fields">
-        <td><b>Sportif de haut niveau :</b></td>
-        <td>{{ individu.dossier_inscription.sportif_haut_niveau|yesno:"Oui,Non" }}</td>
-    </tr>
-    <tr class="fields">
-        <td><b>Votre quotité de travail :</b></td>
-        <td>{{ individu.dossier_inscription.quotite_travail|default:"Ne travaille pas" }}</td>
-    </tr>
-</table>
-    <h3 class="entete">Parcours de l’étudiant</h3>
 
     <div class="margin10">
         <b>Dernier établissement fréquenté</b>
     </div>
-<table class="info">
+    <div class="row">
+        <div class="col-xs-6">Année du dernier établissement fréquenté :</div>
+        <div class="col-xs-6">{{ individu.dossier_inscription.annee_dernier_etablissement|default:"Anomalie" }}</div>
+    </div>
+    <div class="row">
+        <div class="col-xs-6">Dernier établissement fréquenté :</div>
+        <div class="col-xs-6">{{ individu.dossier_inscription.dernier_etablissement|default:"Anomalie" }}</div>
+    </div>
+    <div class="row">
+        <div class="col-xs-6">Type du dernier établissement fréquenté :</div>
+        <div class="col-xs-6">{{ individu.dossier_inscription.dernier_etablissement.cod_tpe|default:"Anomalie" }}</div>
+    </div>
+    <div class="row">
+        <div class="col-xs-6">Code du dernier établissement fréquenté :</div>
+        <div class="col-xs-6">{{ individu.dossier_inscription.dernier_etablissement.cod_etb|default:"Anomalie" }}</div>
+    </div>
 
-        <tr class="fields">
-            <td>Année du dernier établissement fréquenté :</td>
-            <td>{{ individu.dossier_inscription.annee_dernier_etablissement|default:"Anomalie" }}</td>
-        </tr>
-        <tr class="fields">
-            <td>Dernier établissement fréquenté :</td>
-            <td>{{ individu.dossier_inscription.dernier_etablissement|default:"Anomalie" }}</td>
-        </tr>
-        <tr class="fields">
-            <td>Type du dernier établissement fréquenté :</td>
-            <td>{{ individu.dossier_inscription.dernier_etablissement.cod_tpe|default:"Anomalie" }}</td>
-        </tr>
-         <tr class="fields">
-            <td>Code du dernier établissement fréquenté :</td>
-            <td>{{ individu.dossier_inscription.dernier_etablissement.cod_etb|default:"Anomalie" }}</td>
-        </tr>
-</table>
-    <br>
+    <hr>
+
     <div class="margin10">
         <b>Situation de l'année précédente</b>
     </div>
-    <table class="info">
-        <tr class="fields">
-            <td>Situation de l'année précédente :</td>
-            <td>{{ individu.dossier_inscription.sise_annee_precedente|default:"Anomalie" }}</td>
-        </tr>
+    <div class="row">
+        <div class="col-xs-6">Situation de l'année précédente :</div>
+        <div class="col-xs-6">{{ individu.dossier_inscription.sise_annee_precedente|default:"Anomalie" }}</div>
+    </div>
+    <div class="row">
+        <div class="col-xs-6">Etablissement de l'année précédente :</div>
+        <div class="col-xs-6">{{ individu.dossier_inscription.etablissement_annee_precedente|default:"Non renseigné" }}</div>
+    </div>
+    <div class="row">
+        <div class="col-xs-6">Type de l'établissement de l'année précédente :</div>
+        <div class="col-xs-6">{{ individu.dossier_inscription.etablissement_annee_precedente.cod_tpe|default:"Non renseigné" }}</div>
+    </div>
+    <div class="row">
+        <div class="col-xs-6">Code de l'établissement de l'année précédente :</div>
+        <div class="col-xs-6">{{ individu.dossier_inscription.etablissement_annee_precedente.cod_etb|default:"Non renseigné" }}</div>
+    </div>
 
-        <tr class="fields">
-            <td>Etablissement de l'année précédente :</td>
-            <td>{{ individu.dossier_inscription.etablissement_annee_precedente|default:"Non renseigné" }}</td>
-        </tr>
-        <tr class="fields">
-            <td>Type de l'établissement de l'année précédente :</td>
-            <td>{{  individu.dossier_inscription.etablissement_annee_precedente.cod_tpe|default:"Non renseigné" }}</td>
-        </tr>
-        <tr class="fields">
-            <td>Code de l'établissement de l'année précédente :</td>
-            <td>{{  individu.dossier_inscription.etablissement_annee_precedente.cod_etb|default:"Non renseigné" }}</td>
-        </tr>
-    </table>
-    <br>
+    <hr>
+
     <div class="margin10"><b>Dernier diplôme obtenu</b></div>
-    <table class="info">
-        <tr class="fields">
-            <td>Type du dernier diplôme obtenu :</td>
-            <td>{{ individu.dossier_inscription.type_dernier_diplome|default:"Non renseigné" }}</td>
-        </tr>
-        <tr class="fields">
-            <td>Etablissement du dernier diplôme :</td>
-            <td>{{ individu.dossier_inscription.etablissement_dernier_diplome|default:"Non renseigné" }}</td>
-        </tr>
-        <tr class="fields">
-            <td>Type de l'établissement du dernier diplôme :</td>
-            <td>{{ individu.dossier_inscription.etablissement_dernier_diplome.cod_tpe|default:"Non renseigné" }}</td>
-        </tr>
-        <tr class="fields">
-            <td>Code de l'établissement du dernier diplôme :</td>
-            <td>{{ individu.dossier_inscription.etablissement_dernier_diplome.cod_etb|default:"Non renseigné" }}</td>
-        </tr>
-</table>
-    <br>
+    <div class="row">
+        <div class="col-xs-6">Type du dernier diplôme obtenu :</div>
+        <div class="col-xs-6">{{ individu.dossier_inscription.type_dernier_diplome|default:"Non renseigné" }}</div>
+    </div>
+    <div class="row">
+        <div class="col-xs-6">Etablissement du dernier diplôme :</div>
+        <div class="col-xs-6">{{ individu.dossier_inscription.etablissement_dernier_diplome|default:"Non renseigné" }}</div>
+    </div>
+    <div class="row">
+        <div class="col-xs-6">Type de l'établissement du dernier diplôme :</div>
+        <div class="col-xs-6">{{ individu.dossier_inscription.etablissement_dernier_diplome.cod_tpe|default:"Non renseigné" }}</div>
+    </div>
+    <div class="row">
+        <div class="col-xs-6">Code de l'établissement du dernier diplôme :</div>
+        <div class="col-xs-6">{{ individu.dossier_inscription.etablissement_dernier_diplome.cod_etb|default:"Non renseigné" }}</div>
+    </div>
+
+    <hr>
+
     <div class="margin10"><b>Autre établissement fréquenté pour l'année 2012-2013</b></div>
-<table class="info">
+    <div class="row">
+        <div class="col-xs-6">Fréquentez-vous un autre établissement pour l'année en cours ?</div>
+        <div class="col-xs-6">{{ individu.dossier_inscription.autre_eta|yesno:"Oui,Non" }}</div>
+    </div>
+    <div class="row">
+        <div class="col-xs-6">Etablissement :</div>
+        <div class="col-xs-6">{{ individu.dossier_inscription.autre_etablissement|default:"Non renseigné" }}</div>
+    </div>
+    <div class="row">
+        <div class="col-xs-6">Type de l'établissement :</div>
+        <div class="col-xs-6">{{ individu.dossier_inscription.autre_etablissement.cod_tpe|default:"Non renseigné" }}</div>
+    </div>
+    <div class="row">
+        <div class="col-xs-6">Code de l'établissement :</div>
+        <div class="col-xs-6">{{ individu.dossier_inscription.autre_etablissement.cod_etb|default:"Non renseigné" }}</div>
+    </div>
+    <div class="entete">
+        <h4 class="bg-primary">Bourse</h4>
+    </div>
+    <div class="row">
+        <div class="col-xs-6">Numéro de boursier :</div>
+        <div class="col-xs-6">{{ individu.dossier_inscription.num_boursier|default:"Pas de numéro de boursier" }}</div>
+    </div>
+    <div class="row">
+        <div class="col-xs-6">Echelon :</div>
+        <div class="col-xs-6">{{ individu.dossier_inscription.echelon|default:"Non renseigné" }}</div>
+    </div>
+    <div class="row">
+        <div class="col-xs-6">Boursier du Crous l'année précédente :</div>
+        <div class="col-xs-6">{{ individu.dossier_inscription.boursier_crous|yesno:"Oui,Non" }}</div>
+    </div>
 
-        <tr class="fields">
-            <td>Fréquentez-vous un autre établissement pour l'année en cours ?</td>
-            <td>{{ individu.dossier_inscription.autre_eta|yesno:"Oui,Non" }}</td>
-        </tr>
-        <tr class="fields">
-            <td>Etablissement :</td>
-            <td>{{ individu.dossier_inscription.autre_etablissement|default:"Non renseigné" }}</td>
-        </tr>
-        <tr class="fields">
-            <td>Type de l'établissement :</td>
-            <td>{{ individu.dossier_inscription.autre_etablissement.cod_tpe|default:"Non renseigné" }}</td>
-        </tr>
-        <tr class="fields">
-            <td>Code de l'établissement :</td>
-            <td>{{ individu.dossier_inscription.autre_etablissement.cod_etb|default:"Non renseigné" }}</td>
-        </tr>
-</table>
-    <br>
+    <div class="entete">
+        <h4 class="bg-primary">Situation sociale (sur présentation des justificatifs)</h4>
+    </div>
+    <div class="row">
+        <div class="col-xs-6">Situation sociale :</div>
+        <div class="col-xs-6">{{ individu.dossier_inscription.situation_sociale|default:"Anomalie" }}</div>
+    </div>
+    <div class="entete">
+        <h4 class="bg-primary">Couverture sociale</h4>
+    </div>
 
-    <h3 class="entete">Bourse</h3>
-    <table class="info">
-        <tr class="fields">
-            <td><b>Numéro de boursier :</b></td>
-            <td>{{ individu.dossier_inscription.num_boursier|default:"Pas de numéro de boursier" }}</td>
-        </tr>
-        <tr class="fields">
-            <td><b>Echelon :</b></td>
-            <td>{{ individu.dossier_inscription.echelon|default:"Non renseigné" }}</td>
-        </tr>
-        <tr class="fields">
-            <td><b>Boursier du Crous l'année précédente :</b></td>
-            <td>{{ individu.dossier_inscription.boursier_crous|yesno:"Oui,Non" }}</td>
-        </tr>
-    </table>
-    <br>
-<h3 class="entete">Situation sociale (sur présentation des justificatifs)</h3>
-    <table class="info">
-        <tr class="fields">
-        <td>Situation sociale : </td>
-        <td>{{ individu.dossier_inscription.situation_sociale|default:"Anomalie" }}</td>
-        </tr>
-    </table>
-    <br>
-<h3 class="entete">Couverture sociale</h3>
-<table class="info">
-        <tr class="fields">
-            <td><b>Cas où l'étudiant reste affilié au régime de sécurité sociale de ses parents (fournir justificatifs) :</b></td>
-            <td>{{ individu.dossier_inscription.affiliation_parent|default:"Non renseigné" }}</td>
-        </tr>
-        <tr class="fields">
-            <td><b>Cas où l'étudiant n'est pas affilié au régime de sécurité sociale étudiante (fournir justificatifs) :</b></td>
-            <td>{{ individu.dossier_inscription.non_affiliation|default:"Non renseigné" }}</td>
-        </tr>
-        <tr class="fields">
-            <td><b>Votre n° de sécurité sociale (ou INSEE) :</b></td>
-            <td>{{ individu.dossier_inscription.num_secu|default:"Non renseigné" }}</td>
-        </tr>
-        <tr class="fields">
-            <td><b>Centre Payeur :</b></td>
-            <td>{{ individu.dossier_inscription.centre_payeur|default:"Non renseigné" }}</td>
-        </tr>
-</table>
+    <div class="row">
+        <div class="col-xs-6">Cas où l'étudiant reste affilié au régime de sécurité sociale de ses parents (fournir
+            justificatifs) :
+        </div>
+        <div class="col-xs-6">{{ individu.dossier_inscription.affiliation_parent|default:"Non renseigné" }}</div>
+    </div>
+    <div class="row">
+        <div class="col-xs-6">Cas où l'étudiant n'est pas affilié au régime de sécurité sociale étudiante (fournir
+            justificatifs) :
+        </div>
+        <div class="col-xs-6">{{ individu.dossier_inscription.non_affiliation|default:"Non renseigné" }}</div>
+    </div>
+    <div class="row">
+        <div class="col-xs-6">Votre n° de sécurité sociale (ou INSEE) :</div>
+        <div class="col-xs-6">{{ individu.dossier_inscription.num_secu|default:"Non renseigné" }}</div>
+    </div>
+    <div class="row">
+        <div class="col-xs-6">Centre Payeur :</div>
+        <div class="col-xs-6">{{ individu.dossier_inscription.centre_payeur|default:"Non renseigné" }}</div>
+    </div>
+    <div class="row">
+        <div class="col-xs-6"></div>
+        <div class="col-xs-6"></div>
+    </div>
+    <div class="row">
+        <div class="col-xs-6"></div>
+        <div class="col-xs-6"></div>
+    </div>
+
 
     <div class="table_border padding">
 
-        <b>Je certifie exacts les renseignements fournis et je m’engage à respecter le règlement intérieur de l’université Paris 8 ainsi que la
-        règlementation en vigueur relative à l’utilisation de ses moyens informatiques.</b><br>
-        <i>La loi n°78-17 modifiée du 6 janvier 1978 vous donne un droit d’accès et de rectification pour les données enregistrées vous concernant.</i><br>
+        <b>Je certifie exacts les renseignements fournis et je m’engage à respecter le règlement intérieur de
+            l’université Paris 8 ainsi que la
+            règlementation en vigueur relative à l’utilisation de ses moyens informatiques.</b><br>
+        <i>La loi n°78-17 modifiée du 6 janvier 1978 vous donne un droit d’accès et de rectification pour les
+            données
+            enregistrées vous concernant.</i><br>
 
-        <b>J’ai pris connaissance que ma carte d’étudiant est valable 3 ans à compter de sa date d'édition. En cas de perte, je devrai m’acquitter de la somme de 5€ pour la
-        délivrance d’une nouvelle carte.</b> <br><br>
+        <b>J’ai pris connaissance que ma carte d’étudiant est valable 3 ans à compter de sa date d'édition. En cas
+            de
+            perte, je devrai m’acquitter de la somme de 5€ pour la
+            délivrance d’une nouvelle carte.</b> <br><br>
         Date :<br><br>
         Signature de l'étudiant :
     </div>
     <br>
+
     <div class="table_border padding">
-    Veuillez envoyer votre dossier avant le  {{ wish.date_limite_envoi|date:'d/m/Y' }}
+        Veuillez envoyer votre dossier avant le {{ wish.date_limite_envoi|date:'d/m/Y' }}
+    </div>
 </div>
 </body>
 </html>

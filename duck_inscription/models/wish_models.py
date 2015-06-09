@@ -1,25 +1,16 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 import datetime
-from StringIO import StringIO
-from PyPDF2 import PdfFileWriter, PdfFileReader
-from django.contrib.sites.models import Site
-from django.core.urlresolvers import reverse
 from django.db import models
-from django.template import RequestContext
-from django.template.loader import render_to_string
-import django_xworkflows
-from django_xworkflows.xworkflow_log.models import TransitionLog
 from mailrobot.models import Mail
 from wkhtmltopdf.views import PDFTemplateResponse
 from xworkflows import transition, after_transition, before_transition, on_enter_state, transition_check
-from django_apogee.models import CentreGestion, Diplome, InsAdmEtp
+from django_apogee.models import  InsAdmEtp
 from duck_inscription.models import SettingAnneeUni, Individu, SettingsEtape, CentreGestionModel
 from django_xworkflows import models as xwf_models
 from django.utils.timezone import now
 from django.conf import settings
 from xhtml2pdf import pdf as pisapdf
-from xhtml2pdf import pisa
 from duck_utils.utils import make_multi_pdf, num_page, remove_page_pdf, get_email_envoi
 
 __author__ = 'paul'
@@ -132,7 +123,7 @@ class SuiviDossierWorkflow(xwf_models.Workflow):
     )
 
 
-class WishTransitionLog(django_xworkflows.models.BaseTransitionLog):
+class WishTransitionLog(xwf_models.BaseTransitionLog):
     wish = models.ForeignKey('Wish', related_name='etape_dossier')
     MODIFIED_OBJECT_FIELD = 'wish'
 
@@ -140,7 +131,7 @@ class WishTransitionLog(django_xworkflows.models.BaseTransitionLog):
         app_label = 'duck_inscription'
 
 
-class WishParcourTransitionLog(django_xworkflows.models.BaseTransitionLog):
+class WishParcourTransitionLog(xwf_models.BaseTransitionLog):
     wish = models.ForeignKey('Wish', related_name='parcours_dossier')
     MODIFIED_OBJECT_FIELD = 'wish'
 
@@ -351,6 +342,26 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
 
         return make_multi_pdf(context=context, templates=templates, files=[remove_page_pdf(doc_candi)])
 
+    def do_pdf_inscription(self, request, context):
+        cmd_option={
+            'margin_bottom': '20',
+
+        }
+        templates = [
+            {'name': "duck_inscription/wish/etiquette.html"},
+         {'name': 'duck_inscription/wish/dossier_inscription_pdf.html',
+                      'footer': 'duck_inscription/wish/footer.html'},
+          ]
+        templates.extend(self.paiementallmodel.get_templates())
+        templates.extend([ {'name': 'duck_inscription/wish/autorisation_photo.html'}])
+
+        context['voeu'] = self
+        context['wish'] = self
+        context['individu'] = self.individu
+        files = [self.etape.annee.transfert_pdf.file.file.name,
+                 self.etape.annee.bourse_pdf.file.file.name,
+                 self.etape.annee.pieces_pdf.file.file.name]
+        return make_multi_pdf(context=context, templates=templates, files=files, cmd_options=cmd_option)
 
     def droit_univ(self):
         if self.individu.droit_univ():
@@ -426,109 +437,4 @@ class ListeDiplomeAces(models.Model):
         app_label = "duck_inscription"
 
 
-class MoyenPaiementModel(models.Model):
-    """
-    chéque virement etc
-    """
-    type = models.CharField('type paiement', primary_key=True, max_length=3)
-    label = models.CharField('label', max_length=60)
 
-    class Meta:
-        db_table = u'pal_moyen_paiement'
-        verbose_name = u'Moyen de paiement'
-        verbose_name_plural = u'Moyens de paiement'
-        app_label = "duck_inscription"
-
-    def __unicode__(self):
-        return unicode(self.label)
-
-
-class TypePaiementModel(models.Model):
-    """
-    Droit univ ou frais péda
-    """
-    type = models.CharField('type de frais', primary_key=True, max_length=5)
-    label = models.CharField('label', max_length=40)
-
-    class Meta:
-        db_table = u"pal_type_paiement"
-        verbose_name = u"Type de paiement"
-        verbose_name_plural = u"Types de paiement"
-        app_label = "duck_inscription"
-
-    def __unicode__(self):
-        return unicode(self.label)
-
-
-PRECEDENT = 0
-TITLE = 1
-NEXT = 2
-
-
-class PaiementAllModel(models.Model):
-    moment_paiement = [u"Au moment de l'inscription", u'01/01/15', u'15/02/15']
-    liste_etapes = {'droit_univ': [None, u'Droit universitaire', 'choix_demi_annee'],
-                    'choix_demi_annee': ['droit_univ', u'Inscription aux semestres', 'nb_paiement'],
-                    'nb_paiement': ['choix_demi_annee', u"Choisir le nombre de paiements", 'recapitulatif'],
-                    'recapitulatif': ['nb_paiement', u"Récapitulatif", None], }
-    wish = models.OneToOneField(Wish)
-    moyen_paiement = models.ForeignKey(MoyenPaiementModel, verbose_name=u'Votre moyen de paiement :',
-                                       help_text=u"Veuillez choisir un moyen de paiement", null=True)
-    nb_paiement_frais = models.IntegerField(verbose_name=u"Nombre de paiements pour les frais pédagogiques", default=1)
-    etape = models.CharField(max_length=20, default="droit_univ")
-    demi_annee = models.BooleanField(default=False)
-
-    def liste_motif(self):
-        a = []
-        for x in range(self.nb_paiement_frais):
-            chaine = u'IED  %s %s %s %s' % (
-            self.wish.etape.cod_etp, self.wish.individu.code_opi, self.wish.individu.last_name, str(x + 1))
-            a.append(chaine)
-        return a
-
-    def range(self):
-        a = []
-        for x in range(self.nb_paiement_frais):
-            a.append((x, self.moment_paiement[x]))
-        return a
-
-    class Meta:
-        app_label = "duck_inscription"
-
-    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
-        if self.demi_annee and not self.wish.demi_annee:
-            self.wish.demi_annee = True
-            self.wish.save()
-        super(PaiementAllModel, self).save(force_insert, force_update, using, update_fields)
-
-    def precedente_etape(self):
-        if self.liste_etapes[self.etape][PRECEDENT]:
-            if self.etape == 'nb_paiement' and not self.wish.can_demi_annee():
-                self.etape = 'droit_univ'
-            else:
-                self.etape = self.liste_etapes[self.etape][PRECEDENT]
-            self.save()
-            return True
-        return False
-
-    def recap(self):
-        return not self.liste_etapes[self.etape][NEXT]
-
-    def prev(self):
-        return self.liste_etapes[self.etape][PRECEDENT]
-
-    def template_name(self):
-        return 'duck_inscription/wish/%s.html' % self.etape
-
-    def title(self):
-        return self.liste_etapes[self.etape][TITLE]
-
-    def next_etape(self):
-        if self.liste_etapes[self.etape][NEXT]:
-            if self.etape == 'droit_univ' and not self.wish.can_demi_annee():
-                self.etape = 'nb_paiement'
-            else:
-                self.etape = self.liste_etapes[self.etape][NEXT]
-            self.save()
-            return True
-        return False

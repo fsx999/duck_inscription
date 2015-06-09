@@ -1,26 +1,20 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-import os
 import datetime
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse
 
 from django.shortcuts import redirect
-from django.template import RequestContext
-from django.template.loader import render_to_string
-from django.views.generic import TemplateView, View, UpdateView
+
+from django.views.generic import TemplateView, View
 from django.views.generic.edit import FormView
 from floppyforms import ModelChoiceField
 import xworkflows
 import json
 from duck_inscription.forms import WishGradeForm, ListeDiplomeAccesForm, DemandeEquivalenceForm, \
-    NoteMasterForm, ListeAttenteCandidatureForm, ChoixPaiementDroitForm, DemiAnneeForm, \
-    NbPaiementPedaForm, ValidationPaiementForm, ListeAttenteInscriptionForm, ListeAttenteEquivalenceForm
-from duck_inscription.models import Wish, SettingsEtape, NoteMasterModel, CentreGestionModel, PaiementAllModel, \
-    SettingAnneeUni
-from xhtml2pdf import pdf as pisapdf
-from xhtml2pdf import pisa
-from django.conf import settings
+    NoteMasterForm, ListeAttenteCandidatureForm, ListeAttenteInscriptionForm, ListeAttenteEquivalenceForm
+from duck_inscription.models import Wish, SettingsEtape, NoteMasterModel, CentreGestionModel, SettingAnneeUni
+
 from duck_inscription.views import IndividuMixin
 
 __author__ = 'paul'
@@ -321,82 +315,7 @@ class ListeAttenteCandidatureView(ListeAttenteEquivalenceView):
             return redirect(reverse('accueil', kwargs={'pk': individu.pk}))
         return redirect(wish.get_absolute_url())
 
-class OuverturePaiementView(TemplateView, WishIndividuMixin):
-    template_name = "duck_inscription/wish/ouverture_paiement.html"
 
-    def get_context_data(self, **kwargs):
-        context = super(OuverturePaiementView, self).get_context_data(**kwargs)
-        context['wish'] = self.wish
-        return context
-
-    def get(self, request, *args, **kwargs):
-        context = self.get_context_data(**kwargs)
-        wish = context['wish']
-        try:
-
-            wish.dossier_inscription()
-            return redirect(wish.get_absolute_url())
-        except xworkflows.ForbiddenTransition as e:
-            pass
-        return self.render_to_response(context)
-
-
-class ChoixIedFpView(TemplateView):
-    template_name = "duck_inscription/wish/choix_ied_fp.html"
-
-    def get(self, request, *args, **kwargs):
-        centre = self.request.GET.get('centre', None)
-        if centre in ['ied', 'fp']:
-            wish = self.request.user.individu.wishes.get(pk=self.kwargs['pk'])
-            wish.centre_gestion = CentreGestionModel.objects.get(centre_gestion=centre)
-            try:
-                if centre == 'fp':
-                    wish.inscription()
-                else:
-                    wish.droit_universitaire()
-            except xworkflows.InvalidTransitionError:
-                pass
-            return redirect(wish.get_absolute_url())
-        return super(ChoixIedFpView, self).get(request, *args, **kwargs)
-
-
-class DroitView(UpdateView):
-    model = PaiementAllModel
-    template_name = "duck_inscription/individu/dossier_inscription/base_formulaire.html"
-    forms = {
-        'droit_univ': ChoixPaiementDroitForm,
-        'choix_demi_annee': DemiAnneeForm,
-        'nb_paiement': NbPaiementPedaForm,
-        "recapitulatif": ValidationPaiementForm
-    }
-
-    def get_template_names(self):
-        if self.object.etape == "recapitulatif":
-            return "duck_inscription/wish/recapitulatif.html"
-        return self.template_name
-
-    def post(self, request, *args, **kwargs):
-        if request.POST.get('precedent', None):
-            self.object = self.get_object()
-            if self.object.precedente_etape():
-                return redirect(reverse(self.request.resolver_match.url_name, kwargs=self.kwargs))
-        return super(DroitView, self).post(request, *args, **kwargs)
-
-    def get_success_url(self):
-        if self.object.next_etape():
-            return reverse(self.request.resolver_match.url_name, kwargs=self.kwargs)
-        else:
-            wish = self.request.user.individu.wishes.get(pk=self.kwargs['pk'])
-
-            wish.inscription()
-            return wish.get_absolute_url()
-
-    def get_form_class(self):
-        return self.forms[self.object.etape]
-
-    def get_object(self, queryset=None):
-        wish = self.request.user.individu.wishes.get(pk=self.kwargs['pk'])
-        return PaiementAllModel.objects.get_or_create(wish=wish)[0]
 
 
 class InscriptionView(TemplateView):
@@ -447,7 +366,8 @@ class ListeAttenteInscriptionView(FormView):
 # ##le dossier d'inscription
 
 
-class InscriptionPdfView(TemplateView):
+class InscriptionPdfView(EquivalencePdfView):
+
     template_name = "duck_inscription/wish/ordre_virement.html"
     templates = {
         'dossier_inscription': "duck_inscription/wish/dossier_inscription_pdf.html",
@@ -457,81 +377,55 @@ class InscriptionPdfView(TemplateView):
         'etiquette': 'duck_inscription/wish/etiquette.html',
         'autorisation_photo': 'duck_inscription/wish/autorisation_photo.html'
     }
+    fonction_impression = 'do_pdf_inscription'
 
-    def get_context_data(self, **kwargs):
-        context = super(InscriptionPdfView, self).get_context_data(**kwargs)
-        if self.request.user.is_staff:
-            context['wish'] = context['voeu'] = Wish.objects.get(pk=self.kwargs['pk'])
-            context['individu'] = context['wish'].individu
-        else:
-            context['individu'] = self.request.user.individu
-            try:
-                context['wish'] = context['voeu'] = self.request.user.individu.wishes.select_related().get(
-                    pk=self.kwargs['pk'])
-            except Wish.DoesNotExist:
-                return redirect(reverse('accueil'))
 
-        if not context['wish'].centre_gestion:
-            context['wish'].centre_gestion = CentreGestionModel.objects.get(centre_gestion='ied')
-            context['wish'].save()
-        if context['wish'].centre_gestion.centre_gestion == 'ied':
-            context['paiement_frais'] = context['wish'].paiementallmodel
-            try:
-                context['tarif_versement_frais'] = context['wish'].frais_peda() / context[
-                    'paiement_frais'].nb_paiement_frais
-            except ZeroDivisionError:
-                context['wish'].droit_universitaire()
-                context['wish'].save()
-                return redirect(context['wish'].get_absolute_url())
-        context['static'] = os.path.join(settings.BASE_DIR + '/duck_inscription/duck_theme_ied/static/images/').replace(
-            '\\', '/')
-        return context
 
-    def get_template_names(self):
-        tempate_names = super(InscriptionPdfView, self).get_template_names()
-        tempate_names.append('duck_inscription/wish/%s_pdf.html' % (self.etape,))
-        return tempate_names
+    # def get_template_names(self):
+    #     tempate_names = super(InscriptionPdfView, self).get_template_names()
+    #     tempate_names.append('duck_inscription/wish/%s_pdf.html' % (self.etape,))
+    #     return tempate_names
 
-    def render_to_response(self, context, **response_kwargs):
-        response = HttpResponse(mimetype='application/pdf')
-        try:
-            response['Content-Disposition'] = 'attachment; filename=inscription_%s.pdf' % context['wish'].etape.label
-        except KeyError:
-            return redirect(reverse('home'))
+    # def render_to_response(self, context, **response_kwargs):
+    #     response = HttpResponse(content_type='application/pdf')
+    #     try:
+    #         response['Content-Disposition'] = 'attachment; filename=inscription_%s.pdf' % context['wish'].etape.label
+    #     except KeyError:
+    #         return redirect(reverse('home'))
+    #
+    #     pdf = pisapdf.pisaPDF()
+    #     wish = context['wish']
+    #     if wish.centre_gestion.centre_gestion == 'ied':
+    #         pdf.addDocument(pisa.CreatePDF(render_to_string(self.templates['etiquette'], context,
+    #                                                         context_instance=RequestContext(self.request))))
+    #
+    #     pdf.addDocument(pisa.CreatePDF(render_to_string(self.templates['dossier_inscription'], context,
+    #                                                     context_instance=RequestContext(self.request))))
+    #     pdf.addDocument(pisa.CreatePDF(render_to_string(self.templates['autorisation_photo'], context,
+    #                                                     context_instance=RequestContext(self.request))))
+    #
+    #     if not wish.centre_gestion:
+    #         c = CentreGestionModel.objects.get(centre_gestion='ied')
+    #         wish.centre_gestion = c
+    #         wish.save()
+    #     if wish.centre_gestion.centre_gestion == 'ied':
+    #         pdf.addDocument(pisa.CreatePDF(render_to_string(self.templates['formulaire_paiement_droit'], context,
+    #                                                         context_instance=RequestContext(self.request))))
+    #         pdf.addDocument(pisa.CreatePDF(render_to_string(self.templates['formulaire_paiement_frais'], context,
+    #                                                         context_instance=RequestContext(self.request))))
+    #         if not wish.paiementallmodel.moyen_paiement:
+    #             wish.droit_universitaire()
+    #             return redirect(wish.get_absolute_url())
+    #
+    #         if wish.paiementallmodel.moyen_paiement.type == 'v':
+    #             pdf.addDocument(pisa.CreatePDF(render_to_string(self.templates['ordre_virement'], context,
+    #                                                             context_instance=RequestContext(self.request))))
+    #     pdf.addFromFileName(wish.etape.annee.transfert_pdf.file.file.name)
+    #     pdf.addFromFileName(wish.etape.annee.bourse_pdf.file.file.name)
+    #     pdf.addFromFileName(wish.etape.annee.bourse_pdf.file.file.name)
+    #
+    #     pdf.join(response)
+    #     return response
 
-        pdf = pisapdf.pisaPDF()
-        wish = context['wish']
-        if not wish.centre_gestion:
-            wish.centre_gestion = CentreGestionModel.objects.get(centre_gestion='ied')
-            wish.save()
-        if wish.centre_gestion.centre_gestion == 'ied':
-            pdf.addDocument(pisa.CreatePDF(render_to_string(self.templates['etiquette'], context,
-                                                            context_instance=RequestContext(self.request))))
 
-        pdf.addDocument(pisa.CreatePDF(render_to_string(self.templates['dossier_inscription'], context,
-                                                        context_instance=RequestContext(self.request))))
-        pdf.addDocument(pisa.CreatePDF(render_to_string(self.templates['autorisation_photo'], context,
-                                                        context_instance=RequestContext(self.request))))
 
-        if not wish.centre_gestion:
-            c = CentreGestionModel.objects.get(centre_gestion='ied')
-            wish.centre_gestion = c
-            wish.save()
-        if wish.centre_gestion.centre_gestion == 'ied':
-            pdf.addDocument(pisa.CreatePDF(render_to_string(self.templates['formulaire_paiement_droit'], context,
-                                                            context_instance=RequestContext(self.request))))
-            pdf.addDocument(pisa.CreatePDF(render_to_string(self.templates['formulaire_paiement_frais'], context,
-                                                            context_instance=RequestContext(self.request))))
-            if not wish.paiementallmodel.moyen_paiement:
-                wish.droit_universitaire()
-                return redirect(wish.get_absolute_url())
-
-            if wish.paiementallmodel.moyen_paiement.type == 'v':
-                pdf.addDocument(pisa.CreatePDF(render_to_string(self.templates['ordre_virement'], context,
-                                                                context_instance=RequestContext(self.request))))
-        pdf.addFromFileName(wish.etape.annee.transfert_pdf.file.file.name)
-        pdf.addFromFileName(wish.etape.annee.bourse_pdf.file.file.name)
-        pdf.addFromFileName(wish.etape.annee.pieces_pdf.file.file.name)
-
-        pdf.join(response)
-        return response

@@ -6,7 +6,6 @@
 {#        <div class="controls {{ classes }} field-{{ field.name }}">#}
         <div class="col-sm-6">
             {% block widget %}{% if 'readonly' not in field.field.widget.attrs  %}
-
                             {% formfield field %}
 
                         {% else %}
