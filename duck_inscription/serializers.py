@@ -8,6 +8,7 @@ class AnneeUniSerializer(serializers.HyperlinkedModelSerializer):
         model = AnneeUni
 
 
+
 class BacOuxEquSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = BacOuxEqu
