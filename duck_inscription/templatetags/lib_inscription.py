@@ -34,14 +34,14 @@ def annee_en_cour():
     return "Fermé"
 
 @register.simple_tag
-def tag_totaux(etapes, param):
+def tag_totaux(etapes, function, param):
     totaux = 0
     for etape in etapes:
+        func = getattr(etape, function)
         try:
-            totaux += etape[param]
+            totaux += func()[param]
         except KeyError:
             totaux += 0
     return totaux
-
 
 
