@@ -79,9 +79,14 @@ class StatistiqueApogee(views.Dashboard):
         context['selected'] = str(self.request.GET.get('year', datetime.date.today().year))
         etapes = []
         for etape in SettingsEtape.objects.filter(is_inscription_ouverte=True).order_by('diplome'):
+            query = InsAdmEtp.objects.filter(cod_anu=context['selected'], eta_iae='E',
+                                                                              cod_pru__in=['NO', 'FP', 'DD'],
+                                                                              cod_etp=etape.cod_etp) | InsAdmEtp.objects.filter(
+                cod_anu=context['selected'], eta_iae='E', tem_iae_prm='O', cod_etp=etape.cod_etp)
+
             etapes.append({'label': etape.label,
                            'cod_etp': etape.cod_etp,
-                           'nb_inscrit': InsAdmEtp.inscrits.filter(cod_anu=context['selected'], cod_etp=etape.cod_etp).count()})
+                           'nb_inscrit': query.count()})
         context['etapes'] = etapes
         return context
 
