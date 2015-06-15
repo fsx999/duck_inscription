@@ -2,6 +2,11 @@
 {% load lib_inscription %}
 {% block nav_title %}Statistique Apogee{% endblock %}
 {% block content %}
+    {% for x in years %}
+        <a href="{% url 'xadmin:stats_apogee' %}?year={{ x }}" class="btn {% if x == selected %} btn-primary
+                {% else %} btn-default {% endif %}"> {{ x }}</a>
+    {% endfor %}
+
     <table class="table table-bordered table-striped">
         <thead>
         <tr>
@@ -15,16 +20,14 @@
         </thead>
         <tbody>
         {% for etape in etapes %}
-        {% with stat=etape.stat_apogee %}
         <tr>
             <td>{{ etape.label }}</td>
-            <td><a href=" {% url 'xadmin:extraction_apogee' etape.annee.cod_anu etape.cod_etp %}"> {{ stat.nb_inscrit }}</a></td>
+            <td><a href=" {% url 'xadmin:extraction_apogee' selected etape.cod_etp %}"> {{ etape.nb_inscrit }}</a></td>
         <tr>
-        {% endwith %}
         {% endfor %}
         <tr>
             <td>Totaux</td>
-            <td>{% tag_totaux etapes 'stat_apogee' 'nb_inscrit' %}</td>
+            <td>{% tag_totaux etapes  'nb_inscrit' %}</td>
         </tr>
 
         </tbody>

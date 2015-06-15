@@ -75,7 +75,14 @@ class StatistiqueApogee(views.Dashboard):
     @filter_hook
     def get_context(self):
         context = super(StatistiqueApogee, self).get_context()
-        context['etapes'] = SettingsEtape.objects.filter(is_inscription_ouverte=True).order_by('diplome')
+        context['years'] = [str(x) for x in range(2010, datetime.date.today().year+1)]
+        context['selected'] = str(self.request.GET.get('year', datetime.date.today().year))
+        etapes = []
+        for etape in SettingsEtape.objects.filter(is_inscription_ouverte=True).order_by('diplome'):
+            etapes.append({'label': etape.label,
+                           'cod_etp': etape.cod_etp,
+                           'nb_inscrit': InsAdmEtp.inscrits.filter(cod_anu=context['selected'], cod_etp=etape.cod_etp).count()})
+        context['etapes'] = etapes
         return context
 
     @never_cache
