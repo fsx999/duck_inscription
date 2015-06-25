@@ -315,7 +315,24 @@ class ListeAttenteCandidatureView(ListeAttenteEquivalenceView):
             return redirect(reverse('accueil', kwargs={'pk': individu.pk}))
         return redirect(wish.get_absolute_url())
 
+class OuverturePaiementView(TemplateView, WishIndividuMixin):
+    template_name = "duck_inscription/wish/ouverture_paiement.html"
 
+    def get_context_data(self, **kwargs):
+        context = super(OuverturePaiementView, self).get_context_data(**kwargs)
+        context['wish'] = self.wish
+        return context
+
+    def get(self, request, *args, **kwargs):
+        context = self.get_context_data(**kwargs)
+        wish = context['wish']
+        try:
+
+            wish.dossier_inscription()
+            return redirect(wish.get_absolute_url())
+        except xworkflows.ForbiddenTransition as e:
+            pass
+        return self.render_to_response(context)
 
 
 class InscriptionView(TemplateView):
@@ -368,15 +385,15 @@ class ListeAttenteInscriptionView(FormView):
 
 class InscriptionPdfView(EquivalencePdfView):
 
-    template_name = "duck_inscription/wish/ordre_virement.html"
-    templates = {
-        'dossier_inscription': "duck_inscription/wish/dossier_inscription_pdf.html",
-        'ordre_virement': "duck_inscription/wish/ordre_virement.html",
-        'formulaire_paiement_frais': "duck_inscription/wish/formulaire_paiement_frais.html",
-        'formulaire_paiement_droit': "duck_inscription/wish/formulaire_paiement_droit.html",
-        'etiquette': 'duck_inscription/wish/etiquette.html',
-        'autorisation_photo': 'duck_inscription/wish/autorisation_photo.html'
-    }
+    # template_name = "duck_inscription/wish/ordre_virement.html"
+    # templates = {
+    #     'dossier_inscription': "duck_inscription/wish/dossier_inscription_pdf.html",
+    #     'ordre_virement': "duck_inscription/wish/ordre_virement.html",
+    #     'formulaire_paiement_frais': "duck_inscription/wish/formulaire_paiement_frais.html",
+    #     'formulaire_paiement_droit': "duck_inscription/wish/formulaire_paiement_droit.html",
+    #     'etiquette': 'duck_inscription/wish/etiquette.html',
+    #     'autorisation_photo': 'duck_inscription/wish/autorisation_photo.html'
+    # }
     fonction_impression = 'do_pdf_inscription'
 
 
