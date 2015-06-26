@@ -6,9 +6,11 @@ from django.core.urlresolvers import reverse
 from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.views.decorators.csrf import csrf_exempt
+
 from django.views.generic import RedirectView, FormView, View, UpdateView, TemplateView
 from extra_views import InlineFormSetView
 from floppyforms import ModelChoiceField
+from .. import signals
 from xworkflows import InvalidTransitionError
 import xworkflows
 from duck_inscription.forms.individu_forms import CodeEtudiantForm, InfoPersoForm, AdresseForm, AdresseBaseFormSet, \
@@ -333,7 +335,8 @@ class DossierInscriptionView(UpdateView):
         else:
             wish = self.request.user.individu.wishes.get(pk=self.kwargs['pk'])
             try:
-                wish.choix_ied_fp()
+                wish.dispatch()
+                signals.paiement_dispatch.send(sender=self.__class__, wish=wish)
             except xworkflows.InvalidTransitionError:
                 pass
 

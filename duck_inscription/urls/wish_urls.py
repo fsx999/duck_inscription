@@ -42,7 +42,8 @@ urlpatterns = [
             views.ListeAttenteCandidatureView.as_view()),
         name="mis_liste_attente_candi"),
 
-
+    url(r'^ouverture_inscription/(?P<pk>\d+)/$',
+        wish_verif_etape_and_login(views.OuverturePaiementView.as_view()), name="ouverture_inscription"),
     url(r'^inscription/(?P<pk>\d+)/$', wish_verif_etape_and_login(views.InscriptionView.as_view()),
         name="inscription"),
     url(r'^liste_attente_inscription/(?P<pk>\d+)/$',
