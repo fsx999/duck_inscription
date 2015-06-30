@@ -59,9 +59,9 @@ class WishWorkflow(xwf_models.Workflow):
         ('ouverture_inscription', ('creation', 'ouverture_equivalence', 'ouverture_candidature', 'equivalence',
                                    'candidature', 'dossier_inscription'), 'ouverture_inscription'),
         ('dossier_inscription', ('ouverture_inscription',), 'dossier_inscription'),
-        ('dispatch', 'dossier_inscription', 'dispatch'),
-        ('inscription', ('dispatch', 'liste_attente_inscription'), 'inscription'),
-        ('liste_attente_inscription', 'inscription', 'liste_attente_inscription'),
+        ('dispatch', ('dossier_inscription', ), 'dispatch'),
+        ('inscription', ('dispatch',), 'inscription'),
+        ('liste_attente_inscription', 'dispatch', 'liste_attente_inscription'),
         ('auditeur', 'creation', 'auditeur'),
         ('auditeur_traite', 'auditeur', 'auditeur_traite')
     )
@@ -162,6 +162,9 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
 
     is_ok = models.BooleanField(default=False)
     date_liste_inscription = models.DateTimeField(null=True, blank=True)
+
+
+
 
     @on_enter_state('ouverture_equivalence')
     def on_enter_state_ouverture_equivalence(self, res, *args, **kwargs):
@@ -277,7 +280,7 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
 
     def valide_liste(self):
         self.date_validation = datetime.datetime.today()
-        if self.place_dispo() or not self.etape.limite_etu or self.is_reins_formation() or self.is_ok or self.centre_gestion.centre_gestion == 'fp':
+        if self.place_dispo() or self.etape.limite_etu is None or self.is_reins_formation() or self.is_ok or self.centre_gestion.centre_gestion == 'fp':
             self.is_ok = True
             self.valide = True
         self.save()

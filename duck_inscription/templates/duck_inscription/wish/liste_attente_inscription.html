@@ -22,6 +22,7 @@ Cette inscription étant fermées depuis le <b>{{ wish.etape.date_fermeture_insc
     </form>
     {% else %}
         <div class="well">
+        <p>Les inscriptions sont fermées.</p>
         <p>Vous êtes donc sur une liste d'attente d'accès.</p>
         <p>Un e-mail vous informera de la suite accordée à votre dossier d'inscription.</p>
         </div>
@@ -30,5 +31,5 @@ Cette inscription étant fermées depuis le <b>{{ wish.etape.date_fermeture_insc
 
 
 
-    <a href={% url 'accueil' %}>Retour à la liste des voeux</a></p>
+    <a href={% url 'accueil' wish.individu.pk %}>Retour à la liste des voeux</a></p>
 {% endblock %}
