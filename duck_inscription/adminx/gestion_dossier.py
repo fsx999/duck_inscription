@@ -93,7 +93,7 @@ class EquivalenceView(views.FormAdminView):
                     try:
                         wish.equivalence()
                         self._envoi_email(wish, Mail.objects.get(name='email_equivalence_sorti_liste_attente'))
-                        self.message_user("L'etudiant peut imprimer sont dossier d'equivallence!", 'success')
+                        self.message_user("L'etudiant peut imprimer son dossier d'equivalence", 'success')
                     except InvalidTransitionError as e:
                         raise e
                 elif wish.suivi_dossier.is_equivalence_traite or wish.suivi_dossier.is_equivalence_refuse:
