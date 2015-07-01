@@ -44,7 +44,7 @@ class WishWorkflow(xwf_models.Workflow):
         ('ouverture_equivalence', 'creation', 'ouverture_equivalence'),
         ('liste_diplome', 'ouverture_equivalence', 'liste_diplome'),
         ('demande_equivalence', ('creation', 'liste_diplome'), 'demande_equivalence'),
-        ('equivalence', ('creation', 'liste_diplome', 'demande_equivalence'), 'equivalence'),
+        ('equivalence', ('creation', 'liste_diplome', 'demande_equivalence', 'mis_liste_attente_equi'), 'equivalence'),
         ('equivalence_from_attente', 'liste_attente_equivalence', "equivalence"),
         ('liste_attente_equivalence', ('ouverture_equivalence', 'demande_equivalence', 'liste_diplome'),
          'liste_attente_equivalence'),
@@ -353,6 +353,7 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
             'margin_bottom': '20',
 
         }
+        # templates = []
         templates = [
             {'name': "duck_inscription/wish/etiquette.html"},
          {'name': 'duck_inscription/wish/dossier_inscription_pdf.html',
@@ -364,6 +365,7 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
         context['voeu'] = self
         context['wish'] = self
         context['individu'] = self.individu
+        context.update(self.paiementallmodel.get_context())
         files = [self.etape.annee.transfert_pdf.file.file.name,
                  self.etape.annee.bourse_pdf.file.file.name,
                  self.etape.annee.pieces_pdf.file.file.name]

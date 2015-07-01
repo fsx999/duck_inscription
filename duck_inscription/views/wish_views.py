@@ -395,7 +395,7 @@ class InscriptionPdfView(EquivalencePdfView):
     #     'autorisation_photo': 'duck_inscription/wish/autorisation_photo.html'
     # }
     fonction_impression = 'do_pdf_inscription'
-
+    etape = "inscription"
 
 
     # def get_template_names(self):
