@@ -6,7 +6,7 @@ from duck_inscription.models import SettingsEtape, CentreGestionModel
 try:
     from duck_inscription_payzen.models import MoyenPaiementModel
 except ImportError:
-    MoyenPaiementModel = object
+    MoyenPaiementModel = SitSociale
 
 
 class DossierReceptionForm(forms.Form):
