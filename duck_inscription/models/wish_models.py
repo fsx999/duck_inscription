@@ -372,17 +372,17 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
             context.update(self.paiementallmodel.get_context())
         except AttributeError:
             pass
-        file = []
+        files = []
         try:
-            file.append(self.etape.annee.transfert_pdf.file.file.name,)
+            files.append(self.etape.annee.transfert_pdf.file.file.name,)
         except ValueError:
             pass
         try:
-            file.append(self.etape.annee.bourse_pdf.file.file.name,)
+            files.append(self.etape.annee.bourse_pdf.file.file.name,)
         except ValueError:
             pass
         try:
-            file.append(self.etape.annee.pieces_pdf.file.file.name,)
+            files.append(self.etape.annee.pieces_pdf.file.file.name,)
         except ValueError:
             pass
         #
