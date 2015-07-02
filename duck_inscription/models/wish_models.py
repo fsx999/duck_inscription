@@ -359,13 +359,19 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
          {'name': 'duck_inscription/wish/dossier_inscription_pdf.html',
                       'footer': 'duck_inscription/wish/footer.html'},
           ]
-        templates.extend(self.paiementallmodel.get_templates())
+        try:
+            templates.extend(self.paiementallmodel.get_templates())
+        except AttributeError:
+            pass
         templates.extend([ {'name': 'duck_inscription/wish/autorisation_photo.html'}])
 
         context['voeu'] = self
         context['wish'] = self
         context['individu'] = self.individu
-        context.update(self.paiementallmodel.get_context())
+        try:
+            context.update(self.paiementallmodel.get_context())
+        except AttributeError:
+            pass
         files = [self.etape.annee.transfert_pdf.file.file.name,
                  self.etape.annee.bourse_pdf.file.file.name,
                  self.etape.annee.pieces_pdf.file.file.name]
