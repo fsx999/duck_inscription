@@ -372,9 +372,23 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
             context.update(self.paiementallmodel.get_context())
         except AttributeError:
             pass
-        files = [self.etape.annee.transfert_pdf.file.file.name,
-                 self.etape.annee.bourse_pdf.file.file.name,
-                 self.etape.annee.pieces_pdf.file.file.name]
+        file = []
+        try:
+            file.append(self.etape.annee.transfert_pdf.file.file.name,)
+        except ValueError:
+            pass
+        try:
+            file.append(self.etape.annee.bourse_pdf.file.file.name,)
+        except ValueError:
+            pass
+        try:
+            file.append(self.etape.annee.pieces_pdf.file.file.name,)
+        except ValueError:
+            pass
+        #
+        # files = [self.etape.annee.transfert_pdf.file.file.name,
+        #          self.etape.annee.bourse_pdf.file.file.name,
+        #          self.etape.annee.pieces_pdf.file.file.name]
         return make_multi_pdf(context=context, templates=templates, files=files, cmd_options=cmd_option)
 
     def droit_univ(self):
