@@ -256,6 +256,7 @@ class SettingsEtapeXadmin(object):
                                                                                                                    'date_ouverture_inscription',
                                                                                                                    'date_fermeture_inscription',
                                                                                                                    'date_fermeture_reinscription',
+                                                                                                                   'autres',
                                                                                                                    'droit',
                                                                                                                    'frais',
                                                                                                                    'nb_paiement',

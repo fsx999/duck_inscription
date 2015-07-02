@@ -49,6 +49,7 @@ class SettingsEtape(Etape):
 
     label_formation = models.CharField(max_length=120, null=True, blank=True)
     annee = models.ForeignKey(SettingAnneeUni, default=2014)
+    autres = models.FileField(upload_to='document_autre', null=True, blank=True)
     document_equivalence = models.FileField(upload_to='document_equivalence',
                                             verbose_name=u"Document d'équivalence", null=True, blank=True)
     document_candidature = models.FileField(upload_to='document_candidature',
