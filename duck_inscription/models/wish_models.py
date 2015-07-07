@@ -353,17 +353,17 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
             'margin_bottom': '20',
 
         }
-        templates = []
-        # templates = [
-        #     {'name': "duck_inscription/wish/etiquette.html"},
-        #  {'name': 'duck_inscription/wish/dossier_inscription_pdf.html',
-        #               'footer': 'duck_inscription/wish/footer.html'},
-        #   ]
+        # templates = []
+        templates = [
+            {'name': "duck_inscription/wish/etiquette.html"},
+         {'name': 'duck_inscription/wish/dossier_inscription_pdf.html',
+                      'footer': 'duck_inscription/wish/footer.html'},
+          ]
         try:
             templates.extend(self.paiementallmodel.get_templates())
         except AttributeError:
             pass
-        # templates.extend([ {'name': 'duck_inscription/wish/autorisation_photo.html'}])
+        templates.extend([ {'name': 'duck_inscription/wish/autorisation_photo.html'}])
 
         context['voeu'] = self
         context['wish'] = self
