@@ -353,17 +353,17 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
             'margin_bottom': '20',
 
         }
-        # templates = []
-        templates = [
-            {'name': "duck_inscription/wish/etiquette.html"},
-         {'name': 'duck_inscription/wish/dossier_inscription_pdf.html',
-                      'footer': 'duck_inscription/wish/footer.html'},
-          ]
+        templates = []
+        # templates = [
+        #     {'name': "duck_inscription/wish/etiquette.html"},
+        #  {'name': 'duck_inscription/wish/dossier_inscription_pdf.html',
+        #               'footer': 'duck_inscription/wish/footer.html'},
+        #   ]
         try:
             templates.extend(self.paiementallmodel.get_templates())
         except AttributeError:
             pass
-        templates.extend([ {'name': 'duck_inscription/wish/autorisation_photo.html'}])
+        # templates.extend([ {'name': 'duck_inscription/wish/autorisation_photo.html'}])
 
         context['voeu'] = self
         context['wish'] = self
@@ -373,26 +373,23 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
         except AttributeError:
             pass
         files = []
-        try:
-            files.append(self.etape.autres.file.file.name,)
-        except ValueError:
-            pass
-        try:
-            files.append(self.etape.annee.transfert_pdf.file.file.name,)
-        except ValueError:
-            pass
-        try:
-            files.append(self.etape.annee.bourse_pdf.file.file.name,)
-        except ValueError:
-            pass
-        try:
-            files.append(self.etape.annee.pieces_pdf.file.file.name,)
-        except ValueError:
-            pass
-        #
-        # files = [self.etape.annee.transfert_pdf.file.file.name,
-        #          self.etape.annee.bourse_pdf.file.file.name,
-        #          self.etape.annee.pieces_pdf.file.file.name]
+        # try:
+        #     files.append(self.etape.autres.file.file.name,)
+        # except ValueError:
+        #     pass
+        # try:
+        #     files.append(self.etape.annee.transfert_pdf.file.file.name,)
+        # except ValueError:
+        #     pass
+        # try:
+        #     files.append(self.etape.annee.bourse_pdf.file.file.name,)
+        # except ValueError:
+        #     pass
+        # try:
+        #     files.append(self.etape.annee.pieces_pdf.file.file.name,)
+        # except ValueError:
+        #     pass
+
         return make_multi_pdf(context=context, templates=templates, files=files, cmd_options=cmd_option)
 
     def droit_univ(self):

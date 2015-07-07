@@ -584,7 +584,7 @@ class SecuriteSocialeForm(forms.ModelForm):
         required=False)
 
     centre_payeur = forms.ChoiceField(label=u"Indiquez votre centre payeur :",
-                                      choices=(('', '------'), ('SMEREP', 'SMEREP'), ('LMDE', 'LMDE')), required=False,
+                                      choices=settings.CENTRE_SECU, required=False,
                                       widget=forms.Select(
                                           attrs={"value_toggle": '', 'toggle_field': 'non_affiliation'}))
 
