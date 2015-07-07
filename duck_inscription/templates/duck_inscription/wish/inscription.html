@@ -1,7 +1,7 @@
 {% extends "duck_inscription/wish/base_wish.html" %}
 {% block contenu %}
     <div class="well">
-    <legend style="text-align: center">Dossier d'inscription en {{ wish.step.label_formation }}</legend>
+    <legend style="text-align: center">Dossier d'inscription en {{ wish.etape.label_formation }}</legend>
     {% if wish.step.limite_etu  and not wish.is_ok and not wish.is_reins_formation %}
         <div class="alert alert-warning">
         Il reste {{ wish.place_dispo }} places
