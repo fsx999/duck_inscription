@@ -353,7 +353,7 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
             'margin_bottom': '20',
 
         }
-        # templates = []
+
         templates = [
             {'name': "duck_inscription/wish/etiquette.html"},
          {'name': 'duck_inscription/wish/dossier_inscription_pdf.html',
@@ -406,7 +406,7 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
 
     def date_limite_envoi(self):
         # if self.is_reins_formation():
-        return self.etape.date_fermeture_reinscription
+        return self.etape.date_fermeture_inscription
 
     def droit_total(self):
         return float(self.droit_univ() + self.tarif_secu())
