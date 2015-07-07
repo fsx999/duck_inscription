@@ -367,6 +367,12 @@
         <div class="col-xs-6">Type du dernier diplôme obtenu :</div>
         <div class="col-xs-6">{{ individu.dossier_inscription.type_dernier_diplome|default:"Non renseigné" }}</div>
     </div>
+
+     <div class="row">
+        <div class="col-xs-6">Année du dernier diplôme obtenu :</div>
+        <div class="col-xs-6">{{ individu.dossier_inscription.annee_dernier_diplome|default:"Non renseigné" }}</div>
+    </div>
+
     <div class="row">
         <div class="col-xs-6">Etablissement du dernier diplôme :</div>
         <div class="col-xs-6">{{ individu.dossier_inscription.etablissement_dernier_diplome|default:"Non renseigné" }}</div>
