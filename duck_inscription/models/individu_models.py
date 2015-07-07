@@ -616,7 +616,7 @@ class DossierInscription(models.Model):
                                            blank=True)
     non_affiliation = models.ForeignKey(MtfNonAflSso, related_name="non_affiliation_dossier", null=True,
                                         blank=True)
-    centre_payeur = models.CharField(max_length=6, choices=(('LMDE', 'LMDE'), ('SMEREP', 'SMEREP')), null=True,
+    centre_payeur = models.CharField(max_length=6, choices=settings.CENTRE_SECU, null=True,
                                      blank=True)
     num_secu = models.CharField(max_length=15, null=True, blank=True)
 
