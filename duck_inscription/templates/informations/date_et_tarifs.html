@@ -22,12 +22,12 @@
 
         <tr>
             <td>{{ etape.label }}</td>
-            <td>{{ etape.date_ouverture_equivalence|date:"d/m/Y"|default_if_none:"" }}</td>
-            <td>{{ etape.date_fermeture_equivalence|date:"d/m/Y"|default_if_none:"" }}</td>
-            <td>{{ etape.date_ouverture_candidature|date:"d/m/Y"|default_if_none:"" }}</td>
-            <td>{{ etape.date_fermeture_candidature|date:"d/m/Y"|default_if_none:"" }}</td>
-            <td>{{ etape.date_ouverture_inscription|date:"d/m/Y"|default_if_none:"" }}</td>
-            <td>{{ etape.date_fermeture_inscription|date:"d/m/Y"|default_if_none:"" }}</td>
+            <td>{{ etape.date_ouverture_equivalence|date:"d/m/Y H:i"|default_if_none:"" }}</td>
+            <td>{{ etape.date_fermeture_equivalence|date:"d/m/Y H:i"|default_if_none:"" }}</td>
+            <td>{{ etape.date_ouverture_candidature|date:"d/m/Y H:i"|default_if_none:"" }}</td>
+            <td>{{ etape.date_fermeture_candidature|date:"d/m/Y H:i"|default_if_none:"" }}</td>
+            <td>{{ etape.date_ouverture_inscription|date:"d/m/Y H:i"|default_if_none:"" }}</td>
+            <td>{{ etape.date_fermeture_inscription|date:"d/m/Y H:i"|default_if_none:"" }}</td>
             <td>{{ etape.date_fermeture_reinscription|date:"d/m/Y"|default_if_none:"" }}</td>
             <td>{{ etape.droit|floatformat:"-2"|default_if_none:""}}</td>
             <td>{{ etape.frais|floatformat:"-2"|default_if_none:""}}</td>

@@ -96,7 +96,7 @@ class SettingsEtape(Etape):
             'liste_attente_inscription'
         ]).values_list('to_state').annotate(Count('to_state')))
         result.update({'inscription': Wish.objects.filter(etape=self,
-                                                          annee=self.annee,
+                                                          annee=annee,
                                                           state='inscription', valide=True).count()})
         if self.date_ouverture_equivalence:
             result.update({'liste_attente_and_equi': Wish.objects.filter(etape=self,
