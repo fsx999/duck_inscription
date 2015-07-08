@@ -378,15 +378,15 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
         # except ValueError:
         #     pass
         # try:
-        files.append(self.etape.annee.transfert_pdf.file.file.name,)
+        files.append(self.etape.annee.transfert_pdf.file.file.name)
         # except ValueError:
         #     pass
         # try:
-        files.append(self.etape.annee.bourse_pdf.file.file.name,)
+        files.append(self.etape.annee.bourse_pdf.file.file.name)
         # except ValueError:
         #     pass
         # try:
-        files.append(self.etape.annee.pieces_pdf.file.file.name,)
+        files.append(self.etape.annee.pieces_pdf.file.file.name)
         # except ValueError:
         #     pass
 
