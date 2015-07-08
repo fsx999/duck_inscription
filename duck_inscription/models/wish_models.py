@@ -373,22 +373,22 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
         except AttributeError:
             pass
         files = []
-        # try:
-        #     files.append(self.etape.autres.file.file.name,)
-        # except ValueError:
-        #     pass
-        # try:
-        #     files.append(self.etape.annee.transfert_pdf.file.file.name,)
-        # except ValueError:
-        #     pass
-        # try:
-        #     files.append(self.etape.annee.bourse_pdf.file.file.name,)
-        # except ValueError:
-        #     pass
-        # try:
-        #     files.append(self.etape.annee.pieces_pdf.file.file.name,)
-        # except ValueError:
-        #     pass
+        try:
+            files.append(self.etape.autres.file.file.name,)
+        except ValueError:
+            pass
+        try:
+            files.append(self.etape.annee.transfert_pdf.file.file.name,)
+        except ValueError:
+            pass
+        try:
+            files.append(self.etape.annee.bourse_pdf.file.file.name,)
+        except ValueError:
+            pass
+        try:
+            files.append(self.etape.annee.pieces_pdf.file.file.name,)
+        except ValueError:
+            pass
 
         return make_multi_pdf(context=context, templates=templates, files=files, cmd_options=cmd_option)
 
