@@ -88,6 +88,7 @@ class SettingsEtape(Etape):
         return result
 
     def stat_parcours_dossier(self):
+        annee = SettingAnneeUni.objects.get(inscription=True)
         from duck_inscription.models import WishParcourTransitionLog, Wish
         result = dict(WishParcourTransitionLog.objects.filter(wish__etape=self, to_state__in=[
             'equivalence',
@@ -99,7 +100,7 @@ class SettingsEtape(Etape):
                                                           state='inscription', valide=True).count()})
         if self.date_ouverture_equivalence:
             result.update({'liste_attente_and_equi': Wish.objects.filter(etape=self,
-                                                                         annee=self.annee,
+                                                                         annee=annee,
                                                                          state='liste_attente_inscription',
                                                                          etape_dossier__to_state='equivalence_traite').count()})
         else:
@@ -108,15 +109,18 @@ class SettingsEtape(Etape):
 
     def stat_suivi_dossier(self):
         from duck_inscription.models import WishTransitionLog
+        annee = SettingAnneeUni.objects.get(inscription=True)
         return dict(WishTransitionLog.objects.filter(
-            wish__etape=self).values_list('to_state').annotate(Count('to_state')))
+            wish__etape=self, wish__annee=annee).values_list('to_state').annotate(Count('to_state')))
 
     def stat_etat_dossier(self):
-        return dict(self.wish_set.all().values_list('suivi_dossier').annotate(Count('suivi_dossier')))
+        annee = SettingAnneeUni.objects.get(inscription=True)
+        return dict(self.wish_set.filter(annee=annee).values_list('suivi_dossier').annotate(Count('suivi_dossier')))
 
     def stat_nb_reception(self):
         from duck_inscription.models import WishTransitionLog
-        return {"nb_reception": WishTransitionLog.objects.filter(wish__etape=self, to_state='inscription_reception').distinct('wish').count()}
+        annee = SettingAnneeUni.objects.get(inscription=True)
+        return {"nb_reception": WishTransitionLog.objects.filter(wish__etape=self, wish__annee=annee, to_state='inscription_reception').distinct('wish').count()}
 
     def stat_apogee(self):
         from django_apogee.models import InsAdmEtp
