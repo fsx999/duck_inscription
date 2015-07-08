@@ -46,7 +46,8 @@ class WishIndividuMixin(object):
             if self.request.user.is_staff:
                 self._wish = Wish.objects.get(pk=self.kwargs['pk'])
             else:
-                self._wish = self.request.user.individu.wishes.get(pk=self.kwargs['pk'])
+                    self._wish = self.request.user.individu.wishes.get(pk=self.kwargs['pk'])
+
             return self._wish
         return wish
 
