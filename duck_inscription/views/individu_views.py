@@ -23,6 +23,7 @@ from duck_inscription.models.individu_models import Individu as IndividuInscript
 from django_apogee.models import Individu as IndividuApogee
 from django_apogee.models import BacOuxEqu
 from duck_inscription.utils import verif_ine
+from duck_inscription.views import WishIndividuMixin
 
 
 class IndividuMixin(object):
@@ -292,7 +293,7 @@ class RecapitulatifIndividuView(FormView, IndividuMixin):
         return redirect(self.get_success_url())
 
 
-class DossierInscriptionView(UpdateView):
+class DossierInscriptionView(UpdateView, WishIndividuMixin):
     template_name = "duck_inscription/individu/dossier_inscription/base_formulaire.html"
     model = DossierInscription
     forms = {
@@ -333,7 +334,7 @@ class DossierInscriptionView(UpdateView):
         if self.object.next_etape():
             return reverse('dossier_inscription', kwargs=self.kwargs)
         else:
-            wish = self.request.user.individu.wishes.get(pk=self.kwargs['pk'])
+            wish = self.wish
             try:
                 wish.dispatch()
                 signals.paiement_dispatch.send(sender=self.__class__, wish=wish)
@@ -344,9 +345,9 @@ class DossierInscriptionView(UpdateView):
 
     def get_object(self, queryset=None):
         try:
-            return self.request.user.individu.dossier_inscription
+            return self.individu.dossier_inscription
         except DossierInscription.DoesNotExist:
             return DossierInscription.objects.get_or_create(
-                individu=self.request.user.individu,
-                bac=self.request.user.individu.diplome_acces,
-                annee_bac=self.request.user.individu.annee_obtention)[0]
+                individu=self.individu,
+                bac=self.individu.diplome_acces,
+                annee_bac=self.individu.annee_obtention)[0]
