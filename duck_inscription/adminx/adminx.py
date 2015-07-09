@@ -29,6 +29,16 @@ class WishInline(object):
     def label(self, obj):
         return "{} {}".format(obj.code_dossier, obj.etape.label)
 
+    def info_paiement(self, obj):
+        """
+        Pour l'admin
+        :return:
+        """
+        try:
+            return "{} {}".format(obj.paiementallmodel.paiement_request.vads_trans_id, obj.paiementallmodel.pk)
+        except:
+            return ''
+
     def actions(self, obj):
         result = ' '
         if obj.state.is_inscription:
@@ -66,7 +76,8 @@ class WishInline(object):
     style = 'table'
     fields = ['email', 'annee']
     readonly_fields = ['code_dossier',
-                       'get_transition_log', 'get_suivi_dossier', 'print_dossier_equi', 'actions']
+                       'get_transition_log',
+                       'info_paiement', 'get_suivi_dossier', 'print_dossier_equi', 'actions']
     exclude = ['annee', 'is_reins', 'is_auditeur', 'diplome_acces', 'centre_gestion', 'reins', 'date_validation',
                'valide', 'date_liste_inscription', 'suivi_dossier', 'code_dossier']
     can_delete = True
@@ -94,7 +105,7 @@ class WishInline(object):
         if self.request.user.is_superuser:
             return self.readonly_fields
         else:
-            return ['label', 'description', 'current_state', 'get_transition_log', 'get_suivi_dossier',
+            return ['label', 'description', 'info_paiement',  'current_state', 'get_transition_log', 'get_suivi_dossier',
                     'print_dossier_equi', 'actions']
 
     @property

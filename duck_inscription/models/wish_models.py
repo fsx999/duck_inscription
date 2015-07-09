@@ -425,6 +425,8 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
             name_url = u"{}  Code dossier : {}".format(self.etape.label, self.code_dossier)
         return name_url
 
+
+
     @models.permalink
     def get_absolute_url(self):
         return self.state.name, [str(self.pk)]
