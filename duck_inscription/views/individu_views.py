@@ -311,9 +311,11 @@ class DossierInscriptionView(UpdateView):
         """
         :return: le voeu en fonction du pk de l'url (en fonction des droits)
         """
+        from duck_inscription.models.wish_models import Wish
         wish = getattr(self, '_wish', None)
         if not wish:
             if self.request.user.is_staff:
+
                 self._wish = Wish.objects.get(pk=self.kwargs['pk'])
             else:
                     self._wish = self.request.user.individu.wishes.get(pk=self.kwargs['pk'])
