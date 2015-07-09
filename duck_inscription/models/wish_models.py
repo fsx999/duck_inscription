@@ -293,6 +293,7 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
     def place_dispo(self):
         if self.etape.limite_etu:
             nb = self.etape.limite_etu - self.etape.wish_set.filter(date_validation__isnull=False,
+
                                                                     annee=self.annee).count()
             if nb < 0:
                 nb = 0

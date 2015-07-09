@@ -83,6 +83,7 @@ class EquivalenceView(views.FormAdminView):
                     raise PermissionDenied
                 if choix == "autoriser_inscription":
                     try:
+                        wish.is_ok = True
                         wish.ouverture_inscription_from_equi()
                         msg = "Pam pam ! {} peut commencer la procedure d'inscription".format(wish.individu.last_name)
                         self._envoi_email(wish, Mail.objects.get(name='email_autorise_from_equi'))

@@ -358,12 +358,12 @@ class InscriptionView(TemplateView):
         return self.render_to_response(context)
 
 
-class ListeAttenteInscriptionView(FormView):
+class ListeAttenteInscriptionView(FormView, WishIndividuMixin):
     template_name = 'duck_inscription/wish/liste_attente_inscription.html'
     form_class = ListeAttenteInscriptionForm
 
     def form_valid(self, form):
-        wish = self.get_context_data()['wish']
+        wish = self.wish
         demande_attente = form.cleaned_data['demande_attente']
         pk = wish.individu.pk
         if demande_attente == 'O':
@@ -378,7 +378,7 @@ class ListeAttenteInscriptionView(FormView):
 
     def get_context_data(self, **kwargs):
         context = super(ListeAttenteInscriptionView, self).get_context_data(**kwargs)
-        self.wish = context['wish'] = self.request.user.individu.wishes.get(pk=self.kwargs['pk'])
+        context['wish'] = self.wish
         return context
 
 
