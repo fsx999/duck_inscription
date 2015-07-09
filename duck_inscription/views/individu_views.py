@@ -23,7 +23,7 @@ from duck_inscription.models.individu_models import Individu as IndividuInscript
 from django_apogee.models import Individu as IndividuApogee
 from django_apogee.models import BacOuxEqu
 from duck_inscription.utils import verif_ine
-from duck_inscription.views import WishIndividuMixin
+from duck_inscription.views.wish_views import WishIndividuMixin
 
 
 class IndividuMixin(object):
