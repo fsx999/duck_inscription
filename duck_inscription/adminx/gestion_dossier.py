@@ -382,7 +382,7 @@ class DossierInscriptionView(views.FormAdminView):
                 elif choix == 'ouvert':
                     try:
                         wish.is_ok = True
-                        wish.inscription()
+                        wish.dispatch()
                         wish.save()
                     except (InvalidTransitionError, ForbiddenTransition) as e:
                         raise e

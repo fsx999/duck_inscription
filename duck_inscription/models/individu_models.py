@@ -419,7 +419,7 @@ class Individu(xwf_models.WorkflowEnabled, models.Model):
 
     def get_adresse_annuelle_simple(self):
         try:
-            a = self.adresses.get(type='1')
+            a = self.adresses.filter(type='1').first()
             return a.get_full_adresse_simple()
         except AdresseIndividu.DoesNotExist:
             return "Aucune"
@@ -625,6 +625,8 @@ class DossierInscription(models.Model):
             self.autre_etablissement = None
         if self.sise_annee_precedente_id in [u'T', u"U"]:
             self.etablissement_annee_precedente = None
+        if not self.sportif_haut_niveau:
+            self.sportif_haut_niveau = False
         super(DossierInscription, self).save(force_insert, force_update, using, update_fields)
 
     def precedente_etape(self):
