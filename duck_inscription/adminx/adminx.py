@@ -34,10 +34,17 @@ class WishInline(object):
         Pour l'admin
         :return:
         """
+        response = ""
         try:
-            return "{} {}".format(obj.paiementallmodel.paiement_request.vads_trans_id, obj.paiementallmodel.pk)
+            response += "type de paiement : {} <br>".format(obj.paiementallmodel.moyen_paiement)
+            if obj.paiementallmodel.moyen_paiement.type == 'CB':
+                response +=  "transaction : {} <br> numéro de commance : {}".format(obj.paiementallmodel.paiement_request.vads_trans_id, obj.paiementallmodel.pk)
+            return
         except:
-            return ''
+            pass
+        return response
+    info_paiement.allow_tags = True
+    info_paiement.short_description = 'info paiment'
 
     def actions(self, obj):
         result = ' '
