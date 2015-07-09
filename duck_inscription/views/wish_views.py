@@ -365,6 +365,7 @@ class ListeAttenteInscriptionView(FormView):
     def form_valid(self, form):
         wish = self.get_context_data()['wish']
         demande_attente = form.cleaned_data['demande_attente']
+        pk = wish.individu.pk
         if demande_attente == 'O':
             wish.liste_attente = True
             if not wish.date_liste_inscription:
@@ -372,7 +373,7 @@ class ListeAttenteInscriptionView(FormView):
             wish.save()
         else:
             wish.delete()
-            return redirect(reverse('accueil'))
+            return redirect(reverse('accueil', kwargs={'pk': pk}))
         return redirect(wish.get_absolute_url())
 
     def get_context_data(self, **kwargs):
