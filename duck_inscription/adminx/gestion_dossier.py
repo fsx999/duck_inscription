@@ -83,6 +83,7 @@ class EquivalenceView(views.FormAdminView):
                     raise PermissionDenied
                 if choix == "autoriser_inscription":
                     try:
+                        wish.etape = etape
                         wish.is_ok = True
                         wish.ouverture_inscription_from_equi()
                         msg = "Pam pam ! {} peut commencer la procedure d'inscription".format(wish.individu.last_name)
