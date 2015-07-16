@@ -39,7 +39,6 @@ class WishInline(object):
             response += "type de paiement : {} <br>".format(obj.paiementallmodel.moyen_paiement)
             if obj.paiementallmodel.moyen_paiement.type == 'CB':
                 response +=  "transaction : {} <br> numéro de commance : {}".format(obj.paiementallmodel.paiement_request.vads_trans_id, obj.paiementallmodel.pk)
-            return
         except:
             pass
         return response
@@ -82,10 +81,10 @@ class WishInline(object):
     extra = 0
     style = 'table'
     fields = ['email', 'annee']
-    readonly_fields = ['code_dossier',
+    readonly_fields = [
                        'get_transition_log',
-                       'info_paiement', 'get_suivi_dossier', 'print_dossier_equi', 'actions']
-    exclude = ['annee', 'is_reins', 'is_auditeur', 'diplome_acces', 'centre_gestion', 'reins', 'date_validation',
+                       'info_paiement', 'get_suivi_dossier', 'print_dossier_equi', 'actions', 'help_superuser']
+    exclude = ['annee','demi_annee', 'is_reins', 'is_auditeur', 'diplome_acces', 'centre_gestion', 'reins', 'date_validation',
                'valide', 'date_liste_inscription', 'suivi_dossier', 'code_dossier']
     can_delete = True
     hidden_menu = True

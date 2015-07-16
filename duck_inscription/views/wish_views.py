@@ -214,7 +214,6 @@ class ListeAttenteEquivalenceView(FormView, WishIndividuMixin):
         wish = self.wish
         demande_attente = form.cleaned_data['demande_attente']
         if demande_attente == 'O':
-            print "coucou"
             wish.mis_liste_attente_equi()
         elif demande_attente == 'N':
             individu = wish.individu
@@ -336,11 +335,11 @@ class OuverturePaiementView(TemplateView, WishIndividuMixin):
         return self.render_to_response(context)
 
 
-class InscriptionView(TemplateView):
+class InscriptionView(TemplateView, WishIndividuMixin):
     template_name = "duck_inscription/wish/inscription.html"
 
     def get(self, request, *args, **kwargs):
-        wish = request.user.individu.wishes.get(pk=self.kwargs['pk'])
+        wish = self.wish
 
         if request.GET.get("valide", False):
             wish.valide_liste()
@@ -372,7 +371,6 @@ class ListeAttenteInscriptionView(FormView, WishIndividuMixin):
                 wish.date_liste_inscription = datetime.datetime.today()
             wish.save()
         else:
-            wish.delete()
             return redirect(reverse('accueil', kwargs={'pk': pk}))
         return redirect(wish.get_absolute_url())
 

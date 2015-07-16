@@ -235,7 +235,7 @@ class ChangementCentreGestionView(FormView):
     def get_form_kwargs(self):
         kwargs = super(ChangementCentreGestionView, self).get_form_kwargs()
         res = {'situation_sociale': self.wish.individu.dossier_inscription.situation_sociale,
-                                  'centre_gestion': self.wish.centre_gestion}
+               'centre_gestion': self.wish.centre_gestion}
         if hasattr(self.wish, 'paiementallmodel'):
             res['nombre_paiement'], res['type_paiement'] = self.wish.paiementallmodel.nb_paiement_frais, self.wish.paiementallmodel.moyen_paiement
 
@@ -253,26 +253,27 @@ class ChangementCentreGestionView(FormView):
     def form_valid(self, form):
         clean_data = form.cleaned_data
         self.wish.centre_gestion = clean_data['centre_gestion']
-        if self.wish.centre_gestion.centre_gestion == 'ied':
-            try:
-                paiement = self.wish.paiementallmodel
-            except PaiementAllModel.DoesNotExist:
-                paiement = PaiementAllModel(wish=self.wish)
-            paiement.nb_paiement_frais, paiement.moyen_paiement = clean_data['nombre_paiement'], clean_data['type_paiement']
-            paiement.save()
-        else:
-            try:
-                self.wish.paiementallmodel.delete()
-            except PaiementAllModel.DoesNotExist:
-                pass
-        if clean_data.get('demi_annee', None):
-            self.wish.demi_annee = clean_data['demi_annee']
-        if clean_data.get('situation_sociale', None):
-            print "coucou"
-            self.wish.individu.dossier_inscription.situation_sociale = clean_data['situation_sociale']
-            self.wish.individu.dossier_inscription.save()
-        self.wish.save()
-        return HttpResponse('<div class="alert alert-success" role="alert">Le dossier a bien été modifié</div>')
+        # if self.wish.centre_gestion.centre_gestion == 'ied':
+        #     try:
+        #         paiement = self.wish.paiementallmodel
+        #     except PaiementAllModel.DoesNotExist:
+        #         paiement = PaiementAllModel(wish=self.wish)
+        #     paiement.nb_paiement_frais, paiement.moyen_paiement = clean_data['nombre_paiement'], clean_data['type_paiement']
+        #     paiement.save()
+        #
+        # else:
+        #     try:
+        #         self.wish.paiementallmodel.delete()
+        #     except PaiementAllModel.DoesNotExist:
+        #         pass
+        # if clean_data.get('demi_annee', None):
+        #     self.wish.demi_annee = clean_data['demi_annee']
+        # if clean_data.get('situation_sociale', None):
+        #     print "coucou"
+        #     self.wish.individu.dossier_inscription.situation_sociale = clean_data['situation_sociale']
+        #     self.wish.individu.dossier_inscription.save()
+        # self.wish.save()
+        # return HttpResponse('<div class="alert alert-success" role="alert">Le dossier a bien été modifié</div>')
 
     def get_success_url(self):
         return reverse('xadmin:duck_inscription_individu_change', args=(3,))
@@ -304,26 +305,26 @@ class ChangemeCentreGestionView(FormView):
     def form_valid(self, form):
         clean_data = form.cleaned_data
         self.wish.centre_gestion = clean_data['centre_gestion']
-        if self.wish.centre_gestion.centre_gestion == 'ied':
-            try:
-                paiement = self.wish.paiementallmodel
-            except PaiementAllModel.DoesNotExist:
-                paiement = PaiementAllModel(wish=self.wish)
-            paiement.nb_paiement_frais, paiement.moyen_paiement = clean_data['nombre_paiement'], clean_data['type_paiement']
-            paiement.save()
-        else:
-            try:
-                self.wish.paiementallmodel.delete()
-            except PaiementAllModel.DoesNotExist:
-                pass
-        if clean_data.get('demi_annee', None):
-            self.wish.demi_annee = clean_data['demi_annee']
-        if clean_data.get('situation_sociale', None):
-            print "coucou"
-            self.wish.individu.dossier_inscription.situation_sociale = clean_data['situation_sociale']
-            self.wish.individu.dossier_inscription.save()
-        self.wish.save()
-        return HttpResponse('<div class="alert alert-success" role="alert">Le dossier a bien été modifié</div>')
+        # if self.wish.centre_gestion.centre_gestion == 'ied':
+        #     try:
+        #         paiement = self.wish.paiementallmodel
+        #     except PaiementAllModel.DoesNotExist:
+        #         paiement = PaiementAllModel(wish=self.wish)
+        #     paiement.nb_paiement_frais, paiement.moyen_paiement = clean_data['nombre_paiement'], clean_data['type_paiement']
+        #     paiement.save()
+        # else:
+        #     try:
+        #         self.wish.paiementallmodel.delete()
+        #     except PaiementAllModel.DoesNotExist:
+        #         pass
+        # if clean_data.get('demi_annee', None):
+        #     self.wish.demi_annee = clean_data['demi_annee']
+        # if clean_data.get('situation_sociale', None):
+        #     print "coucou"
+        #     self.wish.individu.dossier_inscription.situation_sociale = clean_data['situation_sociale']
+        #     self.wish.individu.dossier_inscription.save()
+        # self.wish.save()
+        # return HttpResponse('<div class="alert alert-success" role="alert">Le dossier a bien été modifié</div>')
 
     def get_success_url(self):
         return reverse('xadmin:duck_inscription_individu_change', args=(3,))
