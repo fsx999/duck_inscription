@@ -1,7 +1,8 @@
 # coding=utf-8
 from __future__ import unicode_literals
+from django.conf import settings
 import floppyforms as forms
-from django_apogee.models import SitSociale
+from django_apogee.models import SitSociale, RegimeParent, MtfNonAflSso
 from duck_inscription.models import SettingsEtape, CentreGestionModel
 try:
     from duck_inscription_payzen.models import MoyenPaiementModel
@@ -89,6 +90,9 @@ class ChangementCentreGestionForm(forms.Form):
     def __init__(self, wish, *args, **kwargs):
         self.wish = wish
         super(ChangementCentreGestionForm, self).__init__(*args, **kwargs)
+        if wish.paiementallmodel.moyen_paiement.type ==  'CB':
+            del self.fields['type_paiement']
+            del self.fields['nombre_paiement']
         # if wish.etape.semestre:
         #     self.fields['demi_annee'] = forms.BooleanField(required=False)
 
@@ -96,6 +100,21 @@ class ChangementCentreGestionForm(forms.Form):
     nombre_paiement = forms.ChoiceField(choices=(("1", '1'), ('2', '2'), ('3', '3')), required=False)
     type_paiement = forms.ModelChoiceField(queryset=MoyenPaiementModel.objects.all(), required=False)
     situation_sociale = forms.ModelChoiceField(queryset=SitSociale.objects.all(), required=False)
+    affiliation_parent = forms.ModelChoiceField(label=u"Affiliation au régime de sécurité sociale des parents :",
+                                                help_text=u"Vous devrez fournir des justificatifs.",
+                                                queryset=RegimeParent.objects.all(), empty_label=u"Aucune",
+                                                required=False)
+
+    non_affiliation = forms.ModelChoiceField(
+        label=u"Cas de non affiliation au régime de sécurité sociale des étudiants (salarié, +28 ans ...)",
+        help_text=u"Vous devrez fournir des justificatifs.", queryset=MtfNonAflSso.objects.all(), empty_label=u"Aucun",
+        required=False)
+
+    centre_payeur = forms.ChoiceField(label=u"Indiquez votre centre payeur :",
+                                      choices=settings.CENTRE_SECU, required=False,
+                                      widget=forms.Select(
+                                          attrs={"value_toggle": '', 'toggle_field': 'non_affiliation'}))
+
 
     def clean(self):
         if not self.wish.state.is_inscription:
