@@ -262,7 +262,6 @@ class ChangementCentreGestionView(FormView):
                 paiement = self.wish.paiementallmodel
             except PaiementAllModel.DoesNotExist:
                 paiement = PaiementAllModel(wish=self.wish)
-            print clean_data.get('type_paiement', None)
             if paiement.moyen_paiement is None or paiement.moyen_paiement.type != 'CB':
                 paiement.nb_paiement_frais, paiement.moyen_paiement = clean_data['nombre_paiement'], clean_data['type_paiement']
 
