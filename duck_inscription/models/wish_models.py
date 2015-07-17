@@ -61,7 +61,7 @@ class WishWorkflow(xwf_models.Workflow):
         ('dossier_inscription', ('ouverture_inscription',), 'dossier_inscription'),
         ('dispatch', ('dossier_inscription', 'liste_attente_inscription', 'inscription'), 'dispatch'),
         ('inscription', ('dispatch', 'liste_attente_inscription'), 'inscription'),
-        ('liste_attente_inscription', 'dispatch', 'liste_attente_inscription'),
+        ('liste_attente_inscription', ('dispatch', 'inscription'), 'liste_attente_inscription'),
         ('auditeur', 'creation', 'auditeur'),
         ('auditeur_traite', 'auditeur', 'auditeur_traite')
     )
