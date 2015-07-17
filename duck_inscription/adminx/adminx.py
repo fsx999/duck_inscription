@@ -47,7 +47,7 @@ class WishInline(object):
 
     def actions(self, obj):
         result = ' '
-        if obj.state.is_inscription:
+        if obj.state.is_inscription or obj.state.is_dispatch:
             url = reverse('changement_centre', kwargs={'pk': obj.pk})
             result += ACTION.format(id=obj.pk, url=url)
         return result
