@@ -13,7 +13,8 @@ import xadmin
 from duck_inscription.models import Individu, SettingsEtape, WishWorkflow, SettingAnneeUni, ListeDiplomeAces
 from duck_inscription.models import Wish, SuiviDossierWorkflow, IndividuWorkflow, SettingsUser, CursusEtape
 from xadmin.util import User
-from duck_inscription.adminx.html_string.action_adminx import ACTION
+from duck_inscription.adminx.html_string.action_adminx import ACTION, DOSSIER_INCOMPLET
+from duck_inscription.models.piece_dossier_models import CategoriePieceModel, PieceDossierModel
 
 
 class WishInline(object):
@@ -50,6 +51,9 @@ class WishInline(object):
         if obj.state.is_inscription or obj.state.is_dispatch:
             url = reverse('changement_centre', kwargs={'pk': obj.pk})
             result += ACTION.format(id=obj.pk, url=url)
+            url =  reverse('dossier_incomplet', kwargs={'pk': obj.pk})
+            result += DOSSIER_INCOMPLET.format(id=obj.pk, url=url)
+
         return result
 
     actions.allow_tags = True
@@ -346,3 +350,5 @@ xadmin.site.register_plugin(IEDPlugin, CommAdminView)
 xadmin.site.register(CursusEtape)
 xadmin.site.register(SettingAnneeUni)
 xadmin.site.register(Wish, OpiView)
+xadmin.site.register(CategoriePieceModel)
+xadmin.site.register(PieceDossierModel)
