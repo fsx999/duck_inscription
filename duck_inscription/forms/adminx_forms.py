@@ -4,6 +4,8 @@ from django.conf import settings
 import floppyforms as forms
 from django_apogee.models import SitSociale, RegimeParent, MtfNonAflSso
 from duck_inscription.models import SettingsEtape, CentreGestionModel
+from duck_inscription.models.piece_dossier_models import PieceDossierModel
+
 try:
     from duck_inscription_payzen.models import MoyenPaiementModel
 except ImportError:
@@ -123,4 +125,5 @@ class ChangementCentreGestionForm(forms.Form):
 
 
 
-
+class DossierIncompletForm(forms.Form):
+    pieces = forms.ModelMultipleChoiceField(queryset=PieceDossierModel.objects.all())

@@ -5,7 +5,7 @@ from duck_inscription.adminx import ExtrationEtiquettesView, ExtrationEtiquetteV
 from duck_inscription.views import InscriptionPdfView, CandidaturePdfView, EquivalencePdfView
 from duck_inscription.views.adminx_views import EquivalencePdfAdminView, \
     DecisionEquivalencePdfAdminView, ImprimerTousDecisions, ImprimerDecisionsEquivalenceEnMasseView, \
-    ChangementCentreGestionView, OpiView
+    ChangementCentreGestionView, OpiView, PiecesDossierView
 
 urlpatterns = patterns(
     '',
@@ -30,5 +30,8 @@ urlpatterns = patterns(
     url(r'^extraction_etiquette_view/(?P<cod_ind>\w+)/$',
         ExtrationEtiquetteView.as_view(),
         name='extraction_etiquette'),
+    url(r'^piece_dossier/(?P<pk>\d+)/$',
+        login_required(PiecesDossierView.as_view()),
+        name='dossier_incomplet'),
     )
 

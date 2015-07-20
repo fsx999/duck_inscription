@@ -7,7 +7,8 @@ from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.views.generic import FormView, TemplateView, View
 from xworkflows import InvalidTransitionError
-from duck_inscription.forms.adminx_forms import DossierReceptionForm, ImprimerEnMasseForm, ChangementCentreGestionForm
+from duck_inscription.forms.adminx_forms import DossierReceptionForm, ImprimerEnMasseForm, ChangementCentreGestionForm, \
+    DossierIncompletForm
 from duck_inscription.models import Wish
 try:
     from duck_inscription_payzen.models import PaiementAllModel
@@ -220,6 +221,23 @@ class OpiView(View):
                 # self.message_user('Etudiant {} remontee'.format(wish.individu.code_opi), 'success')
         return redirect('/duck_inscription/wish/')
 
+class PiecesDossierView(FormView):
+    template_name = 'duck_inscription/adminx/dossier_incomplet.html'
+    form_class = DossierIncompletForm
+
+    # def get_form(self, form_class):
+    #     """
+    #     Returns an instance of the form to be used in this view.
+    #     """
+    #     self.wish = getattr(self, 'wish', Wish.objects.get(pk=self.kwargs['pk']))
+    #     return form_class(wish=self.wish, **self.get_form_kwargs())
+
+    def get_context_data(self, **kwargs):
+        context = super(PiecesDossierView, self).get_context_data(**kwargs)
+        self.wish = getattr(self, 'wish', Wish.objects.get(pk=self.kwargs['pk']))
+
+        context['wish'] = self.wish
+        return context
 
 class ChangementCentreGestionView(FormView):
     form_class = ChangementCentreGestionForm
