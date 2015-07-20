@@ -344,10 +344,11 @@ class InscriptionView(TemplateView, WishIndividuMixin):
         if request.GET.get("valide", False):
             wish.valide_liste()
             if not wish.centre_gestion:
-                wish.centre_gestion = CentreGestionModel.objects.get(centre_gestion='ied')
 
+                wish.centre_gestion = CentreGestionModel.objects.get(centre_gestion='ied')
             if not wish.is_ok and not wish.is_reins_formation() and not wish.centre_gestion.centre_gestion == 'fp':
                 try:
+                    print "coucou"
                     wish.liste_attente_inscription()
                 except xworkflows.InvalidTransitionError:
                     pass
