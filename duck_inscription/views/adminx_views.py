@@ -284,7 +284,7 @@ class ChangementCentreGestionView(FormView):
                 paiement.nb_paiement_frais, paiement.moyen_paiement = clean_data['nombre_paiement'], clean_data['type_paiement']
 
 
-            if clean_data.get('type_paiement', None).type == 'CB':
+            if clean_data.get('type_paiement', None) and  clean_data.get('type_paiement').type == 'CB':
                 paiement.moyen_paiement = clean_data.get('type_paiement')
                 self.wish.is_ok = True
                 self.wish.state='dossier_inscription'
