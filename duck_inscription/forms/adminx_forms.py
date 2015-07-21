@@ -92,9 +92,12 @@ class ChangementCentreGestionForm(forms.Form):
     def __init__(self, wish, *args, **kwargs):
         self.wish = wish
         super(ChangementCentreGestionForm, self).__init__(*args, **kwargs)
-        if wish.paiementallmodel.moyen_paiement.type ==  'CB':
-            del self.fields['type_paiement']
-            del self.fields['nombre_paiement']
+        try:
+            if wish.paiementallmodel.moyen_paiement.type ==  'CB':
+                del self.fields['type_paiement']
+                del self.fields['nombre_paiement']
+        except AttributeError:
+            pass
         # if wish.etape.semestre:
         #     self.fields['demi_annee'] = forms.BooleanField(required=False)
 

@@ -274,24 +274,33 @@ class ChangementCentreGestionView(FormView):
 
     def form_valid(self, form):
         clean_data = form.cleaned_data
-        self.wish.centre_gestion = clean_data['centre_gestion']
-        if self.wish.centre_gestion.centre_gestion != 'fp':
-            try:
-                paiement = self.wish.paiementallmodel
-            except PaiementAllModel.DoesNotExist:
-                paiement = PaiementAllModel(wish=self.wish)
-            if paiement.moyen_paiement is None or paiement.moyen_paiement.type != 'CB':
-                paiement.nb_paiement_frais, paiement.moyen_paiement = clean_data['nombre_paiement'], clean_data['type_paiement']
+        centre_gestion = clean_data.get('centre_gestion')
+        try:
+            paiement = self.wish.paiementallmodel
+        except PaiementAllModel.DoesNotExist:
+            paiement = PaiementAllModel(wish=self.wish)
 
-
-            if clean_data.get('type_paiement', None) and  clean_data.get('type_paiement').type == 'CB':
-                paiement.moyen_paiement = clean_data.get('type_paiement')
-                self.wish.is_ok = True
+        if self.wish.centre_gestion.pk != centre_gestion.pk:
+            self.wish.centre_gestion = centre_gestion
+            if centre_gestion.centre_gestion == 'ied':
                 self.wish.state='dossier_inscription'
-
+                self.wish.is_ok = True
                 paiement.state='choix_ied_fp'
+        try:
+            if self.wish.centre_gestion.centre_gestion != 'fp':
 
-            paiement.save()
+                if paiement.moyen_paiement is None or paiement.moyen_paiement.type != 'CB':
+                        paiement.nb_paiement_frais, paiement.moyen_paiement = clean_data['nombre_paiement'], clean_data['type_paiement']
+
+                if clean_data.get('type_paiement', None) and  clean_data.get('type_paiement').type == 'CB':
+                    paiement.moyen_paiement = clean_data.get('type_paiement')
+                    self.wish.is_ok = True
+                    self.wish.state='dossier_inscription'
+
+                    paiement.state='choix_ied_fp'
+        except AttributeError:
+                    pass
+        paiement.save()
 
         if clean_data.get('situation_sociale', None):
             self.wish.individu.dossier_inscription.situation_sociale = clean_data['situation_sociale']
@@ -302,6 +311,7 @@ class ChangementCentreGestionView(FormView):
             self.wish.individu.dossier_inscription.non_affiliation = clean_data.get('non_affiliation')
         if clean_data.get('centre_payeur', None):
             self.wish.individu.dossier_inscription.centre_payeur = clean_data.get('centre_payeur')
+
         self.wish.individu.dossier_inscription.save()
         self.wish.save()
         return HttpResponse('<div class="alert alert-success" role="alert">Le dossier a bien été modifié</div>')
