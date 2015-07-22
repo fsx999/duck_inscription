@@ -15,6 +15,7 @@ class CategoriePieceModel(models.Model):
         verbose_name = "Catégorie pièces"
         verbose_name_plural = "Catégories pièces"
 
+
 @python_2_unicode_compatible
 class PieceDossierModel(models.Model):
     label = models.TextField()

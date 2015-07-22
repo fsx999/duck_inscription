@@ -1,4 +1,5 @@
 {% load static floppyforms %}
+{% if request.method.lower == 'get' %}
 <div class="modal fade" id="myModalIncomplet{{ wish.pk }}" tabindex="-1" role="dialog"
      aria-labelledby="myModalLabelIncomplet{{ wish.pk }}"
      aria-hidden="true">
@@ -11,13 +12,25 @@
             </div>
             <div class="modal-body">
                 <div id="form_incomplet_{{ wish.pk }}" class="well">
+    <div id="modal_content_incomplet_{{ wish.pk }}">
+{% endif %}
+
                     {% csrf_token %}
+{#                    {% form form %}#}
                     {% formfield form.pieces using "duck_inscription/adminx/checkbox_pieces_dossier_incomplet.html"%}
+
+{% if request.method.lower == 'get' %}
+    </div>
+
+
+
+
                     <div class="form-group">
                         <div class="col-sm-offset-3 col-sm-10">
                             <button id="submitIncomplet{{ wish.pk }}" type="submit" class="btn btn-success">Valider</button>
                         </div>
                     </div>
+
 
                 </div>
             </div>
@@ -36,22 +49,23 @@
             $('#submitIncomplet{{ wish.pk }}').click(function (event) {
                 event.preventDefault();
                 var data = {};
-                $('#form_incomplet_{{ wish.pk }} :input').each(function () {
-                    var name = $(this).attr('name')
-                    if (name) {
-                        data[name] = $(this).val();
-                    }
-                });
 
+                data['pieces'] = [];
+                $('#form_incomplet_{{ wish.pk }} input:checked[name=pieces]').each(function () {
+                    data['pieces'].push($(this).val());
+                });
+                data['csrfmiddlewaretoken'] = $('#form_incomplet_{{ wish.pk }} input[name=csrfmiddlewaretoken]').val();
                 $.ajax({
                     type: "POST",
                     url: "{% url 'dossier_incomplet' wish.pk %}",
                     data: data,
+                    traditional:true,
                     success: function (msg) {
-                        $('#myModalIncomplet{{ wish.pk }} .modal-body').html(msg);
+                        //console.log($('#myModalIncomplet{{ wish.pk }}'));
+                        $('#modal_content_incomplet_{{ wish.pk }}').html(msg);
                     },
-                    error: function (XMLHttpRequest, testStatus, errorTrow) {
-                        console.log(XMLHttpRequest.responseText);
+                    error: function (XMLHttpRequest, testStatus, errorThrow) {
+{#                        console.log(XMLHttpRequest.responseText);#}
                         $('#myModalIncomplet{{ wish.pk }} .modal-body').html(XMLHttpRequest.responseText);
                     }
                 });
@@ -61,3 +75,4 @@
         });
     })(jQuery);
 </script>
+{% endif %}

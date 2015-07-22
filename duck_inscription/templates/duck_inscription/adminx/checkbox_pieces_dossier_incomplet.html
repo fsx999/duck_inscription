@@ -1,6 +1,19 @@
-asdfasdf
-<select  class="form-control" name="{{ name }}"{% if multiple %} multiple="multiple"{% endif %}{% if required %} required{% endif %}{% include "floppyforms/attrs.html" %}>{% for group_name, group_choices in optgroups %}{% if group_name %}
-	<optgroup label="{{ group_name }}">{% endif %}{% for option in group_choices %}
-	<option value="{{ option.0 }}"{% if option.0 in value %} selected="selected"{% endif %}>{{ option.1 }}</option>{% endfor %}{% if group_name %}
-	</optgroup>{% endif %}{% endfor %}
-</select>
+{#<!-- select  class="form-control" name="{{ name }}"{% if multiple %} multiple="multiple"{% endif %}{% if required %} required{% endif %}{% include "floppyforms/attrs.html" %}>{% for group_name, group_choices in optgroups %}{% if group_name %}#}
+{#	<optgroup label="{{ group_name }}">{% endif %}{% for option in group_choices %}#}
+{#	<option value="{{ option.0 }}"{% if option.0 in value %} selected="selected"{% endif %}>{{ option.1 }}</option>{% endfor %}{% if group_name %}#}
+{#	</optgroup>{% endif %}{% endfor %}#}
+{#</select -->#}
+
+Values : {{ value }}
+<ul>
+{% for cat in categories %}
+    <li>
+    <b>{{ cat.name }}</b>
+    <ul>
+    {%  for piece in cat.piecedossiermodel_set.all %}
+        <li><input type="checkbox" id="{{ attrs.id }}_{{ forloop.counter }}" name="pieces" value="{{ piece.id }}"> {{ piece.label }}</li>
+    {% endfor %}
+    </ul>
+    </li>
+{% endfor %}
+</ul>

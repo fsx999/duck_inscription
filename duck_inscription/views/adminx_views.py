@@ -9,7 +9,8 @@ from django.views.generic import FormView, TemplateView, View
 from xworkflows import InvalidTransitionError
 from duck_inscription.forms.adminx_forms import DossierReceptionForm, ImprimerEnMasseForm, ChangementCentreGestionForm, \
     DossierIncompletForm
-from duck_inscription.models import Wish
+from duck_inscription.models import Wish, CategoriePieceModel
+
 try:
     from duck_inscription_payzen.models import PaiementAllModel
 except ImportError:
@@ -221,23 +222,47 @@ class OpiView(View):
                 # self.message_user('Etudiant {} remontee'.format(wish.individu.code_opi), 'success')
         return redirect('/duck_inscription/wish/')
 
+class TestView(View):
+    #template_name = 'duck_inscription/adminx/dossier_incomplet.html'
+
+    def get(self, request, *args, **kwargs):
+        print request, args, kwargs
+        return HttpResponse("HelloWorld !")
+
+
 class PiecesDossierView(FormView):
     template_name = 'duck_inscription/adminx/dossier_incomplet.html'
     form_class = DossierIncompletForm
+    def post(self, request, *args, **kwargs):
+        print request.POST
+        return super(PiecesDossierView, self).post(request, *args, **kwargs)
 
-    # def get_form(self, form_class):
-    #     """
-    #     Returns an instance of the form to be used in this view.
-    #     """
-    #     self.wish = getattr(self, 'wish', Wish.objects.get(pk=self.kwargs['pk']))
-    #     return form_class(wish=self.wish, **self.get_form_kwargs())
+    def get_form(self, form_class):
+        """
+        Returns an instance of the form to be used in this view.
+        """
+        self.wish = getattr(self, 'wish', Wish.objects.get(pk=self.kwargs['pk']))
+        return form_class(**self.get_form_kwargs())
+
+    def form_invalid(self, form):
+
+        return super(PiecesDossierView, self).form_invalid(form)
 
     def get_context_data(self, **kwargs):
         context = super(PiecesDossierView, self).get_context_data(**kwargs)
         self.wish = getattr(self, 'wish', Wish.objects.get(pk=self.kwargs['pk']))
-
+        self.categories = getattr(self, 'categories', CategoriePieceModel.objects.all())
         context['wish'] = self.wish
+        context['categories'] = self.categories
         return context
+
+    def form_valid(self, form):
+        clean_data = form.cleaned_data
+        print clean_data
+        # PiecesManquantesDossierWishModel
+        return self.render_to_response(self.get_context_data(form=form))
+        # return HttpResponse('<div class="alert alert-success" role="alert">Le dossier a bien été modifié</div>', )
+
 
 class ChangementCentreGestionView(FormView):
     form_class = ChangementCentreGestionForm
