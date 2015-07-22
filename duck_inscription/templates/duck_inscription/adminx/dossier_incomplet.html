@@ -14,9 +14,21 @@
                 <div id="form_incomplet_{{ wish.pk }}" class="well">
     <div id="modal_content_incomplet_{{ wish.pk }}">
 {% endif %}
+                    {% if message %}
+                    <div class="alert alert-success">
+                    {{ message }}
+                    </div>
+                        <script>
+                         ;
+    (function ($) {
+        $(document).ready(function () {
+            $('#submitIncomplet{{ wish.pk }}').hide();
+        });})(jQuery);
+                        </script>
+                    {% endif %}
 
                     {% csrf_token %}
-{#                    {% form form %}#}
+
                     {% formfield form.pieces using "duck_inscription/adminx/checkbox_pieces_dossier_incomplet.html"%}
 
 {% if request.method.lower == 'get' %}

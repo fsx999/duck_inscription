@@ -9,7 +9,7 @@ from django.views.generic import FormView, TemplateView, View
 from xworkflows import InvalidTransitionError
 from duck_inscription.forms.adminx_forms import DossierReceptionForm, ImprimerEnMasseForm, ChangementCentreGestionForm, \
     DossierIncompletForm
-from duck_inscription.models import Wish, CategoriePieceModel
+from duck_inscription.models import Wish, CategoriePieceModel, PiecesManquantesDossierWishModel
 
 try:
     from duck_inscription_payzen.models import PaiementAllModel
@@ -233,9 +233,17 @@ class TestView(View):
 class PiecesDossierView(FormView):
     template_name = 'duck_inscription/adminx/dossier_incomplet.html'
     form_class = DossierIncompletForm
-    def post(self, request, *args, **kwargs):
-        print request.POST
-        return super(PiecesDossierView, self).post(request, *args, **kwargs)
+
+    def get_form_kwargs(self):
+        kwargs = super(PiecesDossierView, self).get_form_kwargs()
+        res={}
+
+        if hasattr(self.wish, 'dossier_pieces_manquante'):
+
+            res['pieces'] = self.wish.dossier_pieces_manquante.pieces.all()
+
+        kwargs['initial'].update(res)
+        return kwargs
 
     def get_form(self, form_class):
         """
@@ -258,10 +266,12 @@ class PiecesDossierView(FormView):
 
     def form_valid(self, form):
         clean_data = form.cleaned_data
-        print clean_data
-        # PiecesManquantesDossierWishModel
-        return self.render_to_response(self.get_context_data(form=form))
-        # return HttpResponse('<div class="alert alert-success" role="alert">Le dossier a bien été modifié</div>', )
+        dossier = PiecesManquantesDossierWishModel.objects.get_or_create(wish=self.wish)[0]
+        for piece in clean_data['pieces']:
+            dossier.pieces.add(piece)
+        message = "le dossier est bien modifié"
+        return self.render_to_response(self.get_context_data(form=form, message=message))
+
 
 
 class ChangementCentreGestionView(FormView):

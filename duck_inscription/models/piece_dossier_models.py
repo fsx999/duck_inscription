@@ -24,6 +24,8 @@ class PieceDossierModel(models.Model):
     def __str__(self):
         return "({}) {}".format(self.category.name, self.label)
 
+    def value(self):
+        return str(self.id)
     class Meta:
         verbose_name = "Pièce dossier"
         verbose_name_plural = "Pièces dossier"
@@ -31,7 +33,7 @@ class PieceDossierModel(models.Model):
 
 class PiecesManquantesDossierWishModel(models.Model):
     pieces = models.ManyToManyField(PieceDossierModel)
-    wish = models.ForeignKey(Wish)
+    wish = models.OneToOneField(Wish, related_name='dossier_pieces_manquante')
     date = models.DateTimeField(auto_now_add=True)
     # date = models.DateTimeField(auto_now=True)
 
