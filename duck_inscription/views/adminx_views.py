@@ -1,11 +1,16 @@
 # coding=utf-8
+from __future__ import unicode_literals
 from io import StringIO
 from PyPDF2 import PdfFileReader, PdfFileWriter
+from django.contrib.sites.models import Site
 from django.core.urlresolvers import reverse_lazy, reverse
 from django.db import DatabaseError
 from django.http import HttpResponse
 from django.shortcuts import redirect
+from django.template.loader import get_template
 from django.views.generic import FormView, TemplateView, View
+from duck_utils.utils import get_email_envoi
+from mailrobot.models import Mail
 from xworkflows import InvalidTransitionError
 from duck_inscription.forms.adminx_forms import DossierReceptionForm, ImprimerEnMasseForm, ChangementCentreGestionForm, \
     DossierIncompletForm
@@ -19,7 +24,32 @@ from django.conf import settings
 from duck_inscription.templatetags.lib_inscription import annee_en_cour
 from xhtml2pdf import pdf as pisapdf
 from django.contrib import messages
+class WishIndividuMixin(object):
+    """
+    recupere le voeu à partir du pk si user = staff, ou bien à partir de l'user
+    """
 
+    @property
+    def individu(self):
+        """
+        :return: l'individu en fonction du pk de l'url (en fonction des droits)
+        """
+        individu = getattr(self, '_individu', None)
+        if not individu:
+            self._individu = self.wish.individu
+            return self._individu
+        return individu
+
+    @property
+    def wish(self):
+        """
+        :return: le voeu en fonction du pk de l'url (en fonction des droits)
+        """
+        wish = getattr(self, '_wish', None)
+        if not wish:
+            self._wish = Wish.objects.get(pk=self.kwargs['pk'])
+            return self._wish
+        return wish
 
 class DossierReceptionView(FormView):
     template_name = "duck_inscription/adminx/dossier_reception.html"
@@ -226,11 +256,10 @@ class TestView(View):
     #template_name = 'duck_inscription/adminx/dossier_incomplet.html'
 
     def get(self, request, *args, **kwargs):
-        print request, args, kwargs
         return HttpResponse("HelloWorld !")
 
 
-class PiecesDossierView(FormView):
+class PiecesDossierView(FormView, WishIndividuMixin):
     template_name = 'duck_inscription/adminx/dossier_incomplet.html'
     form_class = DossierIncompletForm
 
@@ -238,27 +267,15 @@ class PiecesDossierView(FormView):
         kwargs = super(PiecesDossierView, self).get_form_kwargs()
         res={}
 
-        if hasattr(self.wish, 'dossier_pieces_manquante'):
+        if hasattr(self.wish, 'dossier_pieces_manquantes'):
 
-            res['pieces'] = self.wish.dossier_pieces_manquante.pieces.all()
+            res['pieces'] = self.wish.dossier_pieces_manquantes.pieces.all()
 
         kwargs['initial'].update(res)
         return kwargs
 
-    def get_form(self, form_class):
-        """
-        Returns an instance of the form to be used in this view.
-        """
-        self.wish = getattr(self, 'wish', Wish.objects.get(pk=self.kwargs['pk']))
-        return form_class(**self.get_form_kwargs())
-
-    def form_invalid(self, form):
-
-        return super(PiecesDossierView, self).form_invalid(form)
-
     def get_context_data(self, **kwargs):
         context = super(PiecesDossierView, self).get_context_data(**kwargs)
-        self.wish = getattr(self, 'wish', Wish.objects.get(pk=self.kwargs['pk']))
         self.categories = getattr(self, 'categories', CategoriePieceModel.objects.all())
         context['wish'] = self.wish
         context['categories'] = self.categories
@@ -267,9 +284,24 @@ class PiecesDossierView(FormView):
     def form_valid(self, form):
         clean_data = form.cleaned_data
         dossier = PiecesManquantesDossierWishModel.objects.get_or_create(wish=self.wish)[0]
+        dossier.pieces.clear()
         for piece in clean_data['pieces']:
             dossier.pieces.add(piece)
         message = "le dossier est bien modifié"
+        # send an email to the user
+        recipients = [
+            get_email_envoi(dossier.wish.individu.user.email),
+        ]
+        template = Mail.objects.get(name='email_inscription_incomplet')
+        piece_template = get_template('duck_inscription/adminx/rendu_pieces_mail.html')
+        motif = piece_template.render({'dossier':dossier})
+        context = {
+            'site': Site.objects.get(id=settings.SITE_ID_IED),
+            'wish': dossier.wish,
+            'motif': motif,
+        }
+        mail = template.make_message(context=context, recipients=recipients)
+        mail.send()
         return self.render_to_response(self.get_context_data(form=form, message=message))
 
 

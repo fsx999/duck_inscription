@@ -1,8 +1,7 @@
 <div class="form-group {% if field.errors %} has-error{% endif %}">
-<label class="col-sm-3 control-label" >{{ field.label }} :</label>
-<div class="col-sm-6">
+<label>{{ field.label }} :</label>
+<div>
     <ul>
-
 {% for cat in categories %}
     <li>
     <b>{{ cat.name }}</b>
@@ -15,7 +14,7 @@
 {% endfor %}
 </ul>
 
- </div>
+</div>
 
 
 </div>

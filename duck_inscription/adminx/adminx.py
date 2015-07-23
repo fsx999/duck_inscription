@@ -51,6 +51,7 @@ class WishInline(object):
         if obj.state.is_inscription or obj.state.is_dispatch:
             url = reverse('changement_centre', kwargs={'pk': obj.pk})
             result += ACTION.format(id=obj.pk, url=url)
+        if obj.state.is_inscription:
             url =  reverse('dossier_incomplet', kwargs={'pk': obj.pk})
             result += DOSSIER_INCOMPLET.format(id=obj.pk, url=url)
 
@@ -181,6 +182,7 @@ class WishInline(object):
         url2 = reverse('impression_decision_equivalence', kwargs={'pk': obj.pk})
         url_inscription = reverse('inscription_pdf', kwargs={'pk': obj.pk})
         url_candidature = reverse('candidature_pdf', kwargs={'pk': obj.pk})
+        url_courrier_pieces_manquantes = reverse('pieces_manquantes_pdf', kwargs={'pk': obj.pk})
 
         reponse = ' '
 
@@ -193,6 +195,11 @@ class WishInline(object):
             reponse += '<a href="{}" class="btn btn-primary">Dossier Candidature</a><hr>'.format(url_candidature)
         if obj.state in ['inscription', 'liste_attente_inscription']:
             reponse += '<a href="{}" class="btn btn-primary">Dossier inscription</a>'.format(url_inscription)
+        if hasattr(obj, 'dossier_pieces_manquantes') and obj.dossier_pieces_manquantes.pieces.count() and obj.state.is_inscription:
+            reponse += '<hr>'
+            reponse += '<a href="{}" class="btn btn-primary">Courrier pièces manquantes</a>'.format(url_courrier_pieces_manquantes)
+
+
         return reponse
 
     print_dossier_equi.allow_tags = True
