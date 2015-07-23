@@ -3,6 +3,7 @@
     <div>UNIVERSITE PARIS 8 - IED </div>
     <div> BAT. D bureau D236</div>
     <div>{{ ETAPE|default:"Equivalence" }}</div>
+    {% if is_pieces_manquantes %}<div>(Pièces Manquantes)</div>{% endif %}
     {% if ETAPE == 'Inscription' %}
     <div>{{ voeu.etape.label }}</div>
     {% else %}

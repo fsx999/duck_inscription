@@ -386,6 +386,19 @@ class ChangementCentreGestionView(FormView):
     def get_success_url(self):
         return reverse('xadmin:duck_inscription_individu_change', args=(3,))
 
+class PiecesManquantesPdfView(TemplateView, WishIndividuMixin):
+    template_name = "duck_inscription/wish/etiquette.html"
+
+
+    def render_to_response(self, context, **response_kwargs):
+
+        wish = self.wish
+        response = HttpResponse(content_type='application/pdf')
+        response['Content-Disposition'] = 'attachment; filename=piece_manquante_%s_%s.pdf' % (wish.code_dossier, wish.etape.cod_etp)
+
+        response.write(wish.do_pdf_pieces_manquantes(request=self.request, context=context))
+        return response
+
 
 # class ChangemeCentreGestionView(FormView):
 #     form_class = ChangementCentreGestionForm

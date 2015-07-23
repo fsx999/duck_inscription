@@ -349,6 +349,17 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
 
         return make_multi_pdf(context=context, templates=templates, files=[remove_page_pdf(doc_candi)])
 
+    def do_pdf_pieces_manquantes(self, request, context={}):
+        context = context.copy()
+        templates = [
+            {'name': "duck_inscription/wish/etiquette.html"},
+            {'name': "duck_inscription/wish/pieces_manquantes.html"}
+        ]
+        context['voeu'] = self
+        context['is_pieces_manquantes'] = True
+        context['pieces_manquantes'] = self.dossier_pieces_manquantes
+        return make_multi_pdf(context=context, templates=templates)
+
     def do_pdf_inscription(self, request, context):
         cmd_option={
             'margin_bottom': '20',

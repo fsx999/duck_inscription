@@ -2,10 +2,10 @@
 from django.conf.urls import patterns, url
 from django.contrib.auth.decorators import login_required
 from duck_inscription.adminx import ExtrationEtiquettesView, ExtrationEtiquetteView
-from duck_inscription.views import InscriptionPdfView, CandidaturePdfView, EquivalencePdfView, PiecesManquantesPdfView
-from duck_inscription.views.adminx_views import EquivalencePdfAdminView, \
-    DecisionEquivalencePdfAdminView, ImprimerTousDecisions, ImprimerDecisionsEquivalenceEnMasseView, \
-    ChangementCentreGestionView, OpiView, PiecesDossierView, TestView
+from duck_inscription.views import InscriptionPdfView, CandidaturePdfView, EquivalencePdfView
+from duck_inscription.views.adminx_views import  \
+    DecisionEquivalencePdfAdminView, ImprimerDecisionsEquivalenceEnMasseView, \
+    ChangementCentreGestionView, OpiView, PiecesDossierView, PiecesManquantesPdfView
 
 urlpatterns = patterns(
     '',
