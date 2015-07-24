@@ -300,6 +300,7 @@ class PiecesDossierView(FormView, WishIndividuMixin):
             'wish': dossier.wish,
             'motif': motif,
         }
+        self.wish.inscription_incomplet_renvoi()
         mail = template.make_message(context=context, recipients=recipients)
         mail.send()
         return self.render_to_response(self.get_context_data(form=form, message=message))
