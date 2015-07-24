@@ -18,6 +18,8 @@ class SettingAnneeUni(AnneeUni):
     pieces_pdf = models.FileField(upload_to='document_inscription', null=True, blank=True)
     tarif_medical = models.FloatField('tarif medical', null=True, blank=True)
     tarif_secu = models.FloatField('tarif secu', null=True, blank=True)
+    debut_pause = models.DateTimeField(null=True, blank=True)
+    fin_pause = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         app_label = 'duck_inscription'
