@@ -14,7 +14,7 @@ class Command(BaseCommand):
         nb = args[1]
         mail = Mail.objects.get(name='email_inscription_ouverte')
         site = Site.objects.get(domain='preins.iedparis8.net')
-        for wish in Wish.objects.filter(annee__cod_anu=2014,
+        for wish in Wish.objects.filter(annee__cod_anu=2015,
                                         state='liste_attente_inscription',
                                         etape__cod_etp=str(cod_etp)).order_by('date_liste_inscription')[0:int(nb)]:
             email_etu = 'paul.guichon@iedparis8.net' if settings.DEBUG else wish.individu.personal_email
