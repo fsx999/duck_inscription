@@ -9,11 +9,16 @@ from django.core.management.base import BaseCommand
 
 
 class Command(BaseCommand):
+    def add_arguments(self, parser):
+        parser.add_argument('cod_etp', nargs='+')
+        parser.add_argument('nb', nargs='+', type=int)
+
     def handle(self, *args, **options):
-        cod_etp = args[0]
-        nb = args[1]
+        cod_etp = options['cod_etp']
+        nb = options['nb']
         mail = Mail.objects.get(name='email_inscription_ouverte')
         site = Site.objects.get(domain='preins.iedparis8.net')
+
         for wish in Wish.objects.filter(annee__cod_anu=2015,
                                         state='liste_attente_inscription',
                                         etape__cod_etp=str(cod_etp)).order_by('date_liste_inscription')[0:int(nb)]:
