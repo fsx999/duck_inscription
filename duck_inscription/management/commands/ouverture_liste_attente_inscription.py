@@ -14,9 +14,8 @@ class Command(BaseCommand):
         parser.add_argument('nb', nargs='+', type=int)
 
     def handle(self, *args, **options):
-        cod_etp = options['cod_etp']
-        nb = options['nb']
-        print cod_etp, nb
+        cod_etp = options['cod_etp'][0]
+        nb = options['nb'][0]
         mail = Mail.objects.get(name='email_inscription_ouverte')
         site = Site.objects.get(domain='preins.iedparis8.net')
 
