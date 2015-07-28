@@ -16,6 +16,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         cod_etp = options['cod_etp']
         nb = options['nb']
+        print cod_etp, nb
         mail = Mail.objects.get(name='email_inscription_ouverte')
         site = Site.objects.get(domain='preins.iedparis8.net')
 
