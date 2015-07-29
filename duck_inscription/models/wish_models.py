@@ -110,7 +110,7 @@ class SuiviDossierWorkflow(xwf_models.Workflow):
         ('inscription_reception', ('inactif',
                                    'equivalence_traite',
                                    'candidature_complet',
-                                   'candidature_traite', 'inscription_incomplet', 'equivalence_reception'
+                                   'candidature_traite', 'inscription_incomplet', 'equivalence_reception',
                                    'inscription_incom_r'), 'inscription_reception'),
         ('inscription_incomplet', ('inscription_reception', 'inscription_complet',
                                    'inscription_traite'), 'inscription_incomplet'),
