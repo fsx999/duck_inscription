@@ -73,7 +73,8 @@ class SuiviDossierWorkflow(xwf_models.Workflow):
     log_model = 'duck_inscription.WishTransitionLog'
 
     states = (
-        ('inactif', 'En attente de reception'), ('equivalence_reception', 'Dossier Equivalence receptionné'),
+        ('inactif', 'En attente de reception'),
+        ('equivalence_reception', 'Dossier Equivalence receptionné'),
         ('equivalence_complet', 'Dossier Equivalence complet'),
         ('equivalence_incomplet', 'Dossier Equivalence incomplet'),
         ('equivalence_traite', 'Dossier Equivalence traite'), ('equivalence_refuse', 'Dossier Equivalence refuse'),
@@ -106,13 +107,16 @@ class SuiviDossierWorkflow(xwf_models.Workflow):
         ('candidature_refuse', ('candidature_reception', 'candidature_incomplet', 'candidature_complet'),
          'candidature_refuse'),
 
-        ('inscription_reception',
-         ('inactif', 'equivalence_traite', 'candidature_complet', 'candidature_traite', 'inscription_incomplet',
-          'inscription_incom_r'),
-         'inscription_reception'),
+        ('inscription_reception', ('inactif',
+                                   'equivalence_traite',
+                                   'candidature_complet',
+                                   'candidature_traite', 'inscription_incomplet', 'equivalence_reception'
+                                   'inscription_incom_r'), 'inscription_reception'),
         ('inscription_incomplet', ('inscription_reception', 'inscription_complet',
-                                   'inscription_traite'), 'inscription_incomplet'),
-        ('inscription_incomplet_renvoi', ('inscription_reception', 'inscription_complet','inscription_traite'),
+                                   'inscription_traite', 'equivalence_reception'), 'inscription_incomplet'),
+        ('inscription_incomplet_renvoi', ('inscription_reception',
+                                          'inscription_complet',
+                                          'inscription_traite', 'equivalence_reception'),
          'inscription_incom_r'),
         ('inscription_complet', ('inscription_reception', 'inscription_incomplet', 'equivalence_reception'), 'inscription_complet'),
         ('inscription_traite', ('inscription_reception', 'inscription_complet', 'inscription_incomplet',
