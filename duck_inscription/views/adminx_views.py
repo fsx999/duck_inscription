@@ -302,8 +302,7 @@ class PiecesDossierView(FormView, WishIndividuMixin):
         }
         try:
             self.wish.inscription_incomplet_renvoi()
-            mail = template.make_message(context=context, recipients=recipients)
-            mail.send()
+
         except InvalidTransitionError:
             if not self.wish.suivi_dossier.is_inscription_incom_r:
                 self.wish.inscription_reception()
