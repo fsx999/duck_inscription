@@ -348,13 +348,12 @@ class DossierInscriptionView(views.FormAdminView):
                             msg = 'Dossier déjà traité'
 
                             self.message_user(msg, 'warning')
-                        elif wish.suivi_dossier.is_inactif:
+                        else:
+
                             wish.inscription_reception()
                             wish.inscription_complet()
                             self._envoi_email(wish, template)
                             self.message_user('Dossier traité', 'success')
-                        else:
-                            raise e
 
                 elif choix == 'incomplet':
                     try:
