@@ -395,7 +395,6 @@ class ChangementCentreGestionView(FormView):
 
             return HttpResponse('<div class="alert alert-success" role="alert">Le dossier a bien été modifié</div>')
         except Exception as e:
-            print "coucuoc"
             return HttpResponse('<div class="alert alert-error" role="alert">{{ }}</div>'.format(e))
 
     def get_success_url(self):
