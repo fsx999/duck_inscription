@@ -39,7 +39,7 @@ class WishInline(object):
         try:
             response += "type de paiement : {} <br>".format(obj.paiementallmodel.moyen_paiement)
             if obj.paiementallmodel.moyen_paiement.type == 'CB':
-                response +=  "transaction : {} <br> numéro de commance : {}".format(obj.paiementallmodel.paiement_request.vads_trans_id, obj.paiementallmodel.pk)
+                response += "transaction : {} <br> numéro de commance : {}".format(obj.paiementallmodel.paiement_request.vads_trans_id, obj.paiementallmodel.pk)
         except:
             pass
         return response

@@ -122,8 +122,8 @@ class ChangementCentreGestionForm(forms.Form):
 
 
     def clean(self):
-        if not self.wish.state.is_inscription:
-            raise forms.ValidationError('le voeu doit être en inscription')
+        # if not self.wish.state.is_inscription:
+        #     raise forms.ValidationError('le voeu doit être en inscription')
         return super(ChangementCentreGestionForm, self).clean()
 
 
