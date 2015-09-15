@@ -3,8 +3,6 @@ from django.contrib.sites.models import Site
 from mailrobot.models import Mail
 from duck_inscription.models import Wish
 from django.conf import settings
-__author__ = 'paul'
-
 from django.core.management.base import BaseCommand
 
 
