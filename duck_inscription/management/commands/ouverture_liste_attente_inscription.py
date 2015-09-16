@@ -22,7 +22,7 @@ class Command(BaseCommand):
                                         etape__cod_etp=str(cod_etp)).order_by('date_liste_inscription')[0:int(nb)]:
             email_etu = 'paul.guichon@iedparis8.net' if settings.DEBUG else wish.individu.personal_email
             wish.is_ok = True
-            wish.inscription()
+            wish.dispatch()
             wish.save()
             mail.make_message(
                 recipients=(email_etu,),

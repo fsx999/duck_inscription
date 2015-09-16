@@ -273,7 +273,7 @@ class Individu(xwf_models.WorkflowEnabled, models.Model):
         effectue la remontee opi
         TODO à refactoriser
         """
-        db = 'oracle_test' if settings.DEBUG else 'oracle'
+        db = 'oracle' if settings.DEBUG else 'oracle'
         premier_universite_fr_id = self.dossier_inscription.premier_universite_fr_id
         ine = self.ine[:-1] if self.ine else ""
         cle = self.ine[-1] if self.ine else ""
@@ -294,8 +294,8 @@ class Individu(xwf_models.WorkflowEnabled, models.Model):
             individu = IndOpi.objects.using(db).get_or_create(
                 cod_ind_opi=self.code_opi,
                 date_nai_ind_opi=self.birthday,
-                lib_pr1_ind_opi=self.first_name1,
-                lib_nom_pat_ind_opi=self.last_name,
+                lib_pr1_ind_opi=self.first_name1.upper(),
+                lib_nom_pat_ind_opi=self.last_name.upper(),
                 cod_opi_int_epo=self.code_opi,)[0]
 
             individu.cod_ind_opi = self.code_opi
@@ -312,7 +312,7 @@ class Individu(xwf_models.WorkflowEnabled, models.Model):
             individu.lib_pr3_ind_opi = self.first_name3.upper()
             individu.num_tel_ind_opi = self.get_tel()
             individu.cod_etu_opi = self.student_code
-            individu.lib_vil_nai_etu_opi = self.town_birth
+            individu.lib_vil_nai_etu_opi = self.town_birth.upper()
             individu.cod_opi_int_epo = self.code_opi
 
             individu.cod_fam = self.family_status_id
@@ -320,9 +320,8 @@ class Individu(xwf_models.WorkflowEnabled, models.Model):
             individu.cod_dep_pay_nai = lieu_naiss[0]
             individu.cod_typ_dep_pay_nai = lieu_naiss[1]
             individu.daa_ens_sup_opi = self.dossier_inscription.annee_premiere_inscription_enseignement_sup_fr
-            individu.daa_etb_opi = self.dossier_inscription.annee_premiere_inscription_p8 if\
-                self.dossier_inscription.annee_premiere_inscription_p8 != '2013' else '2014'
-            individu.cod_sex_etu_opi = self.sex
+            individu.daa_etb_opi = 2015
+            individu.cod_sex_etu_opi = self.sex.upper()
             individu.cod_thp_opi = self.type_handicap_id
             individu.cod_thb_opi = self.type_hebergement_annuel_id
             individu.adr_mail_opi = self.personal_email
@@ -378,11 +377,11 @@ class Individu(xwf_models.WorkflowEnabled, models.Model):
             individu.daa_ens_sup_opi = individu_apogee.daa_ens_sup
             individu.daa_etb_opi = individu_apogee.daa_etb
             individu.daa_ent_etb_opi = individu_apogee.daa_ent_etb
-            individu.lib_nom_pat_ind_opi = self.last_name
-            individu.lib_nom_usu_ind_opi = self.common_name
-            individu.lib_pr1_ind_opi = self.first_name1
-            individu.lib_pr2_ind_opi = self.first_name2
-            individu.lib_pr3_ind_opi = self.first_name3
+            individu.lib_nom_pat_ind_opi = self.last_name.upper()
+            individu.lib_nom_usu_ind_opi = self.common_name.upper()
+            individu.lib_pr1_ind_opi = self.first_name1.upper()
+            individu.lib_pr2_ind_opi = self.first_name2.upper()
+            individu.lib_pr3_ind_opi = self.first_name3.upper()
             individu.num_tel_ind_opi = self.get_tel()
             individu.cod_etu_opi = self.student_code
             individu.cod_opi_int_epo = self.code_opi
@@ -440,10 +439,10 @@ class Individu(xwf_models.WorkflowEnabled, models.Model):
                 cod_pay=adresse.code_pays.cod_pay,
                 cod_bdi=cod_bdi,
                 cod_com=cod_com,
-                lib_ad1=adresse.label_adr_1,
-                lib_ad2=adresse.label_adr_2,
-                lib_ad3=adresse.label_adr_3,
-                lib_ade=adresse.label_adr_etr)
+                lib_ad1=adresse.label_adr_1.upper(),
+                lib_ad2=adresse.label_adr_2.upper(),
+                lib_ad3=adresse.label_adr_3.upper(),
+                lib_ade=adresse.label_adr_etr.upper())
 
 
 class AdresseIndividu(models.Model):
