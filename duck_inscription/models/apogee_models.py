@@ -100,6 +100,14 @@ class SettingsEtape(Etape):
         result.update({'inscription': Wish.objects.filter(etape=self,
                                                           annee=annee,
                                                           state='inscription', valide=True).count()})
+        result.update({'primo': Wish.objects.filter(etape=self,
+                                                          annee=annee,
+                                                          is_reins=False,
+                                                          state='inscription', valide=True).count()})
+        result.update({'reins': Wish.objects.filter(etape=self,
+                                                          annee=annee,
+                                                          is_reins=True,
+                                                          state='inscription', valide=True).count()})
         if self.date_ouverture_equivalence:
             result.update({'liste_attente_and_equi': Wish.objects.filter(etape=self,
                                                                          annee=annee,

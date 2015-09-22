@@ -1,0 +1,19 @@
+<div class="container-fluid">
+    <div class="well">
+        Recherche : <input ng-model="query">
+    </div>
+    <table class="table table-bordered">
+        <tr><td>etape</td><td>primo</td> <td>reins</td></tr>
+         <tr ng-repeat="etape in etapes">
+        <td>
+            {{ etape.label }}
+
+        </td>
+             <td>{{ etape.stat_parcours_dossier.primo }}
+            </td>
+             <td>{{ etape.stat_parcours_dossier.reins }}</td>
+
+    </tr>
+    </table>
+
+<div>

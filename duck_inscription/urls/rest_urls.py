@@ -4,7 +4,7 @@ from django_apogee.models import Pays, Departement, SitFam, TypHebergement, BacO
 from duck_inscription.models import Individu
 from duck_inscription.serializers import IndividuSerializer, PaysSerializer, DepartementSerializer, SitFamSerializer, \
     TypHebergementSerializer, BacOuxEquSerializer, SitMilSerializer, TypHandicapSerializer, AnneeUniSerializer
-
+from . import views
 
 class AnneeUniViewSet(viewsets.ModelViewSet):
     queryset = AnneeUni.objects.all()
@@ -51,7 +51,7 @@ class TypHebergementViewSet(viewsets.ModelViewSet):
     serializer_class = TypHebergementSerializer
 
 
-router = routers.DefaultRouter()
+router = routers.DefaultRouter(trailing_slash=False)
 router.register(r'anneeuni', AnneeUniViewSet)
 router.register(r'bacouxequ', BacOuxEquViewSet)
 router.register(r'departements', DepartementViewSet)
@@ -65,5 +65,6 @@ router.register(r'typehebergement', TypHebergementViewSet)
 
 urlpatterns = [
     url(r'^', include(router.urls)),
-    url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework'))
+    url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
+    url(r'^v1/statistique_inscription', views.StatistiqueView.as_view(), name='statistique_inscription_v1')
 ]
