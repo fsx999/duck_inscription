@@ -360,6 +360,7 @@ class Individu(xwf_models.WorkflowEnabled, models.Model):
 
         elif self.student_code:
             individu_apogee = IndividuApogee.objects.using(db).get(cod_etu=self.student_code)
+
             # ins_adm_anu = InsAdmAnu.objects.using(db).filter(cod_ind=individu_apogee).order_by('cod_anu').last()
 
             individu = IndOpi.objects.using(db).get_or_create(
@@ -368,6 +369,12 @@ class Individu(xwf_models.WorkflowEnabled, models.Model):
                 lib_pr1_ind_opi=self.first_name1.upper(),
                 lib_nom_pat_ind_opi=self.last_name.upper(),
                 cod_opi_int_epo=self.code_opi,)[0]
+            individu.cod_nne_ind_opi = individu_apogee.cod_nne_ind
+            individu.lib_vil_nai_etu_opi = individu_apogee.lib_vil_nai_etu
+            individu.cod_dep_pay_nai = individu_apogee.cod_dep_pay_nai
+            individu.cod_typ_dep_pay_nai = individu_apogee.cod_typ_dep_pay_nai
+            individu.cod_etb_ann_pre_opi = individu_apogee.cod_etb
+            individu.cod_cle_nne_ind_opi = individu_apogee.cod_cle_nne_ind
             individu.cod_ind_opi = self.code_opi
             individu.cod_sim = individu_apogee.cod_sim
             individu.cod_pay_nat = individu_apogee.cod_pay_nat
