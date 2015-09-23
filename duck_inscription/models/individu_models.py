@@ -369,6 +369,9 @@ class Individu(xwf_models.WorkflowEnabled, models.Model):
                 lib_pr1_ind_opi=self.first_name1.upper(),
                 lib_nom_pat_ind_opi=self.last_name.upper(),
                 cod_opi_int_epo=self.code_opi,)[0]
+            individu.cod_sex_etu_opi = individu_apogee.cod_sex_etu
+            individu.cod_thb_opi = individu_apogee.cod_thp
+
             individu.cod_nne_ind_opi = individu_apogee.cod_nne_ind
             individu.lib_vil_nai_etu_opi = individu_apogee.lib_vil_nai_etu
             individu.cod_dep_pay_nai = individu_apogee.cod_dep_pay_nai
