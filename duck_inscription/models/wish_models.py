@@ -167,9 +167,6 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
     is_ok = models.BooleanField(default=False)
     date_liste_inscription = models.DateTimeField(null=True, blank=True)
 
-
-
-
     @on_enter_state('ouverture_equivalence')
     def on_enter_state_ouverture_equivalence(self, res, *args, **kwargs):
         if self.is_reins_formation():

@@ -39,8 +39,19 @@ class WishInline(object):
         try:
             response += "type de paiement : {} <br>".format(obj.paiementallmodel.moyen_paiement)
             if obj.paiementallmodel.moyen_paiement.type == 'CB':
-                response += "transaction : {} <br> numéro de commance : {}".format(obj.paiementallmodel.paiement_request.vads_trans_id, obj.paiementallmodel.pk)
-        except:
+                response += "transaction : {} <br> numéro de commande : {}".format(obj.paiementallmodel.paiement_request.vads_trans_id, obj.paiementallmodel.pk)
+                r = ''
+                for p in obj.paiementallmodel.paiement_request.status_paiement()['transactionItem']:
+                    print p
+                    r += 'date : {date}, montant : {montant} , status: {status} <br>'.format(date=p['expectedCaptureDate'],
+                                                                                        montant=str(p['amount'])[:-2]+','+str(p['amount'])[-2:],
+                                                                                        status=p['transactionStatusLabel'])
+                    if p['transactionStatusLabel'] == 'CAPTURED':
+                        r += '<br><span class="label label-success">Ok</span>'
+                    else:
+                        r += '<br><span class="label label-danger">Annomalie</span>'
+                response += '<br>' + r
+        except Exception as e:
             pass
         return response
     info_paiement.allow_tags = True
@@ -325,7 +336,13 @@ class OpiView(object):
     def opi_url(self, obj):
         url = reverse('remontee_opi')
         if obj.state.is_inscription:
-            return '<a class="btn btn-primary" href="{}?opi={}">Remontée Opi</a>'.format(url, obj.code_dossier)
+            if obj.paiementallmodel.moyen_paiement.type == 'CB':
+                valide = True
+                for p in obj.paiementallmodel.paiement_request.status_paiement()['transactionItem']:
+                    valide = valide and (p['transactionStatusLabel'] == 'CAPTURED')
+                if not valide:
+                    return '<br><span class="label label-danger">Annomalie</span>'
+            return '<br><span class="label label-success">Ok</span><a class="btn btn-primary" href="{}?opi={}">Remontée Opi</a>'.format(url, obj.code_dossier)
         else:
             return ''
 
