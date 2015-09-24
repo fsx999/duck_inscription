@@ -371,7 +371,7 @@ class Individu(xwf_models.WorkflowEnabled, models.Model):
                 cod_opi_int_epo=self.code_opi,)[0]
             individu.cod_sex_etu_opi = individu_apogee.cod_sex_etu
             individu.cod_thb_opi = individu_apogee.cod_thp
-
+            individu.cod_fam = individu_apogee.cod_fam
             individu.cod_nne_ind_opi = individu_apogee.cod_nne_ind
             individu.lib_vil_nai_etu_opi = individu_apogee.lib_vil_nai_etu
             individu.cod_dep_pay_nai = individu_apogee.cod_dep_pay_nai
