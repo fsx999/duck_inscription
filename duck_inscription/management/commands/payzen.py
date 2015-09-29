@@ -1,38 +1,35 @@
-# from __future__ import unicode_literals
-import hashlib
-
-__author__ = 'paulguichon'
 # coding=utf-8
-import datetime
+from __future__ import unicode_literals
+from duck_inscription.models import Wish
 from django.core.management.base import BaseCommand
-from django.utils.timezone import utc
-from suds.client import Client
-from suds.sax.element import Element
-import uuid
-import hmac
-import base64
+from django.core.mail import send_mail
+
+
 class Command(BaseCommand):
-
-
     def handle(self, *args, **options):
-        date = datetime.datetime.utcnow().replace(
-                tzinfo=utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-        certif = '5535052304931319'
-        url = 'https://secure.payzen.eu/vads-ws/v5?wsdl'
-        client = Client(url)
-        shopId = Element('shopId').setText('58163425')
-        rid = str(uuid.uuid1())
-        requestId = Element('requestId').setText(rid)
-        timestamp = Element('timestamp').setText(date)
-        mode = Element('mode').setText('PRODUCTION')
+        text = """
+Bonjour,
 
-        id = rid + date
-        token = hmac.new(bytes(certif).encode("utf-8"), bytes(id).encode("utf-8"), hashlib.sha256).digest()
-        token = base64.b64encode(token)
-        authToken = Element('authToken').setText(token)
-        client.set_options(soapheaders=(shopId, requestId, timestamp, mode, authToken))
-        # print client
-        p = client.factory.create('queryRequest')
-        p.orderId = 693
-        for x in client.service.findPayments(p)['transactionItem']:
-            print x['amount']
+Suite à un problème technique sur notre site, une étape importante de la procédure de candidature n'a pas été effectuée. Afin de régulariser la situation merci de vous connecter à nouveau à votre compte (Candidature) et de renseigner :
+
+Vos résultats pour la candidature du Master 2
+
+Moyenne générale
+Note de stage
+Note du Mémoire du Master 1
+
+
+et pour la candidature de Master 1
+
+Moyenne générale seulement
+
+Il n'y a rien d'autre à faire.
+
+Cordialement
+        """
+
+        for wish in Wish.objects.filter(etape__cod_etp__in=['M1NPCL', 'M2NPCL'], state='candidature'):
+            send_mail('[IED] Problème de candidature important', text, 'nepasrepondre@iedparis8.net', [wish.individu.personal_email])
+            wish.state = 'note_master'
+            wish.save()
+        print "fini"
