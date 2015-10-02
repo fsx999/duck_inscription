@@ -12,6 +12,8 @@
             <th>Etape</th>
             <th>Effectué</th>
             <th>Réceptionné</th>
+            <th>Réceptionné primo</th>
+            <th>Réceptionné reins</th>
             <th>Incomplet</th>
             <th>Incomplet(avec renvoi)</th>
             <th>Complet</th>
@@ -27,6 +29,8 @@
             <td>{{ etape.label }}</td>
             <td><a href=" {% url 'xadmin:extraction_stat' 'parcours_dossier' 'inscription' etape.cod_etp %}"> {{ stat.inscription }}</a></td>
             <td><a href=" {% url 'xadmin:extraction_stat' 'etat_suivi_dossier' 'inscription_reception' etape.cod_etp %}"> {{ etape.stat_nb_reception.nb_reception }}</a></td>
+            <td><a href=" {% url 'xadmin:extraction_stat' 'etat_suivi_dossier' 'inscription_reception' etape.cod_etp %}"> {{ etape.stat_nb_reception.nb_reception_primo }}</a></td>
+            <td><a href=" {% url 'xadmin:extraction_stat' 'etat_suivi_dossier' 'inscription_reception' etape.cod_etp %}"> {{ etape.stat_nb_reception.nb_reception_reins }}</a></td>
             <td><a href=" {% url 'xadmin:extraction_stat' 'etat' 'inscription_incomplet' etape.cod_etp %}">{{ etats.inscription_incomplet }}</a></td>
             <td>{{ etats.inscription_incom_r }}</td>
             <td><a href=" {% url 'xadmin:extraction_stat' 'etat' 'inscription_complet' etape.cod_etp %}">{{ stat_suivi.inscription_complet }}</a></td>
@@ -40,6 +44,8 @@
         <tr>
             <td>Totaux</td>
             <td>{% tag_totaux etapes 'stat_parcours_dossier' 'inscription' %}</td>
+            <td>{% tag_totaux etapes 'stat_nb_reception' 'nb_reception' %}</td>
+            <td>{% tag_totaux etapes 'stat_nb_reception' 'nb_reception' %}</td>
             <td>{% tag_totaux etapes 'stat_nb_reception' 'nb_reception' %}</td>
             <td>{% tag_totaux etapes 'stat_etat_dossier' 'inscription_incomplet' %}</td>
             <td>{% tag_totaux etapes 'stat_etat_dossier' 'inscription_incom_r' %}</td>
