@@ -213,7 +213,7 @@ class CandidatureView(views.FormAdminView):
                 # if wish.suivi_dossier.is_candidature_traite:
                 #     msg = 'Dossier déjà traité'
                 #     self.message_user(msg, 'warning')
-                if not wish.state.is_candidature and not wish.state.is_mis_liste_attente_candi:
+                if not wish.state.is_candidature and not wish.state.is_liste_attente_candidature:
                     msg = 'Dossier n\'est pas en candidature'
                     self.message_user(msg, 'warning')
                 elif choix == 'complet':
