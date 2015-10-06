@@ -349,7 +349,6 @@ class ChangementCentreGestionView(FormView):
         return super(ChangementCentreGestionView, self).form_invalid(form)
 
     def form_valid(self, form):
-        print "oucouc"
         clean_data = form.cleaned_data
         centre_gestion = clean_data.get('centre_gestion')
         try:
@@ -373,9 +372,9 @@ class ChangementCentreGestionView(FormView):
                     if clean_data.get('type_paiement', None) and  clean_data.get('type_paiement').type == 'CB':
                         paiement.moyen_paiement = clean_data.get('type_paiement')
                         self.wish.is_ok = True
-                        self.wish.state='dossier_inscription'
+                        self.wish.state = 'dossier_inscription'
 
-                        paiement.state='choix_ied_fp'
+                        paiement.state = 'choix_ied_fp'
             except AttributeError:
                         pass
             paiement.save()
@@ -385,11 +384,13 @@ class ChangementCentreGestionView(FormView):
                 self.wish.individu.dossier_inscription.save()
             if clean_data.get('affiliation_parent', None):
                 self.wish.individu.dossier_inscription.affiliation_parent = clean_data.get('affiliation_parent')
+                self.wish.individu.dossier_inscription.save()
             if clean_data.get('non_affiliation', None):
                 self.wish.individu.dossier_inscription.non_affiliation = clean_data.get('non_affiliation')
+                self.wish.individu.dossier_inscription.save()
             if clean_data.get('centre_payeur', None):
                 self.wish.individu.dossier_inscription.centre_payeur = clean_data.get('centre_payeur')
-
+                self.wish.individu.dossier_inscription.save()
             self.wish.individu.dossier_inscription.save()
             self.wish.save()
 
