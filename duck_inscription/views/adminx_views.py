@@ -379,18 +379,18 @@ class ChangementCentreGestionView(FormView):
                         pass
             paiement.save()
 
-            if clean_data.get('situation_sociale', None):
-                self.wish.individu.dossier_inscription.situation_sociale = clean_data['situation_sociale']
-                self.wish.individu.dossier_inscription.save()
-            if clean_data.get('affiliation_parent', None):
-                self.wish.individu.dossier_inscription.affiliation_parent = clean_data.get('affiliation_parent')
-                self.wish.individu.dossier_inscription.save()
-            if clean_data.get('non_affiliation', None):
-                self.wish.individu.dossier_inscription.non_affiliation = clean_data.get('non_affiliation')
-                self.wish.individu.dossier_inscription.save()
-            if clean_data.get('centre_payeur', None):
-                self.wish.individu.dossier_inscription.centre_payeur = clean_data.get('centre_payeur')
-                self.wish.individu.dossier_inscription.save()
+            # if clean_data.get('situation_sociale', None):
+            self.wish.individu.dossier_inscription.situation_sociale = clean_data['situation_sociale']
+            # self.wish.individu.dossier_inscription.save()
+            # if clean_data.get('affiliation_parent', None):
+            self.wish.individu.dossier_inscription.affiliation_parent = clean_data.get('affiliation_parent')
+            # self.wish.individu.dossier_inscription.save()
+            # if clean_data.get('non_affiliation', None):
+            self.wish.individu.dossier_inscription.non_affiliation = clean_data.get('non_affiliation')
+            # self.wish.individu.dossier_inscription.save()
+            # if clean_data.get('centre_payeur', None):
+            self.wish.individu.dossier_inscription.centre_payeur = clean_data.get('centre_payeur')
+            # self.wish.individu.dossier_inscription.save()
             self.wish.individu.dossier_inscription.save()
             self.wish.save()
 
