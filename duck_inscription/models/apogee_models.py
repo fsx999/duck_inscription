@@ -122,7 +122,7 @@ class SettingsEtape(Etape):
     def stat_nb_reception(self):
         from duck_inscription.models import WishTransitionLog
         annee = SettingAnneeUni.objects.get(inscription=True)
-        query = WishTransitionLog.objects.filter(wish__etape=self, wish__annee=annee, to_state='candidature_reception').distinct('wish')
+        query = WishTransitionLog.objects.filter(wish__etape=self, wish__annee=annee, to_state='inscription_reception').distinct('wish')
         return {"nb_reception": query.count(),
                 "nb_reception_primo": query.filter(wish__is_reins=False).count(),
                 "nb_reception_reins": query.filter(wish__is_reins=True).count()}
