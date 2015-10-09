@@ -12,6 +12,7 @@ urlpatterns = patterns(
     url(r'^login/$',
         'django.contrib.auth.views.login', {'template_name': 'registration/login.html',
                                             'authentication_form': LoginIED}, name="auth_login"),
+
     url(r'^password/reset/$', 'django.contrib.auth.views.password_reset', {'password_reset_form': PasswordRest},
         name='auth_password_reset'),
     url(r'^register/$',
