@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 from crispy_forms.bootstrap import TabHolder, Tab
 from django.core.urlresolvers import reverse
 from django.forms.models import inlineformset_factory
-
 from xadmin.views import filter_hook, CommAdminView
 from duck_theme_ied.xadmin_plugins.topnav import IEDPlugin
 from xadmin.plugins.auth import UserAdmin
