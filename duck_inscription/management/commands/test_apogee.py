@@ -29,7 +29,6 @@ Merci
 
         for x in queryset:
             send_mail('[IED] information inscription', text, 'nepasrepondre@iedparis8.net', [x.individu.personal_email])
-        fini
         #on récupére les personnes du jour (soit la date de création, de modif plus grand que la veille
         # print "debut test"
         # print Individu.objects.using(APOGEE_CONNECTION).count()
