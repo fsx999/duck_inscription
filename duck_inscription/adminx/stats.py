@@ -81,7 +81,7 @@ class StatistiqueApogee(views.Dashboard):
         total = 0
         for etape in SettingsEtape.objects.filter(is_inscription_ouverte=True).order_by('diplome'):
             query = InsAdmEtpInitial.objects.using('oracle').filter(cod_anu=context['selected'], eta_iae='E',
-                                                                              cod_pru__in=['NO', 'FP', 'DD'],
+                                                                              cod_pru__in=['NO', 'FP', 'DD'], tem_iae_prm='O',
                                                                               cod_etp=etape.cod_etp) | InsAdmEtpInitial.objects.using('oracle').filter(
                 cod_anu=context['selected'], eta_iae='E', tem_iae_prm='O', cod_etp=etape.cod_etp)
 
