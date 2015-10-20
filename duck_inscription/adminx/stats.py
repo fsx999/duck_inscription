@@ -9,7 +9,7 @@ from openpyxl.workbook import Workbook
 from openpyxl.writer.excel import save_virtual_workbook
 from wkhtmltopdf.views import PDFTemplateView
 import xlwt
-from django_apogee.models import InsAdmEtp, Individu
+from django_apogee.models import InsAdmEtp, Individu, InsAdmEtpInitial
 from xadmin.views import filter_hook, BaseAdminView
 from xadmin import views
 import xadmin
@@ -80,9 +80,9 @@ class StatistiqueApogee(views.Dashboard):
         etapes = []
         total = 0
         for etape in SettingsEtape.objects.filter(is_inscription_ouverte=True).order_by('diplome'):
-            query = InsAdmEtp.objects.filter(cod_anu=context['selected'], eta_iae='E',
+            query = InsAdmEtpInitial.objects.using('oracle').filter(cod_anu=context['selected'], eta_iae='E',
                                                                               cod_pru__in=['NO', 'FP', 'DD'],
-                                                                              cod_etp=etape.cod_etp) | InsAdmEtp.objects.filter(
+                                                                              cod_etp=etape.cod_etp) | InsAdmEtpInitial.objects.using('oracle').filter(
                 cod_anu=context['selected'], eta_iae='E', tem_iae_prm='O', cod_etp=etape.cod_etp)
 
             etapes.append({'label': etape.label,
