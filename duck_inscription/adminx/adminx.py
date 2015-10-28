@@ -340,7 +340,7 @@ class OpiView(object):
                 for p in obj.paiementallmodel.paiement_request.status_paiement()['transactionItem']:
                     valide = valide and (p['transactionStatusLabel'] in ['CAPTURED', 'WAITING_AUTHORISATION'])
                 if not valide:
-                    return '<br><span class="label label-danger">Annomalie</span>'
+                    return '<br><span class="label label-danger">Annomalie</span><a class="btn btn-primary" href="{}?opi={}">Remontée Opi</a>'.format(url, obj.code_dossier)
             return '<br><span class="label label-success">Ok</span><a class="btn btn-primary" href="{}?opi={}">Remontée Opi</a>'.format(url, obj.code_dossier)
         else:
             return ''
