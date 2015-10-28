@@ -38,17 +38,16 @@ class WishInline(object):
         try:
             response += "type de paiement : {} <br>".format(obj.paiementallmodel.moyen_paiement)
             if obj.paiementallmodel.moyen_paiement.type == 'CB':
-                response += "transaction : {} <br> numéro de commande : {}".format(obj.paiementallmodel.paiement_request.vads_trans_id, obj.paiementallmodel.pk)
+                response += "transaction : {} <br> numéro de commande : {}<br>".format(obj.paiementallmodel.paiement_request.vads_trans_id, obj.paiementallmodel.pk)
                 r = ''
                 for p in obj.paiementallmodel.paiement_request.status_paiement()['transactionItem']:
-                    print p
                     r += 'date : {date}, montant : {montant} , status: {status} <br>'.format(date=p['expectedCaptureDate'],
                                                                                         montant=str(p['amount'])[:-2]+','+str(p['amount'])[-2:],
                                                                                         status=p['transactionStatusLabel'])
                     if p['transactionStatusLabel'] == 'CAPTURED':
-                        r += '<br><span class="label label-success">Ok</span>'
+                        r += '<span class="label label-success">Ok</span><br>'
                     else:
-                        r += '<br><span class="label label-danger">Annomalie</span>'
+                        r += '<span class="label label-danger">Annomalie</span><br>'
                 response += '<br>' + r
         except Exception as e:
             pass
