@@ -1,0 +1,81 @@
+{% load static from staticfiles %}
+{% load lib_inscription %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="{% static "bootstrap3/css/bootstrap.css" %}">
+    <script src="{% static "bootstrap3/js/bootstrap.js" %}"></script>
+    <style type="text/css">
+        .barcode {
+            font-family: CCode39;
+            font-size: 35px;
+        }
+
+        .center {
+            text-align: center;
+        }
+
+        img {
+            zoom: 60%;
+        }
+
+        .info tr {
+            padding-top: 3pt;
+        }
+
+        .photo {
+            text-align: center;
+            width: 110px;
+            height: 150px;
+            margin-bottom: 10px;
+            border: solid 1px #101010;
+        }
+
+        .zomm {
+            zoom: 30%;
+        }
+
+        .entete h4 {
+            padding: 5px;
+        }
+    </style>
+
+</head>
+
+<body>
+<div class="container">
+    <div class="row">
+        <div class="col-xs-6">
+        <img class="zomm" id="logo_p8" src="{% static "images/logop8.jpg" %}"/>
+           </div>
+        <div class="col-xs-6"><span class="pull-right"><img id="logo_ied"
+                                                            src="{% static "images/logo-ied.jpg" %}"/></span>
+        </div>
+    </div>
+
+    <hr>
+
+
+<p>Madame, Monsieur {{ voeu.individu.last_name }} {{ voeu.individu.first_name1 }},</p>
+<p>
+Nous vous informons que votre dossier d'inscription numéro {{ voeu.code_dossier }} en {{ voeu.etape }} est incomplet.
+    <br>
+
+Le dossier incomplet va vous être renvoyé. Dès sa réception, nous vous invitons à le compléter avec les pièces manquantes et à nous le renvoyer au cours du mois de septembre.
+</p>
+<p>Ajouter une enveloppe C4 (22,9 x 32,4 cm) timbrée à votre adresse. La précédente ayant été utilisée pour le renvoi de
+votre dossier incomplet.</p>
+<div class="well">
+Pièces manquantes :
+<ul>
+{% for piece in pieces_manquantes.pieces.all %}
+<li>{{ piece.label | safe }}</li>
+{% endfor %}
+</ul>
+</div>
+<p>Cordialement,</p>
+<p>La scolarité de l'IED</p>
+</div>
+</body>
+</html>

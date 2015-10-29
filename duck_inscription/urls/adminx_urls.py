@@ -3,12 +3,11 @@ from django.conf.urls import patterns, url
 from django.contrib.auth.decorators import login_required
 from duck_inscription.adminx import ExtrationEtiquettesView, ExtrationEtiquetteView
 from duck_inscription.views import InscriptionPdfView, CandidaturePdfView, EquivalencePdfView
-from duck_inscription.views.adminx_views import EquivalencePdfAdminView, \
-    DecisionEquivalencePdfAdminView, ImprimerTousDecisions, ImprimerDecisionsEquivalenceEnMasseView, \
-    ChangementCentreGestionView, OpiView, PiecesDossierView
+from duck_inscription.views.adminx_views import \
+    DecisionEquivalencePdfAdminView, ImprimerDecisionsEquivalenceEnMasseView, \
+    ChangementCentreGestionView, OpiView, PiecesDossierView, PiecesManquantesPdfView
 
-urlpatterns = patterns(
-    '',
+urlpatterns = [
     url(r'imprimer_decisions_ordre/$', login_required(ImprimerDecisionsEquivalenceEnMasseView.as_view()),
         name='imprimer_decisions_ordre'),
     url(r'^impression_dossier_equivalence/(?P<pk>\d+)/$', login_required(EquivalencePdfView.as_view()),
@@ -33,5 +32,9 @@ urlpatterns = patterns(
     url(r'^piece_dossier/(?P<pk>\d+)/$',
         login_required(PiecesDossierView.as_view()),
         name='dossier_incomplet'),
-    )
-
+    url(r'^pieces_manquantes_pdf/(?P<pk>\d+)/$', login_required(PiecesManquantesPdfView.as_view()),
+        name='pieces_manquantes_pdf')
+    # url(r'^piece_dossier/(?P<pk>\d+)/$',
+    #     login_required(TestView.as_view()),
+    #     name='dossier_incomplet'),
+]

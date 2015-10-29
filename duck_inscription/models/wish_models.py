@@ -73,7 +73,8 @@ class SuiviDossierWorkflow(xwf_models.Workflow):
     log_model = 'duck_inscription.WishTransitionLog'
 
     states = (
-        ('inactif', 'En attente de reception'), ('equivalence_reception', 'Dossier Equivalence receptionné'),
+        ('inactif', 'En attente de reception'),
+        ('equivalence_reception', 'Dossier Equivalence receptionné'),
         ('equivalence_complet', 'Dossier Equivalence complet'),
         ('equivalence_incomplet', 'Dossier Equivalence incomplet'),
         ('equivalence_traite', 'Dossier Equivalence traite'), ('equivalence_refuse', 'Dossier Equivalence refuse'),
@@ -106,21 +107,24 @@ class SuiviDossierWorkflow(xwf_models.Workflow):
         ('candidature_refuse', ('candidature_reception', 'candidature_incomplet', 'candidature_complet'),
          'candidature_refuse'),
 
-        ('inscription_reception',
-         ('inactif', 'equivalence_traite', 'candidature_complet', 'candidature_traite', 'inscription_incomplet',
-          'inscription_incom_r'),
-         'inscription_reception'),
+        ('inscription_reception', ('inactif',
+                                   'equivalence_traite',
+                                   'candidature_complet',
+                                   'candidature_traite', 'inscription_incomplet', 'equivalence_reception',
+                                   'inscription_incom_r'), 'inscription_reception'),
         ('inscription_incomplet', ('inscription_reception', 'inscription_complet',
                                    'inscription_traite'), 'inscription_incomplet'),
-        ('inscription_incomplet_renvoi', ('inscription_reception', 'inscription_complet','inscription_traite'),
+        ('inscription_incomplet_renvoi', ('inscription_reception',
+                                          'inscription_complet',
+                                          'inscription_traite',),
          'inscription_incom_r'),
-        ('inscription_complet', ('inscription_reception', 'inscription_incomplet', 'equivalence_reception'), 'inscription_complet'),
+        ('inscription_complet', ('inscription_reception', 'inscription_incomplet', ), 'inscription_complet'),
         ('inscription_traite', ('inscription_reception', 'inscription_complet', 'inscription_incomplet',
                                 'inscription_refuse', 'inscription_traite'), 'inscription_traite',),
         ('inscription_refuse', ('inscription_reception', 'inscription_complet', 'inscription_incomplet', 'inactif'),
          'inscription_refuse',),
         ('inscription_annule', ('inscription_annule', 'inscription_refuse', 'inscription_reception',
-                                'inscription_complet',
+                                'inscription_complet','inscription_traite',
                                 'inscription_incomplet', 'inactif', 'inscription_incom_r'),
          'inscription_annule')
     )
@@ -162,9 +166,6 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
 
     is_ok = models.BooleanField(default=False)
     date_liste_inscription = models.DateTimeField(null=True, blank=True)
-
-
-
 
     @on_enter_state('ouverture_equivalence')
     def on_enter_state_ouverture_equivalence(self, res, *args, **kwargs):
@@ -349,17 +350,33 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
 
         return make_multi_pdf(context=context, templates=templates, files=[remove_page_pdf(doc_candi)])
 
+    def do_pdf_pieces_manquantes(self, request, context={}):
+        context = context.copy()
+        templates = [
+            {'name': "duck_inscription/wish/etiquette.html"},
+            {'name': "duck_inscription/wish/pieces_manquantes.html"}
+        ]
+        context['voeu'] = self
+        context['is_pieces_manquantes'] = True
+        context['pieces_manquantes'] = self.dossier_pieces_manquantes
+        return make_multi_pdf(context=context, templates=templates)
+
     def do_pdf_inscription(self, request, context):
         cmd_option={
             'margin_bottom': '20',
 
         }
-
-        templates = [
-            {'name': "duck_inscription/wish/etiquette.html"},
-         {'name': 'duck_inscription/wish/dossier_inscription_pdf.html',
-                      'footer': 'duck_inscription/wish/footer.html'},
-          ]
+        if self.centre_gestion.centre_gestion != 'fp':
+            templates = [
+                {'name': "duck_inscription/wish/etiquette.html"},
+             {'name': 'duck_inscription/wish/dossier_inscription_pdf.html',
+                          'footer': 'duck_inscription/wish/footer.html'},
+              ]
+        else:
+            templates = [
+             {'name': 'duck_inscription/wish/dossier_inscription_pdf.html',
+                          'footer': 'duck_inscription/wish/footer.html'},
+              ]
         try:
             templates.extend(self.paiementallmodel.get_templates())
         except AttributeError:

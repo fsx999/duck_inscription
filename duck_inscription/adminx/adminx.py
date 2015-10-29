@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 from crispy_forms.bootstrap import TabHolder, Tab
 from django.core.urlresolvers import reverse
 from django.forms.models import inlineformset_factory
-
 from xadmin.views import filter_hook, CommAdminView
 from duck_theme_ied.xadmin_plugins.topnav import IEDPlugin
 from xadmin.plugins.auth import UserAdmin
@@ -39,8 +38,18 @@ class WishInline(object):
         try:
             response += "type de paiement : {} <br>".format(obj.paiementallmodel.moyen_paiement)
             if obj.paiementallmodel.moyen_paiement.type == 'CB':
-                response +=  "transaction : {} <br> numéro de commance : {}".format(obj.paiementallmodel.paiement_request.vads_trans_id, obj.paiementallmodel.pk)
-        except:
+                response += "transaction : {} <br> numéro de commande : {}<br>".format(obj.paiementallmodel.paiement_request.vads_trans_id, obj.paiementallmodel.pk)
+                r = ''
+                for p in obj.paiementallmodel.paiement_request.status_paiement()['transactionItem']:
+                    r += 'date : {date}, montant : {montant} , status: {status} <br>'.format(date=p['expectedCaptureDate'],
+                                                                                        montant=str(p['amount'])[:-2]+','+str(p['amount'])[-2:],
+                                                                                        status=p['transactionStatusLabel'])
+                    if p['transactionStatusLabel'] == 'CAPTURED':
+                        r += '<span class="label label-success">Ok</span><br>'
+                    else:
+                        r += '<span class="label label-danger">Annomalie</span><br>'
+                response += '<br>' + r
+        except Exception as e:
             pass
         return response
     info_paiement.allow_tags = True
@@ -51,6 +60,7 @@ class WishInline(object):
         if obj.state.is_inscription or obj.state.is_dispatch:
             url = reverse('changement_centre', kwargs={'pk': obj.pk})
             result += ACTION.format(id=obj.pk, url=url)
+        if obj.state.is_inscription:
             url =  reverse('dossier_incomplet', kwargs={'pk': obj.pk})
             result += DOSSIER_INCOMPLET.format(id=obj.pk, url=url)
 
@@ -181,6 +191,7 @@ class WishInline(object):
         url2 = reverse('impression_decision_equivalence', kwargs={'pk': obj.pk})
         url_inscription = reverse('inscription_pdf', kwargs={'pk': obj.pk})
         url_candidature = reverse('candidature_pdf', kwargs={'pk': obj.pk})
+        url_courrier_pieces_manquantes = reverse('pieces_manquantes_pdf', kwargs={'pk': obj.pk})
 
         reponse = ' '
 
@@ -193,6 +204,11 @@ class WishInline(object):
             reponse += '<a href="{}" class="btn btn-primary">Dossier Candidature</a><hr>'.format(url_candidature)
         if obj.state in ['inscription', 'liste_attente_inscription']:
             reponse += '<a href="{}" class="btn btn-primary">Dossier inscription</a>'.format(url_inscription)
+        if hasattr(obj, 'dossier_pieces_manquantes') and obj.dossier_pieces_manquantes.pieces.count() and obj.state.is_inscription:
+            reponse += '<hr>'
+            reponse += '<a href="{}" class="btn btn-primary">Courrier pièces manquantes</a>'.format(url_courrier_pieces_manquantes)
+
+
         return reponse
 
     print_dossier_equi.allow_tags = True
@@ -318,7 +334,13 @@ class OpiView(object):
     def opi_url(self, obj):
         url = reverse('remontee_opi')
         if obj.state.is_inscription:
-            return '<a class="btn btn-primary" href="{}?opi={}">Remontée Opi</a>'.format(url, obj.code_dossier)
+            if obj.paiementallmodel.moyen_paiement.type == 'CB':
+                valide = True
+                for p in obj.paiementallmodel.paiement_request.status_paiement()['transactionItem']:
+                    valide = valide and (p['transactionStatusLabel'] in ['CAPTURED', 'WAITING_AUTHORISATION'])
+                if not valide:
+                    return '<br><span class="label label-danger">Annomalie</span><a class="btn btn-primary" href="{}?opi={}">Remontée Opi</a>'.format(url, obj.code_dossier)
+            return '<br><span class="label label-success">Ok</span><a class="btn btn-primary" href="{}?opi={}">Remontée Opi</a>'.format(url, obj.code_dossier)
         else:
             return ''
 

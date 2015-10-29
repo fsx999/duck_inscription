@@ -1,15 +1,21 @@
 # coding=utf-8
+from __future__ import unicode_literals
 from io import StringIO
 from PyPDF2 import PdfFileReader, PdfFileWriter
+from django.contrib.sites.models import Site
 from django.core.urlresolvers import reverse_lazy, reverse
 from django.db import DatabaseError
 from django.http import HttpResponse
 from django.shortcuts import redirect
+from django.template.loader import get_template
 from django.views.generic import FormView, TemplateView, View
+from duck_utils.utils import get_email_envoi
+from mailrobot.models import Mail
 from xworkflows import InvalidTransitionError
 from duck_inscription.forms.adminx_forms import DossierReceptionForm, ImprimerEnMasseForm, ChangementCentreGestionForm, \
     DossierIncompletForm
-from duck_inscription.models import Wish
+from duck_inscription.models import Wish, CategoriePieceModel, PiecesManquantesDossierWishModel
+
 try:
     from duck_inscription_payzen.models import PaiementAllModel
 except ImportError:
@@ -18,6 +24,34 @@ from django.conf import settings
 from duck_inscription.templatetags.lib_inscription import annee_en_cour
 from xhtml2pdf import pdf as pisapdf
 from django.contrib import messages
+
+
+class WishIndividuMixin(object):
+    """
+    recupere le voeu à partir du pk si user = staff, ou bien à partir de l'user
+    """
+
+    @property
+    def individu(self):
+        """
+        :return: l'individu en fonction du pk de l'url (en fonction des droits)
+        """
+        individu = getattr(self, '_individu', None)
+        if not individu:
+            self._individu = self.wish.individu
+            return self._individu
+        return individu
+
+    @property
+    def wish(self):
+        """
+        :return: le voeu en fonction du pk de l'url (en fonction des droits)
+        """
+        wish = getattr(self, '_wish', None)
+        if not wish:
+            self._wish = Wish.objects.get(pk=self.kwargs['pk'])
+            return self._wish
+        return wish
 
 
 class DossierReceptionView(FormView):
@@ -221,23 +255,65 @@ class OpiView(View):
                 # self.message_user('Etudiant {} remontee'.format(wish.individu.code_opi), 'success')
         return redirect('/duck_inscription/wish/')
 
-class PiecesDossierView(FormView):
+class TestView(View):
+    #template_name = 'duck_inscription/adminx/dossier_incomplet.html'
+
+    def get(self, request, *args, **kwargs):
+        return HttpResponse("HelloWorld !")
+
+
+class PiecesDossierView(FormView, WishIndividuMixin):
     template_name = 'duck_inscription/adminx/dossier_incomplet.html'
     form_class = DossierIncompletForm
 
-    # def get_form(self, form_class):
-    #     """
-    #     Returns an instance of the form to be used in this view.
-    #     """
-    #     self.wish = getattr(self, 'wish', Wish.objects.get(pk=self.kwargs['pk']))
-    #     return form_class(wish=self.wish, **self.get_form_kwargs())
+    def get_form_kwargs(self):
+        kwargs = super(PiecesDossierView, self).get_form_kwargs()
+        res={}
+
+        if hasattr(self.wish, 'dossier_pieces_manquantes'):
+
+            res['pieces'] = self.wish.dossier_pieces_manquantes.pieces.all()
+
+        kwargs['initial'].update(res)
+        return kwargs
 
     def get_context_data(self, **kwargs):
         context = super(PiecesDossierView, self).get_context_data(**kwargs)
-        self.wish = getattr(self, 'wish', Wish.objects.get(pk=self.kwargs['pk']))
-
+        self.categories = getattr(self, 'categories', CategoriePieceModel.objects.all())
         context['wish'] = self.wish
+        context['categories'] = self.categories
         return context
+
+    def form_valid(self, form):
+        clean_data = form.cleaned_data
+        dossier = PiecesManquantesDossierWishModel.objects.get_or_create(wish=self.wish)[0]
+        dossier.pieces.clear()
+        for piece in clean_data['pieces']:
+            dossier.pieces.add(piece)
+        message = "le dossier est bien modifié"
+        # send an email to the user
+        recipients = [
+            get_email_envoi(dossier.wish.individu.user.email),
+        ]
+        template = Mail.objects.get(name='email_inscription_incomplet')
+        piece_template = get_template('duck_inscription/adminx/rendu_pieces_mail.html')
+        motif = piece_template.render({'dossier':dossier})
+        context = {
+            'site': Site.objects.get(id=settings.SITE_ID_IED),
+            'wish': dossier.wish,
+            'motif': motif,
+        }
+        try:
+            self.wish.inscription_incomplet_renvoi()
+
+        except InvalidTransitionError:
+            if not self.wish.suivi_dossier.is_inscription_incom_r:
+                self.wish.inscription_reception()
+                self.wish.inscription_incomplet_renvoi()
+        mail = template.make_message(context=context, recipients=recipients)
+        mail.send()
+        return self.render_to_response(self.get_context_data(form=form, message=message))
+
 
 class ChangementCentreGestionView(FormView):
     form_class = ChangementCentreGestionForm
@@ -276,48 +352,67 @@ class ChangementCentreGestionView(FormView):
         clean_data = form.cleaned_data
         centre_gestion = clean_data.get('centre_gestion')
         try:
-            paiement = self.wish.paiementallmodel
-        except PaiementAllModel.DoesNotExist:
-            paiement = PaiementAllModel(wish=self.wish)
+            try:
+                paiement = self.wish.paiementallmodel
+            except PaiementAllModel.DoesNotExist:
+                paiement = PaiementAllModel(wish=self.wish)
 
-        if self.wish.centre_gestion.pk != centre_gestion.pk:
-            self.wish.centre_gestion = centre_gestion
-            if centre_gestion.centre_gestion == 'ied':
-                self.wish.state='dossier_inscription'
-                self.wish.is_ok = True
-                paiement.state='choix_ied_fp'
-        try:
-            if self.wish.centre_gestion.centre_gestion != 'fp':
-
-                if paiement.moyen_paiement is None or paiement.moyen_paiement.type != 'CB':
-                        paiement.nb_paiement_frais, paiement.moyen_paiement = clean_data['nombre_paiement'], clean_data['type_paiement']
-
-                if clean_data.get('type_paiement', None) and  clean_data.get('type_paiement').type == 'CB':
-                    paiement.moyen_paiement = clean_data.get('type_paiement')
-                    self.wish.is_ok = True
+            if self.wish.centre_gestion.pk != centre_gestion.pk:
+                self.wish.centre_gestion = centre_gestion
+                if centre_gestion.centre_gestion == 'ied':
                     self.wish.state='dossier_inscription'
-
+                    self.wish.is_ok = True
                     paiement.state='choix_ied_fp'
-        except AttributeError:
-                    pass
-        paiement.save()
+            try:
+                if self.wish.centre_gestion.centre_gestion != 'fp':
 
-        if clean_data.get('situation_sociale', None):
+                    if paiement.moyen_paiement is None or paiement.moyen_paiement.type != 'CB':
+                            paiement.nb_paiement_frais, paiement.moyen_paiement = clean_data['nombre_paiement'], clean_data['type_paiement']
+
+                    if clean_data.get('type_paiement', None) and  clean_data.get('type_paiement').type == 'CB':
+                        paiement.moyen_paiement = clean_data.get('type_paiement')
+                        self.wish.is_ok = True
+                        self.wish.state = 'dossier_inscription'
+
+                        paiement.state = 'choix_ied_fp'
+            except AttributeError:
+                        pass
+            paiement.save()
+
+            # if clean_data.get('situation_sociale', None):
             self.wish.individu.dossier_inscription.situation_sociale = clean_data['situation_sociale']
-            self.wish.individu.dossier_inscription.save()
-        if clean_data.get('affiliation_parent', None):
+            # self.wish.individu.dossier_inscription.save()
+            # if clean_data.get('affiliation_parent', None):
             self.wish.individu.dossier_inscription.affiliation_parent = clean_data.get('affiliation_parent')
-        if clean_data.get('non_affiliation', None):
+            # self.wish.individu.dossier_inscription.save()
+            # if clean_data.get('non_affiliation', None):
             self.wish.individu.dossier_inscription.non_affiliation = clean_data.get('non_affiliation')
-        if clean_data.get('centre_payeur', None):
+            # self.wish.individu.dossier_inscription.save()
+            # if clean_data.get('centre_payeur', None):
             self.wish.individu.dossier_inscription.centre_payeur = clean_data.get('centre_payeur')
+            # self.wish.individu.dossier_inscription.save()
+            self.wish.individu.dossier_inscription.save()
+            self.wish.save()
 
-        self.wish.individu.dossier_inscription.save()
-        self.wish.save()
-        return HttpResponse('<div class="alert alert-success" role="alert">Le dossier a bien été modifié</div>')
+            return HttpResponse('<div class="alert alert-success" role="alert">Le dossier a bien été modifié</div>')
+        except Exception as e:
+            return HttpResponse('<div class="alert alert-error" role="alert">{{ }}</div>'.format(e))
 
     def get_success_url(self):
         return reverse('xadmin:duck_inscription_individu_change', args=(3,))
+
+
+class PiecesManquantesPdfView(TemplateView, WishIndividuMixin):
+    template_name = "duck_inscription/wish/etiquette.html"
+
+    def render_to_response(self, context, **response_kwargs):
+
+        wish = self.wish
+        response = HttpResponse(content_type='application/pdf')
+        response['Content-Disposition'] = 'attachment; filename=piece_manquante_%s_%s.pdf' % (wish.code_dossier, wish.etape.cod_etp)
+
+        response.write(wish.do_pdf_pieces_manquantes(request=self.request, context=context))
+        return response
 
 
 # class ChangemeCentreGestionView(FormView):

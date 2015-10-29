@@ -1,5 +1,5 @@
 {% extends "xadmin/base_site.html" %}
-{% load lib_inscription %}
+{% load lib_inscription static %}
 {% block nav_title %}Statistique Apogee{% endblock %}
 {% block content %}
     {% for x in years %}
@@ -32,3 +32,23 @@
         </tbody>
     </table>
 {% endblock %}
+{#{% block extrastyle %}#}
+{#    {{ block.super }}#}
+{#    <script src="{% static "angular/angular.js" %}"></script>#}
+{#    <script src="{% static "angular/angular-route.js" %}"></script>#}
+{#    <script src="{% static "angular/angular-resource.js" %}"></script>#}
+{#    <script src="{% static "angular/ui-bootstrap-0.13.1.js" %}"></script>#}
+{#    <script src="{% static "statistique/app/js/app.js" %}"></script>#}
+{#    <script src="{% static "statistique/app/js/controller.js" %}"></script>#}
+{#    <script src="{% static "statistique/app/js/services.js" %}"></script>#}
+{#{% endblock %}#}
+{##}
+{#{% block content %}#}
+{##}
+{#<div ng-app="statistiqueApp">#}
+{##}
+{#    <div ng-view></div>#}
+{#</div>#}
+{##}
+{##}
+{#{% endblock %}#}

@@ -3,3 +3,4 @@ from __future__ import unicode_literals
 from .individu_views import *
 from enregistrement_views import *
 from wish_views import *
+from rest_views import *

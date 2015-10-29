@@ -18,6 +18,8 @@ class SettingAnneeUni(AnneeUni):
     pieces_pdf = models.FileField(upload_to='document_inscription', null=True, blank=True)
     tarif_medical = models.FloatField('tarif medical', null=True, blank=True)
     tarif_secu = models.FloatField('tarif secu', null=True, blank=True)
+    debut_pause = models.DateTimeField(null=True, blank=True)
+    fin_pause = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         app_label = 'duck_inscription'
@@ -131,7 +133,10 @@ class SettingsEtape(Etape):
     def stat_nb_reception(self):
         from duck_inscription.models import WishTransitionLog
         annee = SettingAnneeUni.objects.get(inscription=True)
-        return {"nb_reception": WishTransitionLog.objects.filter(wish__etape=self, wish__annee=annee, to_state='inscription_reception').distinct('wish').count()}
+        query = WishTransitionLog.objects.filter(wish__etape=self, wish__annee=annee, to_state='inscription_reception').distinct('wish')
+        return {"nb_reception": query.count(),
+                "nb_reception_primo": query.filter(wish__is_reins=False).count(),
+                "nb_reception_reins": query.filter(wish__is_reins=True).count()}
 
     def stat_apogee(self):
         from django_apogee.models import InsAdmEtp

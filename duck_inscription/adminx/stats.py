@@ -9,7 +9,7 @@ from openpyxl.workbook import Workbook
 from openpyxl.writer.excel import save_virtual_workbook
 from wkhtmltopdf.views import PDFTemplateView
 import xlwt
-from django_apogee.models import InsAdmEtp, Individu
+from django_apogee.models import InsAdmEtp, Individu, InsAdmEtpInitial
 from xadmin.views import filter_hook, BaseAdminView
 from xadmin import views
 import xadmin
@@ -80,9 +80,9 @@ class StatistiqueApogee(views.Dashboard):
         etapes = []
         total = 0
         for etape in SettingsEtape.objects.filter(is_inscription_ouverte=True).order_by('diplome'):
-            query = InsAdmEtp.objects.filter(cod_anu=context['selected'], eta_iae='E',
-                                                                              cod_pru__in=['NO', 'FP', 'DD'],
-                                                                              cod_etp=etape.cod_etp) | InsAdmEtp.objects.filter(
+            query = InsAdmEtpInitial.objects.using('oracle').filter(cod_anu=context['selected'], eta_iae='E',
+                                                                              cod_pru__in=['NO', 'FP', 'DD'], tem_iae_prm='O',
+                                                                              cod_etp=etape.cod_etp) | InsAdmEtpInitial.objects.using('oracle').filter(
                 cod_anu=context['selected'], eta_iae='E', tem_iae_prm='O', cod_etp=etape.cod_etp)
 
             etapes.append({'label': etape.label,
@@ -281,7 +281,7 @@ class ExtrationPalView(BaseAdminView):
         step = SettingsEtape.objects.get(cod_etp=cod_etp)
         wb = xlwt.Workbook()
         ws = wb.add_sheet('etudiant')
-        queryset = step.wish_set.filter(annee__cod_anu=2014, is_reins=False).order_by('individu__last_name')
+        queryset = step.wish_set.filter(annee__cod_anu=2015, is_reins=False, state='candidature', etape_dossier__to_state='candidature_reception').order_by('individu__last_name')
         ws.write(1, 0, "code etudiant")
         ws.write(1, 1, "nom")
         ws.write(1, 2, "prenom")
