@@ -168,7 +168,7 @@ xadmin.site.register_view(r'^extraction/(?P<type_stat>\w+)/(?P<etat>\w+)/(?P<ste
 
 class ExtractionStatApogee(ExtractionStatistiqueBase):
 
-    model_extraction = InsAdmEtp
+    model_extraction = InsAdmEtpInitial
     attrs_queryset = ['step', 'annee']
     structure_excel = [['Numero Etudiant', 'obj.cod_ind.cod_etu'],
                        ['Nom patronimique', 'obj.cod_ind.lib_nom_pat_ind'],
@@ -185,7 +185,7 @@ class ExtractionStatApogee(ExtractionStatistiqueBase):
     url = '/stats_apogee/'
 
     def get_queryset(self):
-        return self.model_extraction.inscrits.filter(**self.filter_queryset[self.type_stat])
+        return self.model_extraction.inscrits.using('oracle').filter(**self.filter_queryset[self.type_stat])
 
     def get(self, request, *args, **kwargs):
         self.set_attr_queryset(**kwargs)
