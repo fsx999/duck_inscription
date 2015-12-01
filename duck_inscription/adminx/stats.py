@@ -262,12 +262,13 @@ class ExtrationEtiquettesView(PDFTemplateView):
 
     def get_context_data(self, **kwargs):
         cod_etp = self.kwargs.get('step', None)
-        etudiants = Individu.objects.filter(etapes_ied__cod_etp=cod_etp,
-                                            etapes_ied__cod_anu=2014, etapes_ied__eta_iae='E',
-                                            etapes_ied__tem_iae_prm='O', ).order_by('lib_nom_pat_ind')
+        cod_anu = self.request.GET.get('cod_anu', 2015)
+
+        etudiants = Individu.objects.using('oracle').filter(etapes__cod_etp=cod_etp,
+                                            etapes__cod_anu=cod_anu, etapes__eta_iae='E',
+                                            etapes__tem_iae_prm='O', ).order_by('lib_nom_pat_ind')
 
         context = super(ExtrationEtiquettesView, self).get_context_data(**kwargs)
-
         context["etudiants"] = etudiants
 
         return context
