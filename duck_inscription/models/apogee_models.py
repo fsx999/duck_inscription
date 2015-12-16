@@ -79,6 +79,17 @@ class SettingsEtape(Etape):
             return True
         return False
 
+    def tarif_reins(self):
+        """
+
+        :return: frais de réins : frais si demi_tarif = false sinon frais/2
+        """
+        try:
+            tarif = self.frais if not self.demi_tarif else self.frais/2
+        except :
+            tarif = None
+        return tarif
+
     def get_tarif_paiement(self, reins=False, semestre=False):
         tarif = self.frais
         if self.demi_tarif and (reins or semestre):
