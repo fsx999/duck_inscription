@@ -14,6 +14,7 @@ class Command(BaseCommand):
         print u"debut d'initialisation"
         print u"création de settings pour les années universitaires"
         for annee in AnneeUni.objects.using('oracle').all():
+            print annee
             annee.save(using='default')
             SettingAnneeUni.objects.get_or_create(cod_anu=annee.cod_anu, anneeuni_ptr=annee)
         print u"création des étapes"
