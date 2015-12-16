@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from django.conf import settings
-from django_apogee.models import AnneeUni, VersionEtape as VersionEtapeApogee, EtpGererCge, Etape
+from django_apogee.models import AnneeUni, VersionEtape as VersionEtapeApogee, EtpGererCge, Etape, ConfAnneeUni
 from duck_inscription.models import SettingAnneeUni, SettingsEtape, Wish
 
 __author__ = 'paul'
@@ -17,6 +17,7 @@ class Command(BaseCommand):
             print annee
             annee.save(using='default')
             SettingAnneeUni.objects.get_or_create(cod_anu=annee.cod_anu, anneeuni_ptr=annee)
+            ConfAnneeUni.objects.get_or_create(cod_anu=annee.cod_anu, anneeuni_ptr=annee)
         print u"création des étapes"
         s =SettingAnneeUni.objects.order_by('cod_anu').last()
         s.inscription=True
