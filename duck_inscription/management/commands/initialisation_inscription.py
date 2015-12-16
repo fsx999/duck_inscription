@@ -13,7 +13,8 @@ class Command(BaseCommand):
         #on récupére les personnes du jour (soit la date de création, de modif plus grand que la veille
         print u"debut d'initialisation"
         print u"création de settings pour les années universitaires"
-        for annee in AnneeUni.objects.all():
+        for annee in AnneeUni.objects.using('oracle').all():
+            annee.save(using='default')
             SettingAnneeUni.objects.get_or_create(cod_anu=annee.cod_anu, anneeuni_ptr=annee)
         print u"création des étapes"
         s =SettingAnneeUni.objects.order_by('cod_anu').last()
