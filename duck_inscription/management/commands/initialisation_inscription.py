@@ -19,7 +19,8 @@ class Command(BaseCommand):
         s =SettingAnneeUni.objects.order_by('cod_anu').last()
         s.inscription=True
         s.save()
-        for etape in Etape.objects.filter(etpgerercge__cod_cmp=settings.COMPOSANTE):
+        for etape in Etape.objects.using('oracle').filter(etpgerercge__cod_cmp=settings.COMPOSANTE):
+            etape.save(using='default')
             e = SettingsEtape.objects.get_or_create(cod_etp=etape.cod_etp, etape_ptr=etape)[0]
 
             e.label = etape.lib_etp
