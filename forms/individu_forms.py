@@ -34,7 +34,6 @@ FRANCE = '100'
 
 class GMT0(tzinfo):
     def utcoffset(self, dt):
-        print timedelta(0)
         return timedelta(0)
 
     def tzname(self, dt):
@@ -151,7 +150,6 @@ class CodeEtudiantForm(forms.Form):
         data = self.cleaned_data.get("code_etu", "")
         try:
             if len(Individu.objects.filter(cod_etu=data)) == 0:
-                print "coucou"
                 raise forms.ValidationError("Vous devez rentrer un code étudiant valide", code='invalide')
         except ValueError:
             raise forms.ValidationError("Vous devez rentrer un code étudiant valide", code='invalide')
@@ -161,8 +159,6 @@ class CodeEtudiantForm(forms.Form):
         data = super(CodeEtudiantForm, self).clean()
         code_etu = data.get("code_etu", 0)
         date_naissance = data.get("date_naissance", date.today())
-        print date_naissance
-        print str(Individu.objects.filter(cod_etu=code_etu).first().date_nai_ind)[:10]
         if not Individu.objects.filter(cod_etu=code_etu):
             raise forms.ValidationError(u"Le numéro étudiant et la date de naissance ne correspondent pas")
         if str(Individu.objects.filter(cod_etu=code_etu).first().date_nai_ind)[:10] != str(date_naissance):

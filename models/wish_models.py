@@ -267,7 +267,6 @@ class Wish(xwf_models.WorkflowEnabled, models.Model):
     def transitions_logs(self):
         reponse = []
         for transition in self.etape_dossier.all().order_by('timestamp'):
-            print type(transition.timestamp)
             reponse.append('{} {}'.format(SuiviDossierWorkflow.states[transition.to_state].title,
                            transition.timestamp.strftime('le %d-%m-%Y à %H:%M ')))
         return reponse
