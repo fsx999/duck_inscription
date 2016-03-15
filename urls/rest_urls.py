@@ -4,7 +4,7 @@ from django_apogee.models import Pays, Departement, SitFam, TypHebergement, BacO
 from duck_inscription.models import Individu
 from duck_inscription.serializers import IndividuSerializer, PaysSerializer, DepartementSerializer, SitFamSerializer, \
     TypHebergementSerializer, BacOuxEquSerializer, SitMilSerializer, TypHandicapSerializer, AnneeUniSerializer
-from . import views
+from duck_inscription import views
 
 class AnneeUniViewSet(viewsets.ModelViewSet):
     queryset = AnneeUni.objects.all()
